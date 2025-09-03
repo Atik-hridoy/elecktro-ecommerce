@@ -1,0 +1,13 @@
+{
+  "@@locale": "es",
+  "appTitle": "Elecktro",
+  "splashTitle": "Bienvenido a Elecktro",
+  "splashSubtitle": "Tu Tienda de Electrónica",
+  "loading": "Cargando...",
+  "error": "Ocurrió un error",
+  "retry": "Reintentar",
+  "home": "Inicio",
+  "categories": "Categorías",
+  "cart": "Carrito",
+  "profile": "Perfil"
+}

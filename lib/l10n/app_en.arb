@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "appTitle": "Elecktro",
+  "splashTitle": "Welcome to Elecktro",
+  "splashSubtitle": "Your One Stop Electronics Shop",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "retry": "Retry",
+  "home": "Home",
+  "categories": "Categories",
+  "cart": "Cart",
+  "profile": "Profile"
+}
