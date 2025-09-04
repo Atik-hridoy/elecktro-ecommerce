@@ -1,37 +1,122 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import '../widget/navbar.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
 import '../widget/banner_card.dart';
+import '../widget/category_list.dart';
+import '../controllers/home_controller.dart';  // Import HomeController
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
-}
+  Widget build(BuildContext context) {
+    final homeController = Get.put(HomeController()); // Create an instance of HomeController
 
-class _HomeViewState extends State<HomeView> {
-  int _selectedIndex = 0;
+    List<Widget> _buildPages() => [
+      _buildHomePage(homeController), // Home page with full structure
+      const Center(child: Text('Categories', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('Cart', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('Profile', style: TextStyle(fontSize: 24))),
+    ];
 
-  // Your page widgets
-  final List<Widget> _pages = [
-    _buildHomePage(), // Updated home page with full structure
-    const Center(child: Text('Categories', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('Cart', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('Profile', style: TextStyle(fontSize: 24))),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        appBar: homeController.selectedIndex.value == 0
+            ? CustomAppBar(
+                userName: 'John Doe',
+                phoneNumber: '+1 234 567 890',
+                searchHint: 'Search products...',
+                onNotificationTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notifications clicked')),
+                  );
+                },
+                onProfileTap: () {
+                  homeController.updateIndex(3); // Navigate to profile
+                },
+                onSearchChanged: (query) {
+                  print('Search query: $query');
+                },
+              )
+            : null,
+        body: _buildPages()[homeController.selectedIndex.value],
+        bottomNavigationBar: ReusableBottomNavBar(
+          currentIndex: homeController.selectedIndex.value,
+          onTap: (index) => homeController.updateIndex(index),
+          activeColor: Colors.green,
+          inactiveColor: Colors.grey,
+          backgroundColor: Colors.white,
+          sv1: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: homeController.selectedIndex.value == 0 ? 36 : 32,
+            height: homeController.selectedIndex.value == 0 ? 36 : 32,
+            child: SvgPicture.asset(
+              'assets/icons/home/sv1.svg',
+              color: homeController.selectedIndex.value == 0
+                  ? Colors.green
+                  : Colors.grey.shade800,
+              width: homeController.selectedIndex.value == 0 ? 36 : 32,
+              height: homeController.selectedIndex.value == 0 ? 36 : 32,
+              fit: BoxFit.contain,
+            ),
+          ),
+          sv2: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: homeController.selectedIndex.value == 1 ? 44 : 40,
+            height: homeController.selectedIndex.value == 1 ? 44 : 40,
+            child: SvgPicture.asset(
+              'assets/icons/home/sv2.svg',
+              color: homeController.selectedIndex.value == 1
+                  ? Colors.green
+                  : Colors.grey.shade800,
+              width: homeController.selectedIndex.value == 1 ? 44 : 40,
+              height: homeController.selectedIndex.value == 1 ? 44 : 40,
+              fit: BoxFit.contain,
+            ),
+          ),
+          sv3: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: homeController.selectedIndex.value == 2 ? 36 : 32,
+            height: homeController.selectedIndex.value == 2 ? 36 : 32,
+            child: SvgPicture.asset(
+              'assets/icons/home/sv3.svg',
+              color: homeController.selectedIndex.value == 2
+                  ? Colors.green
+                  : Colors.grey.shade800,
+              width: homeController.selectedIndex.value == 2 ? 36 : 32,
+              height: homeController.selectedIndex.value == 2 ? 36 : 32,
+              fit: BoxFit.contain,
+            ),
+          ),
+          sv4: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: homeController.selectedIndex.value == 3 ? 44 : 40,
+            height: homeController.selectedIndex.value == 3 ? 44 : 40,
+            child: SvgPicture.asset(
+              'assets/icons/home/sv4.svg',
+              color: homeController.selectedIndex.value == 3
+                  ? Colors.green
+                  : Colors.grey.shade800,
+              width: homeController.selectedIndex.value == 3 ? 44 : 40,
+              height: homeController.selectedIndex.value == 3 ? 44 : 40,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // Home page body structure
-  static Widget _buildHomePage() {
+  Widget _buildHomePage(HomeController homeController) {
     return Builder(
       builder: (context) => SingleChildScrollView(
         child: Column(
@@ -40,7 +125,7 @@ class _HomeViewState extends State<HomeView> {
             // Add top padding to account for status bar
             SizedBox(height: MediaQuery.of(context).padding.top),
             // Banner Section
-            BannerCard(
+            const BannerCard(
               items: [
                 'assets/banner/pic1.png',
                 'assets/banner/pic2.png',
@@ -49,74 +134,57 @@ class _HomeViewState extends State<HomeView> {
                 'assets/banner/pic5.png',
               ],
               currentIndex: 0,
-            ),
-            const SizedBox(height: 16),
-            // Categories Section
-            Container(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _buildCategoryItem(
-                    "Best Offers", 
-                    Colors.red, 
-                    "SPECIAL\nUP TO",
-                    true
+          ),
+          const SizedBox(height: 16),
+
+          // Category Section
+          CategoryList(categories: homeController.categories),  // Use the controller's categories
+
+          const SizedBox(height: 24),
+
+          // Popular Products Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Popular Products',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
-                  _buildCategoryItem("Computers", Colors.grey.shade300, "", false),
-                  _buildCategoryItem("Phone", Colors.grey.shade300, "", false),
-                  _buildCategoryItem("Server Tool", Colors.grey.shade300, "", false),
-                  _buildCategoryItem("accessories", Colors.grey.shade300, "", false),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Popular Products Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Popular Products',
+                ),
+                GestureDetector(
+                  onTap: () {
+                    // Handle View All tap
+                  },
+                  child: const Text(
+                    'View All',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      fontSize: 14,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      // Handle View All tap
-                    },
-                    child: const Text(
-                      'View All',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Popular Products Grid
-            Container(
-              height: 240, // Slightly increased height to accommodate the price
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: 6, // Total number of products
-                itemBuilder: (context, index) {
-                  // List of product data
-                  final products = [
+          // Popular Products Grid
+          Container(
+            height: 240, // Slightly increased height to accommodate the price
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: 6, // Total number of products
+              itemBuilder: (context, index) {
+                // List of product data
+                final products = [
                   {
                     'name': 'Trkil Tracker',
                     'brand': 'Trkil',
@@ -250,162 +318,6 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
       )
-    );
-  }
-
-  static Widget _buildCategoryItem(String title, Color bgColor, String badge, bool hasSpecial) {
-    return Container(
-      width: 80,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: hasSpecial 
-                ? Stack(
-                    children: [
-                      const Center(
-                        child: Icon(
-                          Icons.local_offer,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      Positioned(
-                        top: 4,
-                        left: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Colors.yellow,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            badge,
-                            style: const TextStyle(
-                              fontSize: 6,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : const Center(
-                    child: Icon(
-                      Icons.category,
-                      color: Colors.grey,
-                      size: 24,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return 
-    AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        appBar: _selectedIndex == 0 ? CustomAppBar(
-          userName: 'John Doe',
-          phoneNumber: '+1 234 567 890',
-          searchHint: 'Search products...',
-          onNotificationTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notifications clicked')),
-            );
-          },
-          onProfileTap: () {
-            setState(() {
-              _selectedIndex = 3; // Navigate to profile
-            });
-          },
-          onSearchChanged: (query) {
-            print('Search query: $query');
-          },
-        ) : null,
-        body: _selectedIndex == 0 ? _buildHomePage() : _pages[_selectedIndex],
-        bottomNavigationBar: ReusableBottomNavBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          activeColor: Colors.green,
-          inactiveColor: Colors.grey,
-          backgroundColor: Colors.white,
-          // Using SVG icons from assets
-          sv1: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: _selectedIndex == 0 ? 36 : 32,
-            height: _selectedIndex == 0 ? 36 : 32,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv1.svg',
-              color: _selectedIndex == 0 ? Colors.green : Colors.grey.shade800,
-              width: _selectedIndex == 0 ? 36 : 32,
-              height: _selectedIndex == 0 ? 36 : 32,
-              fit: BoxFit.contain,
-            ),
-          ),
-          sv2: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: _selectedIndex == 1 ? 44 : 40,
-            height: _selectedIndex == 1 ? 44 : 40,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv2.svg',
-              color: _selectedIndex == 1 ? Colors.green : Colors.grey.shade800,
-              width: _selectedIndex == 1 ? 44 : 40,
-              height: _selectedIndex == 1 ? 44 : 40,
-              fit: BoxFit.contain,
-            ),
-          ),
-          sv3: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: _selectedIndex == 2 ? 36 : 32,
-            height: _selectedIndex == 2 ? 36 : 32,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv3.svg',
-              color: _selectedIndex == 2 ? Colors.green : Colors.grey.shade800,
-              width: _selectedIndex == 2 ? 36 : 32,
-              height: _selectedIndex == 2 ? 36 : 32,
-              fit: BoxFit.contain,
-            ),
-          ),
-          sv4: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: _selectedIndex == 3 ? 44 : 40,
-            height: _selectedIndex == 3 ? 44 : 40,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv4.svg',
-              color: _selectedIndex == 3 ? Colors.green : Colors.grey.shade800,
-              width: _selectedIndex == 3 ? 44 : 40,
-              height: _selectedIndex == 3 ? 44 : 40,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

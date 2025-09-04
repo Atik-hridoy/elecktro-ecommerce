@@ -1,3 +1,5 @@
+import 'package:elecktro_ecommerce/app/modules/category/bindings.dart';
+import 'package:elecktro_ecommerce/app/modules/category/view.dart';
 import 'package:elecktro_ecommerce/app/modules/home/bindings/home_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/home/views/home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_binding.dart';
@@ -26,6 +28,11 @@ class AppPages {
       name: Routes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: Routes.category,
+      page: () => const CategoryView(),
+      binding: CategoryBinding(),
     ),
   ];
 }
