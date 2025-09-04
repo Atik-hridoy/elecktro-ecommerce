@@ -68,23 +68,10 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
-    - assets/icons/Group 290580.svg
-    - assets/icons/Ellipse 915.svg
-    - assets/icons/onboarding/Component 245.svg
-    - assets/icons/onboarding/on1.svg
-    - assets/icons/onboarding/green.jpeg
-    - assets/icons/onboarding/green2.jpeg
-    - assets/icons/onboarding/RoundArrrow.svg
-    - assets/icons/onboarding/on2.svg
-    - assets/icons/onboarding/on3.svg
-    - assets/icons/onboarding/error.svg
-    - assets/icons/home/sv1.svg
-    - assets/icons/home/sv2.svg
-    - assets/icons/home/sv3.svg
-    - assets/icons/home/sv4.svg
-    - assets/icons/home/notification.svg
-    
-    
+    - assets/banner/
+    - assets/icons/onboarding/
+    - assets/icons/home/
+
   # Internationalization
   generate: true
 
