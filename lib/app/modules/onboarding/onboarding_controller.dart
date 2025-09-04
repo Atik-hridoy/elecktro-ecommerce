@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
 class OnboardingController extends GetxController {
   final currentPage = 0.obs;
+  Timer? _timer;
+  final int autoScrollDuration = 3; // seconds
+  late PageController pageController;
   
   final List<Map<String, String>> onboardingData = [
     {
@@ -25,12 +30,46 @@ class OnboardingController extends GetxController {
   void nextPage() {
     if (currentPage.value < onboardingData.length - 1) {
       currentPage.value++;
+      pageController.animateToPage(
+        currentPage.value,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
     } else {
       navigateToHome();
     }
   }
   
   void navigateToHome() {
+    _cancelTimer();
     Get.offAllNamed(Routes.home);
+  }
+  
+  // Start auto scroll timer
+  void startAutoScroll(PageController pageController) {
+    _cancelTimer();
+    _timer = Timer.periodic(Duration(seconds: autoScrollDuration), (_) {
+      if (currentPage.value < onboardingData.length - 1) {
+        pageController.nextPage(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _cancelTimer();
+      }
+    });
+  }
+  
+  // Cancel the auto scroll timer
+  void _cancelTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  @override
+  void onClose() {
+    _cancelTimer();
+    pageController.dispose();
+    super.onClose();
   }
 }

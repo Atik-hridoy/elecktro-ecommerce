@@ -30,14 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.10+1
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-
-  
   provider: ^6.1.2
   shared_preferences: ^2.2.2
-  flutter_svg: ^2.0.10+1
   responsive_framework: ^1.4.1
   cupertino_icons: ^1.0.8
   flutter_screenutil: ^6.0.0-alpha.1
@@ -79,6 +77,13 @@ flutter:
     - assets/icons/onboarding/RoundArrrow.svg
     - assets/icons/onboarding/on2.svg
     - assets/icons/onboarding/on3.svg
+    - assets/icons/onboarding/error.svg
+    - assets/icons/home/sv1.svg
+    - assets/icons/home/sv2.svg
+    - assets/icons/home/sv3.svg
+    - assets/icons/home/sv4.svg
+    - assets/icons/home/notification.svg
+    
     
   # Internationalization
   generate: true
