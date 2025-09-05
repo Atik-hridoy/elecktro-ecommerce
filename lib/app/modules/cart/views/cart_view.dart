@@ -1,4 +1,6 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
@@ -12,16 +14,22 @@ class CartView extends GetView<CartController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const RoundedAppBar(
-        title: 'My Cart',
-        height: 60.0,
-        borderRadius: 20.0,
-        backgroundColor: Colors.white,
-        textColor: Colors.black,
-        elevation: 4.0,
-        shadowColor: Color(0x33000000),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
       ),
+      child: Scaffold(
+      appBar: RoundedAppBar(
+  title: 'My Cart',
+  height: 60.0,
+  borderRadius: 20.0,
+  backgroundColor: Colors.white,
+  textColor: Colors.black,
+  elevation: 4.0,
+  shadowColor: const Color(0x33000000),
+  showBackButton: false,
+),
       body: Obx(() => controller.cartItems.isEmpty
           ? const Center(
               child: Text(
@@ -162,6 +170,7 @@ class CartView extends GetView<CartController> {
             ),
           ),
       bottomNavigationBar: buildBottomNavigationBar(),
+      )
     );
   }
   
