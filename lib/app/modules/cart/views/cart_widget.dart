@@ -73,12 +73,12 @@ class _CartProductCardState extends State<CartProductCard> {
       onTap: widget.onTap,
       child: Container(
         width: widget.width ?? double.infinity,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
         child: IntrinsicHeight(
           child: Container(
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12), // More rectangular corners
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.1),
@@ -95,12 +95,12 @@ class _CartProductCardState extends State<CartProductCard> {
                 Stack(
                   children: [
                     Container(
-                      width: 80,
+                      width: 100, // Slightly wider image container
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          bottomLeft: Radius.circular(12),
+                          topLeft: Radius.circular(6),
+                          bottomLeft: Radius.circular(6),
                         ),
                       ),
                       child: _buildProductImage(),
@@ -122,7 +122,7 @@ class _CartProductCardState extends State<CartProductCard> {
                 // Product Details Section
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,

@@ -32,6 +32,7 @@ class CartController extends GetxController {
         'price': 199.99,
         'size': 'M',
         'color': 'Silver',
+        'image': 'assets/icons/home/ex1.png',
  
       });
     }
