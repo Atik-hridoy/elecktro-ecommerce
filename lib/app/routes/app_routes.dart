@@ -4,5 +4,6 @@ abstract class Routes {
   static const splash = '/splash';
   static const onboarding = '/onboarding';
   static const home = '/home';
-  // Add more route names as needed
+  static const category = '/category';
+  static const cart = '/cart';
 }
