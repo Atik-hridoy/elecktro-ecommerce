@@ -15,29 +15,31 @@ class NavigationService extends GetxService {
   
   // Handle navigation based on tab index
   void handleNavigation(int index) {
-    _homeController.updateIndex(index);
-    
-    switch (index) {
-      case 0: // Home
-        if (Get.currentRoute != Routes.home) {
-          Get.offAllNamed(Routes.home);
-        }
-        break;
-      case 1: // Categories
-        if (Get.currentRoute != Routes.category) {
-          Get.offAllNamed(Routes.category);
-        }
-        break;
-      case 2: // Cart (show as overlay)
-        if (!Get.isDialogOpen!) {
-          Get.toNamed(Routes.cart);
-        }
-        break;
-      case 3: // Profile
-        // Handle profile navigation if needed
-        break;
-    }
+  _homeController.updateIndex(index);
+  
+  switch (index) {
+    case 0: // Home
+      if (Get.currentRoute != Routes.home) {
+        Get.offAllNamed(Routes.home);
+      }
+      break;
+    case 1: // Categories
+      if (Get.currentRoute != Routes.category) {
+        Get.offAllNamed(Routes.category);
+      }
+      break;
+    case 2: // Cart
+      if (Get.currentRoute != Routes.cart) {
+        Get.toNamed(Routes.cart);
+      }
+      break;
+    case 3: // Profile
+      if (Get.currentRoute != Routes.profile) {
+        Get.offAllNamed(Routes.profile);
+      }
+      break;
   }
+}
   
   // Get the current tab index
   int getCurrentIndex() {
