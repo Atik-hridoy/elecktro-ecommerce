@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class HomeController extends GetxController {
   var selectedIndex = 0.obs; // Observable variable for the selected index
@@ -39,11 +38,10 @@ class HomeController extends GetxController {
 
   // Method to update selected index
   void updateIndex(int index) {
-    if (index == 1) { // Assuming index 1 is for categories
-      Get.toNamed(Routes.category);
-    } else {
-      selectedIndex.value = index;
-    }
+    selectedIndex.value = index;
   }
+  
+  // Get current index
+  int get currentIndex => selectedIndex.value;
   
 }

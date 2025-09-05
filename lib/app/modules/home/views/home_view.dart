@@ -1,28 +1,23 @@
+import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import '../widget/navbar.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
 import '../widget/banner_card.dart';
 import '../widget/category_list.dart';
-import '../controllers/home_controller.dart';  // Import HomeController
+import '../widget/navbar.dart';
+import '../controllers/home_controller.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final homeController = Get.put(HomeController()); // Create an instance of HomeController
+    // Initialize the controller if not already initialized
+    final homeController = Get.find<HomeController>();
 
-    List<Widget> _buildPages() => [
-      _buildHomePage(homeController), // Home page with full structure
-      const Center(child: Text('Categories', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('Cart', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('Profile', style: TextStyle(fontSize: 24))),
-    ];
-
+  
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -47,72 +42,45 @@ class HomeView extends StatelessWidget {
                 },
               )
             : null,
-        body: _buildPages()[homeController.selectedIndex.value],
-        bottomNavigationBar: ReusableBottomNavBar(
-          currentIndex: homeController.selectedIndex.value,
-          onTap: (index) => homeController.updateIndex(index),
-          activeColor: Colors.green,
+        body: _buildHomePage(homeController),
+        bottomNavigationBar: Obx(() {
+          // Observe the current index from HomeController
+          final currentIndex = Get.find<HomeController>().selectedIndex.value;
+          return ReusableNavBar(
+            currentIndex: currentIndex,
+            onTap: NavigationService.to.handleNavigation,
+          activeColor: const Color(0xFF044D37), // Green color from your design
           inactiveColor: Colors.grey,
           backgroundColor: Colors.white,
-          sv1: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: homeController.selectedIndex.value == 0 ? 36 : 32,
-            height: homeController.selectedIndex.value == 0 ? 36 : 32,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv1.svg',
-              color: homeController.selectedIndex.value == 0
-                  ? Colors.green
-                  : Colors.grey.shade800,
-              width: homeController.selectedIndex.value == 0 ? 36 : 32,
-              height: homeController.selectedIndex.value == 0 ? 36 : 32,
-              fit: BoxFit.contain,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined, size: 24),
+              activeIcon: Icon(Icons.home, size: 24),
+              label: 'Home',
             ),
-          ),
-          sv2: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: homeController.selectedIndex.value == 1 ? 44 : 40,
-            height: homeController.selectedIndex.value == 1 ? 44 : 40,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv2.svg',
-              color: homeController.selectedIndex.value == 1
-                  ? Colors.green
-                  : Colors.grey.shade800,
-              width: homeController.selectedIndex.value == 1 ? 44 : 40,
-              height: homeController.selectedIndex.value == 1 ? 44 : 40,
-              fit: BoxFit.contain,
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category_outlined, size: 24),
+              activeIcon: Icon(Icons.category, size: 24),
+              label: 'Categories',
             ),
-          ),
-          sv3: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: homeController.selectedIndex.value == 2 ? 36 : 32,
-            height: homeController.selectedIndex.value == 2 ? 36 : 32,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv3.svg',
-              color: homeController.selectedIndex.value == 2
-                  ? Colors.green
-                  : Colors.grey.shade800,
-              width: homeController.selectedIndex.value == 2 ? 36 : 32,
-              height: homeController.selectedIndex.value == 2 ? 36 : 32,
-              fit: BoxFit.contain,
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart_outlined, size: 24),
+              activeIcon: Icon(Icons.shopping_cart, size: 24),
+              label: 'Cart',
             ),
-          ),
-          sv4: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: homeController.selectedIndex.value == 3 ? 44 : 40,
-            height: homeController.selectedIndex.value == 3 ? 44 : 40,
-            child: SvgPicture.asset(
-              'assets/icons/home/sv4.svg',
-              color: homeController.selectedIndex.value == 3
-                  ? Colors.green
-                  : Colors.grey.shade800,
-              width: homeController.selectedIndex.value == 3 ? 44 : 40,
-              height: homeController.selectedIndex.value == 3 ? 44 : 40,
-              fit: BoxFit.contain,
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline, size: 24),
+              activeIcon: Icon(Icons.person, size: 24),
+              label: 'Profile',
             ),
-          ),
+          ],
+        
+        );
+      },
         ),
       ),
     );
+  
   }
 
   // Home page body structure
@@ -148,26 +116,10 @@ class HomeView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Popular Products',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
+                const Text('Popular Products', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 GestureDetector(
-                  onTap: () {
-                    // Handle View All tap
-                  },
-                  child: const Text(
-                    'View All',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  onTap: () {},
+                  child: const Text('View All', style: TextStyle(fontSize: 14, color: Colors.red, fontWeight: FontWeight.w500)),
                 ),
               ],
             ),
@@ -176,12 +128,12 @@ class HomeView extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Popular Products Grid
-          Container(
-            height: 240, // Slightly increased height to accommodate the price
+          SizedBox(
+            height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 6, // Total number of products
+              itemCount: 6,
               itemBuilder: (context, index) {
                 // List of product data
                 final products = [

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'onboarding_controller.dart';
@@ -9,92 +8,85 @@ class OnboardingPage extends StatelessWidget {
   final Map<String, String> item;
   final Size screenSize;
   
-  // Cache the SVG pictures
-  final Map<String, SvgPicture> _cachedSvgs = {};
+  // Cache the images
+  final Map<String, Image> _cachedImages = {};
 
   OnboardingPage({
     Key? key,
     required this.item,
     required this.screenSize,
   }) : super(key: key) {
-    // Pre-cache SVGs
-    _cachedSvgs[item['image']!] = SvgPicture.asset(
+    // Pre-cache images
+    _cachedImages[item['image']!] = Image.asset(
       item['image']!,
       width: screenSize.width,
-      fit: BoxFit.fitWidth,
-      cacheColorFilter: true,
-    );
-    
-    _cachedSvgs['assets/icons/Group 290580.svg'] = SvgPicture.asset(
-      'assets/icons/Group 290580.svg',
-      width: screenSize.width * 0.15,
-      height: screenSize.width * 0.15,
-      cacheColorFilter: true,
+      fit: BoxFit.cover,
+      cacheHeight: (screenSize.height * 0.5).toInt(),
+      cacheWidth: screenSize.width.toInt(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Image Section
-          SizedBox(
-            width: screenSize.width,
-            height: screenSize.height * 0.50,
-            child: Stack(
-              children: [
-                // Background Image
-                Positioned.fill(
-                  child: _cachedSvgs[item['image']!] ?? const SizedBox(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Image Section
+                    SizedBox(
+                      width: screenSize.width,
+                      height: screenSize.height * 0.50,
+                      child: _cachedImages[item['image']!] ?? const SizedBox(),
+                    ),
+                    
+                    // Title and Subtitle
+                    const SizedBox(height: 40),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Text(
+                        item['title']!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          height: 1.2,
+                          letterSpacing: 0.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      child: Text(
+                        item['subtitle']!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          fontFamily: 'Poppins',
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                // Overlay Image (Group 290580.svg)
-                Positioned(
-                  top: screenSize.height * 0.02,
-                  left: 0,
-                  right: 0,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: _cachedSvgs['assets/icons/Group 290580.svg'] ?? const SizedBox(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Title and Subtitle
-          const SizedBox(height: 130),
-          Text(
-            item['title']!,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              height: 1.0,
-              letterSpacing: 0.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40.0),
-            child: Text(
-              item['subtitle']!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                fontFamily: 'Poppins',
-                height: 1.4,
               ),
             ),
-          ),
-          const SizedBox(height: 30),
-        ],
+          );
+        },
       ),
     );
   }
@@ -239,11 +231,10 @@ class _OnboardingViewState extends State<OnboardingView> {
                 shape: BoxShape.circle,
                 color: Colors.white,
               ),
-              child: SvgPicture.asset(
-                'assets/icons/onboarding/RoundArrrow.svg',
-                width: 40,
-                height: 40,
-                cacheColorFilter: true,
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 30,
+                color: Color(0xFF09B782),
               ),
             ),
           ),

@@ -12,17 +12,17 @@ class OnboardingController extends GetxController {
   // Made final and static since it's constant data
   static const List<Map<String, String>> onboardingData = [
     {
-      'image': 'assets/icons/onboarding/on1.svg',
+      'image': 'assets/icons/onboarding/on1.webp',
       'title': 'Online Order',
       'subtitle': 'Browse and shop your favorite products anytime, anywhere with just a few taps.',
     },
     {
-      'image': 'assets/icons/onboarding/on2.svg',
+      'image': 'assets/icons/onboarding/on2.webp',
       'title': 'Easy Payment',
       'subtitle': 'Choose from multiple secure payment methods for a smooth and hassle-free checkout.',
     },
     {
-      'image': 'assets/icons/onboarding/on3.svg',
+      'image': 'assets/icons/onboarding/on3.webp',
       'title': 'Fast Delivery',
       'subtitle': 'Get your orders delivered quickly and reliably, right to your doorstep.',
     },

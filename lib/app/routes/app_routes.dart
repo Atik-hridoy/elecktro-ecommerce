@@ -5,4 +5,5 @@ abstract class Routes {
   static const onboarding = '/onboarding';
   static const home = '/home';
   static const category = '/category';
+  static const cart = '/cart';
 }

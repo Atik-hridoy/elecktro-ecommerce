@@ -1,17 +1,26 @@
+import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
+import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'controller.dart';
 import '../home/widget/category_list.dart';
 import '../home/widget/product_card.dart';
 import '../home/widget/navbar.dart';
 
 class CategoryView extends GetView<CategoryController> {
-  const CategoryView({super.key});
+  CategoryView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final navigationService = NavigationService.to;
+    
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(200), // Increased height to accommodate both search and categories
         child: Container(
@@ -89,10 +98,8 @@ class CategoryView extends GetView<CategoryController> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 85), // Space for bottom navigation bar
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 16), // Reduced bottom padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -155,47 +162,39 @@ class CategoryView extends GetView<CategoryController> {
           ],
         ),
       ),
-          // Bottom Navigation Bar
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: ReusableBottomNavBar(
-              currentIndex: 1, // Category tab is active
-              onTap: (index) {
-                if (index == 0) {
-                  Get.offAllNamed('/home');
-                } else if (index == 1) {
-                  // Already on categories
-                } else if (index == 2) {
-                  Get.offAllNamed('/cart');
-                } else if (index == 3) {
-                  Get.offAllNamed('/profile');
-                }
-              },
-              sv1: SvgPicture.asset(
-                'assets/icons/home/sv1.svg',
-                width: 24,
-                height: 24,
-              ),
-              sv2: SvgPicture.asset(
-                'assets/icons/home/sv2.svg',
-                width: 24,
-                height: 24,
-              ),
-              sv3: SvgPicture.asset(
-                'assets/icons/home/sv3.svg',
-                width: 24,
-                height: 24,
-              ),
-              sv4: SvgPicture.asset(
-                'assets/icons/home/sv4.svg',
-                width: 24,
-                height: 24,
-              ),
+      bottomNavigationBar: Obx(() {
+        // Observe the current index from HomeController
+        final currentIndex = Get.find<HomeController>().selectedIndex.value;
+        return ReusableNavBar(
+          currentIndex: currentIndex,
+          onTap: navigationService.handleNavigation,
+          activeColor: const Color(0xFF044D37),
+          inactiveColor: Colors.grey,
+          backgroundColor: Colors.white,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined, size: 24),
+              activeIcon: Icon(Icons.home, size: 24),
+              label: 'Home',
             ),
-          ),
-        ],
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category_outlined, size: 24),
+              activeIcon: Icon(Icons.category, size: 24),
+              label: 'Categories',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart_outlined, size: 24),
+              activeIcon: Icon(Icons.shopping_cart, size: 24),
+              label: 'Cart',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline, size: 24),
+              activeIcon: Icon(Icons.person, size: 24),
+              label: 'Profile',
+            ),
+          ],
+        );
+      }),
       )
     );
   }
