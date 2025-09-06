@@ -149,6 +149,7 @@ class CategoryView extends GetView<CategoryController> {
               itemCount: 10, // Number of product cards
               itemBuilder: (context, index) {
                 return ProductCard(
+                  productId: 'Product ${index + 1}',
                   name: 'Product ${index + 1}',
                   brand: 'Brand ${index + 1}',
                   price: '\$${(index + 1) * 99}.99',

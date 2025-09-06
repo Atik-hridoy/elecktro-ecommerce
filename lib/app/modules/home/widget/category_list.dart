@@ -39,6 +39,7 @@ class CategoryList extends StatelessWidget {
       width: 80,
       margin: const EdgeInsets.only(right: 12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 60,
@@ -49,25 +50,34 @@ class CategoryList extends StatelessWidget {
             ),
             child: Center(
               child: hasSpecial
-                  ? Text(
-                      badge,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
+                  ? Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        badge,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
                       ),
                     )
                   : const Icon(Icons.category, size: 30, color: Colors.white),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 6),
+          SizedBox(
+            height: 30, // Fixed height to contain two lines of text
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                height: 1.1, // Tighter line height
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
