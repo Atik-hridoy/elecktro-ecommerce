@@ -9,4 +9,7 @@ abstract class Routes {
   static const profile = '/profile';
   static const productDetails = '/product-details';
   static const checkout = '/checkout';
+  static const paymentCard = '/payment-card';
+
+ 
 }

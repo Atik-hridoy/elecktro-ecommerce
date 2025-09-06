@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -495,7 +496,7 @@ class CheckoutView extends GetView<CheckoutController> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                controller.processCheckout();
+                Get.toNamed(Routes.paymentCard);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,

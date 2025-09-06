@@ -470,11 +470,10 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         shadowColor: Colors.black.withOpacity(0.8), // Add shadow to the bottom area
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(26), // Rounded top-left corner
-            topRight: Radius.circular(26), // Rounded top-right corner
+            // Rounded top-right corner
           ),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(30),
             width: double.infinity,
             child: Row(
               children: [

@@ -4,6 +4,7 @@ import 'package:elecktro_ecommerce/app/modules/category/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/category/view.dart';
 import 'package:elecktro_ecommerce/app/modules/checkOut/bindings/checkout_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/checkOut/views/checkout_view.dart';
+import 'package:elecktro_ecommerce/app/modules/checkOut/views/paymentCard_view.dart';
 import 'package:elecktro_ecommerce/app/modules/home/bindings/home_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/home/views/home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_binding.dart';
@@ -60,6 +61,11 @@ class AppPages {
     GetPage(
       name: Routes.checkout,
       page: () => const CheckoutView(),
+      binding: CheckoutBinding(),
+    ),
+    GetPage(
+      name: Routes.paymentCard,
+      page: () => const PaymentCardView(),
       binding: CheckoutBinding(),
     ),
     
