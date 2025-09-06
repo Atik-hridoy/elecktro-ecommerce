@@ -1,5 +1,8 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+
 
 class ProductCard extends StatelessWidget {
   final String name;
@@ -16,6 +19,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onAddToCart;
   final bool isFavorite;
   final bool showAddToCart;
+  final String productId; // Add productId parameter
 
   const ProductCard({
     super.key,
@@ -33,9 +37,33 @@ class ProductCard extends StatelessWidget {
     this.onAddToCart,
     this.isFavorite = false,
     this.showAddToCart = true,
+    required this.productId,
   });
+   
 
+   void _navigateToProductDetails() {
+    Get.toNamed(
+      Routes.productDetails,
+      parameters: {
+        'name': name,
+        'brand': brand,
+        'price': price,
+        if (imageUrl != null) 'imageUrl': imageUrl!,
+        if (discount != null) 'discount': discount!,
+      },
+    );
+ }
   // Helper method to build rating stars
+  Widget _buildPlaceholderIcon() {
+    return const Center(
+      child: Icon(
+        Icons.devices,
+        size: 32,
+        color: Colors.white,
+      ),
+    );
+  }
+
   Widget _buildRatingStars(double rating) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -51,7 +79,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: _navigateToProductDetails,
+      child: Container(
       width: 150,
       margin: const EdgeInsets.only(right: 12, bottom: 2),
       decoration: BoxDecoration(
@@ -85,25 +115,23 @@ class ProductCard extends StatelessWidget {
                   child: imageUrl != null
                       ? ClipRRect(
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                          child: Image.network(
-                            imageUrl!,
-                            fit: BoxFit.contain,
-                            height: 100,
-                            width: double.infinity,
-                            errorBuilder: (context, error, stackTrace) => const Icon(
-                              Icons.devices,
-                              size: 32,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: imageUrl!.startsWith('http')
+                              ? Image.network(
+                                  imageUrl!,
+                                  fit: BoxFit.contain,
+                                  height: 100,
+                                  width: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                                )
+                              : Image.asset(
+                                  imageUrl!,
+                                  fit: BoxFit.contain,
+                                  height: 100,
+                                  width: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                                ),
                         )
-                      : const Center(
-                          child: Icon(
-                            Icons.devices,
-                            size: 32,
-                            color: Colors.white,
-                          ),
-                        ),
+                      : _buildPlaceholderIcon(),
                 ),
                 // Discount badge
                 if (showDiscountBadge && discount != null)
@@ -139,7 +167,7 @@ class ProductCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             spreadRadius: 0.5,
                             blurRadius: 3,
                             offset: const Offset(0, 1),
@@ -236,6 +264,7 @@ class ProductCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

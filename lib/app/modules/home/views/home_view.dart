@@ -136,42 +136,55 @@ class HomeView extends StatelessWidget {
               itemCount: 6,
               itemBuilder: (context, index) {
                 // List of product data
-                final products = [
+                // Define colors first
+                final colors = [
+                  Colors.blue[200]!,
+                  Colors.purple[200]!,
+                  Colors.red[200]!,
+                  Colors.teal[200]!,
+                  Colors.orange[200]!,
+                ];
+
+                // Ensure we have at least one color
+                final color = colors.isNotEmpty 
+                    ? colors[index % colors.length]
+                    : Colors.grey[200]!;
+
+                const products = [
                   {
-                    'name': 'Trkil Tracker',
-                    'brand': 'Trkil',
-                    'price': '\$16.30',
-                    'color': Colors.black,
-                  },
-                  {
-                    'name': 'Oppo A35',
-                    'brand': 'Osaka',
-                    'price': '\$2500',
-                    'color': Colors.blue.shade200,
-                  },
-                  {
-                    'name': 'Smart Watch',
-                    'brand': 'FitPro',
-                    'price': '\$199',
-                    'color': Colors.red.shade200,
-                  },
-                  {
+                    'id': 'prod_001',
                     'name': 'Wireless Earbuds',
-                    'brand': 'Sonic',
-                    'price': '\$129',
-                    'color': Colors.purple.shade200,
+                    'brand': 'SoundBeats',
+                    'price': '\$99',
+                    'imageUrl': 'assets/images/1.jpeg',
                   },
                   {
-                    'name': 'Laptop Stand',
+                    'id': 'prod_002',
+                    'name': 'Smart Watch',
+                    'brand': 'TechWear',
+                    'price': '\$199',
+                    'imageUrl': 'assets/images/2.jpeg',
+                  },
+                  {
+                    'id': 'prod_003',
+                    'name': 'Bluetooth Speaker',
+                    'brand': 'BoomAudio',
+                    'price': '\$79',
+                    'imageUrl': 'assets/images/3.jpeg',
+                  },
+                  {
+                    'id': 'prod_004',
+                    'name': 'Wireless Mouse',
                     'brand': 'ErgoTech',
                     'price': '\$39',
-                    'color': Colors.teal.shade200,
+                    'imageUrl': 'assets/images/4.jpeg',
                   },
                   {
+                    'id': 'prod_005',
                     'name': 'Power Bank',
                     'brand': 'ChargeIt',
                     'price': '\$49',
-                    'color': Colors.orange.shade200,
+                    'imageUrl': 'assets/images/5.jpeg',
                   },
                 ];
 
@@ -179,9 +192,11 @@ class HomeView extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 12),
                   child: ProductCard(
                     name: products[index]['name'] as String,
+                    productId: products[index]['id'] as String,
                     brand: products[index]['brand'] as String,
                     price: products[index]['price'] as String,
-                    bgColor: products[index]['color'] as Color,
+                    imageUrl: products[index]['imageUrl'],
+                    bgColor: color,
                   ),
                 );
               },
@@ -214,52 +229,52 @@ class HomeView extends StatelessWidget {
               itemCount: 6, // Total number of products
               itemBuilder: (context, index) {
                 // List of recommended products
-                final recommendedProducts = [
+                const recommendedProducts = [
                   {
-                    'name': 'Wireless Mouse',
-                    'brand': 'TechGear',
-                    'price': '\$29',
-                    'color': Colors.blueGrey.shade200,
+                    'id': 'prod_006',
+                    'name': 'Wireless Keyboard',
+                    'brand': 'KeyMaster',
+                    'price': '\$59',
                   },
                   {
-                    'name': 'Bluetooth Speaker',
-                    'brand': 'BoomSound',
-                    'price': '\$89',
-                    'color': Colors.indigo.shade200,
+                    'id': 'prod_007',
+                    'name': 'Gaming Mouse',
+                    'brand': 'GameGear',
+                    'price': '\$79',
                   },
                   {
-                    'name': 'Phone Stand',
-                    'brand': 'MobiMount',
-                    'price': '\$15',
-                    'color': Colors.amber.shade200,
+                    'id': 'prod_008',
+                    'name': 'USB Hub',
+                    'brand': 'PortPlus',
+                    'price': '\$25',
+                  },{
+                    'id': 'prod_009',
+                    'name': 'Laptop Stand',
+                    'brand': 'ErgoTech',
+                    'price': '\$35',
                   },
                   {
-                    'name': 'USB-C Hub',
-                    'brand': 'PortableTech',
-                    'price': '\$45',
-                    'color': Colors.green.shade200,
-                  },
-                  {
+                    'id': 'prod_010',
                     'name': 'Screen Protector',
                     'brand': 'ShieldMax',
                     'price': '\$12',
-                    'color': Colors.brown.shade200,
                   },
                   {
+                    'id': 'prod_011',
                     'name': 'Laptop Sleeve',
                     'brand': 'UrbanGear',
                     'price': '\$25',
-                    'color': Colors.grey.shade300,
                   },
                 ];
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ProductCard(
+                    productId: recommendedProducts[index]['id'] as String,
                     name: recommendedProducts[index]['name'] as String,
                     brand: recommendedProducts[index]['brand'] as String,
                     price: recommendedProducts[index]['price'] as String,
-                    bgColor: recommendedProducts[index]['color'] as Color,
+                    bgColor: Colors.grey[200]!,
                   ),
                 );
               },

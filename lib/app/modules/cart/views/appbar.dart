@@ -43,12 +43,13 @@ class RoundedAppBar extends StatelessWidget implements PreferredSizeWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
+        
         centerTitle: true,
         elevation: elevation,
         backgroundColor: backgroundColor,
         foregroundColor: textColor,
         shadowColor: shadowColor,
-        automaticallyImplyLeading: showBackButton,
+        automaticallyImplyLeading: false,
         leading: showBackButton
             ? IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
