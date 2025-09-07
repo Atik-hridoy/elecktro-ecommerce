@@ -17,6 +17,9 @@ import 'package:elecktro_ecommerce/app/modules/splash/splash_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/product_view.dart';
 import 'package:get/get.dart';
 
+import '../modules/success/bindings.dart';
+import '../modules/success/view.dart';
+
 part 'app_routes.dart';
 
 class AppPages {
@@ -68,6 +71,11 @@ class AppPages {
       page: () => const PaymentCardView(),
       binding: CheckoutBinding(),
     ),
-    
+    GetPage(
+      name: Routes.success,
+      page: () => const SuccessView(),
+      binding: SuccessBinding(),
+    ),
+
   ];
 }
