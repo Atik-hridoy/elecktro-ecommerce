@@ -9,14 +9,37 @@ class CheckoutController extends GetxController {
   final RxDouble subtotal = 0.0.obs;
   final RxDouble deliveryFee = 5.99.obs; // Example fixed delivery fee
   
+  // Payment method
+  final RxString selectedPaymentMethod = 'Online Payment'.obs;
+  
+  // Voucher / Discount
+  final RxString voucherCode = ''.obs;
+  final RxDouble discount = 0.0.obs;
+  final TextEditingController voucherTextController = TextEditingController();
+  
   // Computed total amount
-  double get totalAmount => subtotal.value + deliveryFee.value;
+  double get totalAmount => (subtotal.value + deliveryFee.value - discount.value).clamp(0.0, double.infinity);
+
+  void setPaymentMethod(String value) {
+    selectedPaymentMethod.value = value;
+  }
+
+  @override
+  void onClose() {
+    voucherTextController.dispose();
+    super.onClose();
+  }
   
   @override
   void onInit() {
     super.onInit();
     // In a real app, you would fetch cart items from a service
     _loadCartItems();
+    // Keep text field and reactive code in sync
+    voucherTextController.text = voucherCode.value;
+    voucherTextController.addListener(() {
+      voucherCode.value = voucherTextController.text;
+    });
   }
 
   // Load cart items (mock data for example)
@@ -57,6 +80,10 @@ class CheckoutController extends GetxController {
       total += (item['price'] as num).toDouble() * (item['quantity'] as int);
     }
     subtotal.value = total;
+    // Re-apply voucher if any
+    if (voucherCode.value.isNotEmpty) {
+      _applyVoucherInternal(voucherCode.value);
+    }
   }
   
   // Update item quantity
@@ -77,6 +104,62 @@ class CheckoutController extends GetxController {
     if (index >= 0 && index < cartItems.length) {
       cartItems.removeAt(index);
       _calculateSubtotal();
+    }
+  }
+  
+  // Apply voucher logic
+  void applyVoucher(String code) {
+    voucherCode.value = code.trim();
+    _applyVoucherInternal(voucherCode.value, showFeedback: true);
+  }
+
+  void clearVoucher() {
+    voucherCode.value = '';
+    discount.value = 0.0;
+    Get.snackbar(
+      'Voucher Removed',
+      'Discount has been cleared',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+    );
+  }
+
+  void _applyVoucherInternal(String code, {bool showFeedback = false}) {
+    double newDiscount = 0.0;
+    if (code.isEmpty) {
+      discount.value = 0.0;
+      return;
+    }
+    // Simple demo rules: FREESHIP removes delivery fee; SAVE10 gives 10% off subtotal
+    if (code.toUpperCase() == 'FREESHIP') {
+      newDiscount = deliveryFee.value; // waive delivery
+    } else if (code.toUpperCase() == 'SAVE10') {
+      newDiscount = (subtotal.value * 0.10);
+    } else {
+      // invalid code
+      if (showFeedback) {
+        Get.snackbar(
+          'Invalid Voucher',
+          'The code "$code" is not valid',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+      discount.value = 0.0;
+      return;
+    }
+
+    discount.value = newDiscount;
+    if (showFeedback) {
+      Get.snackbar(
+        'Voucher Applied',
+        'Discount applied successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     }
   }
   
