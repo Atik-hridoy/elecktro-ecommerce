@@ -7,15 +7,11 @@ import 'onboarding_controller.dart';
 class OnboardingPage extends StatelessWidget {
   final Map<String, String> item;
   final Size screenSize;
-  
+
   // Cache the images
   final Map<String, Image> _cachedImages = {};
 
-  OnboardingPage({
-    Key? key,
-    required this.item,
-    required this.screenSize,
-  }) : super(key: key) {
+  OnboardingPage({super.key, required this.item, required this.screenSize}) {
     // Pre-cache images
     _cachedImages[item['image']!] = Image.asset(
       item['image']!,
@@ -33,9 +29,7 @@ class OnboardingPage extends StatelessWidget {
         builder: (context, constraints) {
           return SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: IntrinsicHeight(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,7 +40,7 @@ class OnboardingPage extends StatelessWidget {
                       height: screenSize.height * 0.50,
                       child: _cachedImages[item['image']!] ?? const SizedBox(),
                     ),
-                    
+
                     // Title and Subtitle
                     const SizedBox(height: 40),
                     Padding(
@@ -101,25 +95,25 @@ class OnboardingView extends StatefulWidget {
 
 class _OnboardingViewState extends State<OnboardingView> {
   late final PageController _pageController;
-  late final OnboardingController _controller = Get.find<OnboardingController>();
+  late final OnboardingController _controller =
+      Get.find<OnboardingController>();
   late Size _screenSize;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      viewportFraction: 1.0,
-      keepPage: true,
-    );
+    _pageController = PageController(viewportFraction: 1.0, keepPage: true);
     _controller.pageController = _pageController;
-    
+
     // Set status bar color and brightness
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-    ));
-    
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+
     // Start auto-scrolling when the view is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.startAutoScroll(_pageController);
@@ -135,7 +129,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   Widget build(BuildContext context) {
     _screenSize = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -166,10 +160,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                   },
                 ),
               ),
-              
+
               // Page Indicator and Next Button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 20,
+                ),
                 child: GetBuilder<OnboardingController>(
                   id: 'indicator',
                   builder: (controller) => Row(
@@ -194,7 +191,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                           );
                         },
                       ),
-                      
+
                       // Next/Get Started Button
                       _buildNextButton(controller),
                     ],
@@ -218,7 +215,8 @@ class _OnboardingViewState extends State<OnboardingView> {
           shape: const CircleBorder(),
           child: InkWell(
             onTap: () {
-              if (controller.currentPage.value < OnboardingController.onboardingData.length - 1) {
+              if (controller.currentPage.value <
+                  OnboardingController.onboardingData.length - 1) {
                 controller.nextPage();
               } else {
                 controller.navigateToHome();

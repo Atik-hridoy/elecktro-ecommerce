@@ -5,13 +5,10 @@ class AppError {
   final String message;
   final dynamic error;
 
-  const AppError({
-    this.message = 'An unexpected error occurred',
-    this.error,
-  });
+  const AppError({this.message = 'An unexpected error occurred', this.error});
 
   factory AppError.network(String message) => AppError(message: message);
-  
+
   factory AppError.fromDioError(dynamic error) {
     if (error.toString().contains('SocketException')) {
       return AppError.network('No internet connection');
@@ -27,11 +24,7 @@ class ErrorView extends StatelessWidget {
   final AppError error;
   final VoidCallback? onRetry;
 
-  const ErrorView({
-    Key? key,
-    required this.error,
-    this.onRetry,
-  }) : super(key: key);
+  const ErrorView({super.key, required this.error, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +38,7 @@ class ErrorView extends StatelessWidget {
             height: 120,
           ),
           const SizedBox(height: 16),
-          Text(
-            'Error',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Error', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
             error.message,
@@ -57,10 +47,7 @@ class ErrorView extends StatelessWidget {
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ],
       ),

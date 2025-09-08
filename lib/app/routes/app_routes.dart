@@ -10,6 +10,8 @@ abstract class Routes {
   static const productDetails = '/product-details';
   static const checkout = '/checkout';
   static const paymentCard = '/payment-card';
-
+  static const success = '/success';
+  static const auth = '/auth';
+  static const otp = '/otp';
  
 }

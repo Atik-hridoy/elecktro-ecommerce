@@ -21,25 +21,31 @@ class _BannerCardState extends State<BannerCard> {
   late final PageController _pageController;
   late int _currentPage;
   Timer? _autoScrollTimer;
+  bool _isUserScrolling = false;
 
   @override
   void initState() {
     super.initState();
     _currentPage = widget.currentIndex;
     _pageController = PageController(initialPage: _currentPage);
-    _startAutoScroll();
+    // Start auto-scroll after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startAutoScroll();
+    });
   }
   
   @override
   void didUpdateWidget(BannerCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentIndex != _currentPage) {
+    if (widget.currentIndex != _currentPage && !_isUserScrolling) {
       _currentPage = widget.currentIndex;
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
@@ -51,24 +57,31 @@ class _BannerCardState extends State<BannerCard> {
   }
 
   void _startAutoScroll() {
+    _autoScrollTimer?.cancel(); // Cancel any existing timer
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
       
-      if (_pageController.hasClients) {
-        if (widget.items.isEmpty) return;
-        if (_currentPage < widget.items.length - 1) {
-          _pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        } else {
-          _pageController.jumpToPage(0);
-          _currentPage = 0;
-          widget.onPageChanged?.call(_currentPage);
+      if (_pageController.hasClients && !_isUserScrolling && widget.items.length > 1) {
+        int nextPage = _currentPage + 1;
+        if (nextPage >= widget.items.length) {
+          nextPage = 0;
         }
+        
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        ).then((_) {
+          if (mounted) {
+            setState(() {
+              _currentPage = nextPage;
+            });
+            widget.onPageChanged?.call(_currentPage);
+          }
+        });
       }
     });
   }
@@ -80,62 +93,94 @@ class _BannerCardState extends State<BannerCard> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Main Image with smooth sliding
+          // Main Image with smooth sliding and gesture detection
           SizedBox(
             height: 200,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                if (_currentPage != index) {
-                  _currentPage = index;
-                  widget.onPageChanged?.call(index);
-                }
+            child: GestureDetector(
+              onPanDown: (_) {
+                _isUserScrolling = true;
+                _autoScrollTimer?.cancel();
               },
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      widget.items[index],
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+              onPanEnd: (_) {
+                _isUserScrolling = false;
+                _startAutoScroll();
+              },
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  if (_currentPage != index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                    widget.onPageChanged?.call(index);
+                    // Restart auto-scroll timer after user interaction
+                    _autoScrollTimer?.cancel();
+                    if (!_isUserScrolling) {
+                      _startAutoScroll();
+                    }
+                  }
+                },
+                itemCount: widget.items.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        widget.items[index],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.error_outline, size: 40, color: Colors.grey),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 12),
-          // Clean indicators without shadow
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              widget.items.length,
-              (index) => GestureDetector(
-                onTap: () {
-                  _pageController.animateToPage(
-                    index,
+          // Page indicators
+          if (widget.items.length > 1)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                widget.items.length,
+                (index) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ).then((_) {
+                      widget.onPageChanged?.call(index);
+                      // Restart auto-scroll after manual navigation
+                      _autoScrollTimer?.cancel();
+                      _startAutoScroll();
+                    });
+                  },
+                  child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: _currentPage == index ? 24 : 8,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
-                    color: _currentPage == index 
-                        ? Colors.orange 
-                        : Colors.grey.shade300,
+                    width: _currentPage == index ? 24 : 8,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: _currentPage == index 
+                          ? const Color(0xFF044D37) // Using app's primary color
+                          : Colors.grey.shade300,
+                    ),
                   ),
                 ),
-              ),
-            ).toList(),
-          ),
+              ).toList(),
+            ),
         ],
       ),
     );

@@ -14,7 +14,7 @@ class RoundedAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   const RoundedAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.height = 70.0,
     this.borderRadius = 20.0,
@@ -25,7 +25,7 @@ class RoundedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.onBackPressed,
     this.actions,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => Size.fromHeight(height);
@@ -43,7 +43,7 @@ class RoundedAppBar extends StatelessWidget implements PreferredSizeWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
-        
+
         centerTitle: true,
         elevation: elevation,
         backgroundColor: backgroundColor,

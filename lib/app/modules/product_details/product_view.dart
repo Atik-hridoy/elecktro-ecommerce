@@ -1,8 +1,6 @@
-import 'package:elecktro_ecommerce/app/modules/checkOut/bindings/checkout_binding.dart';
-import 'package:elecktro_ecommerce/app/modules/checkOut/views/checkout_view.dart';
-import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
 
 class ProductDetailsView extends StatefulWidget {
   const ProductDetailsView({super.key});
@@ -12,6 +10,13 @@ class ProductDetailsView extends StatefulWidget {
 }
 
 class _ProductDetailsViewState extends State<ProductDetailsView> {
+  late final ProductDetailsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<ProductDetailsController>();
+  }
   int selectedSizeIndex = 3; // XL selected by default
   int selectedColorIndex = 0; // Green selected by default
   int quantity = 1;
@@ -467,84 +472,66 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       bottomNavigationBar: Material(
         elevation: 10, 
         color: Colors.grey[100],
-        shadowColor: Colors.black.withOpacity(0.8), // Add shadow to the bottom area
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            // Rounded top-right corner
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(30),
-            width: double.infinity,
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add product to cart and navigate to checkout
-                      // controller.addToCart(); // Uncomment this if you have a controller method for adding to cart
-                      Get.to(
-                        () => const CheckoutView(),
-                        binding: CheckoutBinding(),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+        shadowColor: Colors.black.withOpacity(0.8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              // Buy Now Button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    controller.onBuyNow();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF3D00),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.shopping_bag_outlined),
-                        SizedBox(width: 8),
-                        Text(
-                          'Buy Now',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                  ),
+                  child: const Text(
+                    'Buy Now',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add the product to cart
-                      // controller.addToCart(); // Uncomment this if you have a controller method for adding to cart
-                      Get.toNamed(Routes.cart);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFC107),
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.shopping_cart_outlined),
-                        SizedBox(width: 8),
-                        Text(
-                          'Add to Cart',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+              ),
+              const SizedBox(width: 16),
+              // Add to Cart Button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TODO: Implement add to cart functionality
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFC107),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.shopping_cart_outlined),
+                      SizedBox(width: 8),
+                      Text(
+                        'Add to Cart',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

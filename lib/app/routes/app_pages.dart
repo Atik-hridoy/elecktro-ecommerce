@@ -1,3 +1,6 @@
+import 'package:elecktro_ecommerce/app/modules/auth/bindings/bindings.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/views/authview.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/views/otpView.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/bindings/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/views/cart_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/bindings.dart';
@@ -16,6 +19,9 @@ import 'package:elecktro_ecommerce/app/modules/splash/splash_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/splash/splash_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/product_view.dart';
 import 'package:get/get.dart';
+
+import '../modules/success/bindings.dart';
+import '../modules/success/view.dart';
 
 part 'app_routes.dart';
 
@@ -68,6 +74,21 @@ class AppPages {
       page: () => const PaymentCardView(),
       binding: CheckoutBinding(),
     ),
-    
+    GetPage(
+      name: Routes.success,
+      page: () => const SuccessView(),
+      binding: SuccessBinding(),
+    ),
+    GetPage(
+      name: Routes.auth,
+      page: () => const AuthView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.otp,
+      page: () => const OtpView(),
+      binding: AuthBinding(),
+    ),
+
   ];
 }

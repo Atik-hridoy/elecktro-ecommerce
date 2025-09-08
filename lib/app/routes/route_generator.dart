@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/modules/auth/views/authview.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/views/cart_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/view.dart';
 import 'package:elecktro_ecommerce/app/modules/checkOut/views/checkout_view.dart';
@@ -9,6 +10,8 @@ import 'package:elecktro_ecommerce/app/modules/profile/views/profile_view.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:elecktro_ecommerce/app/modules/splash/splash_view.dart';
+
+import '../modules/success/view.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -31,7 +34,11 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => CheckoutView());
       case Routes.paymentCard:
         return MaterialPageRoute(builder: (_) => PaymentCardView());
-      
+      case Routes.success:
+        return MaterialPageRoute(builder: (_) => SuccessView());
+      case Routes.auth:
+        return MaterialPageRoute(builder: (_) => AuthView());
+
       default:
         // If there is no such named route
         return _errorRoute();

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class PaymentCardView extends StatefulWidget {
   const PaymentCardView({super.key});
@@ -29,7 +31,7 @@ class _PaymentCardViewState extends State<PaymentCardView> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 15,
                   spreadRadius: 1,
                   offset: const Offset(0, 4),
@@ -99,7 +101,7 @@ class _PaymentCardViewState extends State<PaymentCardView> {
                               height: 150,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                               ),
                             ),
                           ),
@@ -111,7 +113,7 @@ class _PaymentCardViewState extends State<PaymentCardView> {
                               height: 100,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.05),
+                                color: Colors.white.withValues(alpha: 0.05),
                               ),
                             ),
                           ),
@@ -402,7 +404,8 @@ class _PaymentCardViewState extends State<PaymentCardView> {
             flex: 2,
             child: ElevatedButton(
               onPressed: () {
-                // Handle payment confirmation
+                // Navigate to success screen after confirming payment
+                Get.offAllNamed(Routes.success);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00C896),
@@ -436,3 +439,5 @@ class _PaymentCardViewState extends State<PaymentCardView> {
     super.dispose();
   }
 }
+
+

@@ -33,7 +33,7 @@ class ReusableNavBar extends StatelessWidget {
   ///
   /// The [items] must have between 2 and 4 items.
   const ReusableNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     required this.activeColor,
@@ -42,8 +42,10 @@ class ReusableNavBar extends StatelessWidget {
     required this.items,
     this.elevation = 8.0,
     this.borderRadius,
-  })  : assert(items.length >= 2 && items.length <= 4, 'Must have between 2-4 items'),
-        super(key: key);
+  }) : assert(
+         items.length >= 2 && items.length <= 4,
+         'Must have between 2-4 items',
+       );
 
   /// Creates a navigation bar with SVG icons.
   ///
@@ -68,11 +70,13 @@ class ReusableNavBar extends StatelessWidget {
       elevation: elevation,
       borderRadius: borderRadius,
       items: items
-          .map((item) => BottomNavigationBarItem(
-                icon: item.icon,
-                label: item.label,
-                tooltip: item.label,
-              ))
+          .map(
+            (item) => BottomNavigationBarItem(
+              icon: item.icon,
+              label: item.label,
+              tooltip: item.label,
+            ),
+          )
           .toList(),
     );
   }
@@ -140,10 +144,7 @@ class NavBarItem {
   final String label;
 
   /// Creates a navigation bar item.
-  const NavBarItem({
-    required this.icon,
-    required this.label,
-  });
+  const NavBarItem({required this.icon, required this.label});
 
   /// Creates a navigation bar item with an SVG icon.
   factory NavBarItem.svg({
@@ -194,4 +195,3 @@ class _SvgIcon extends StatelessWidget {
     );
   }
 }
-

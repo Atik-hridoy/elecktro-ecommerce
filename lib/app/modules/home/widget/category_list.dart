@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 
 class CategoryList extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
-  
-  const CategoryList({
-    super.key,
-    required this.categories,
-  });
+
+  const CategoryList({super.key, required this.categories});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 100,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,

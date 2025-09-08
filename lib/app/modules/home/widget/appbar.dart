@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final TextEditingController? searchController;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.userName,
     required this.phoneNumber,
     this.searchHint = "Search in Cartup",
@@ -31,7 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.notificationIcon,
     this.showSearch = true,
     this.searchController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +72,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 onTap: onProfileTap,
                 child: Row(
                   children: [
-                    Container(
+                    SizedBox(
                       width: 40,
                       height: 40,
-                      child: SvgPicture.asset(
-                        'assets/icons/Group 290580.svg',
-                      ),
+                      child: SvgPicture.asset('assets/icons/Group 290580.svg'),
                     ),
                     const SizedBox(width: 12),
                     Column(
@@ -92,7 +90,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ),
                         Text(
-                          phoneNumber.length > 2 
+                          phoneNumber.length > 2
                               ? '${'*' * (phoneNumber.length - 2)}${phoneNumber.substring(phoneNumber.length - 2)}'
                               : phoneNumber,
                           style: TextStyle(
@@ -112,7 +110,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   GestureDetector(
                     onTap: onNotificationTap,
-                    child: notificationIcon ??
+                    child:
+                        notificationIcon ??
                         SvgPicture.asset(
                           'assets/icons/home/notification.svg',
                           width: 24,
@@ -135,7 +134,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-          
+
           // Search bar
           if (showSearch) ...[
             const SizedBox(height: 16),
@@ -146,19 +145,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFEEEEEE),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                    width: 1,
-                  ),
+                  border: Border.all(color: Colors.grey.shade200, width: 1),
                 ),
                 child: Row(
                   children: [
                     const SizedBox(width: 16),
-                    Icon(
-                      Icons.search,
-                      color: Colors.grey.shade500,
-                      size: 20,
-                    ),
+                    Icon(Icons.search, color: Colors.grey.shade500, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: onSearchTap != null
@@ -186,10 +178,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 filled: true,
                                 fillColor: const Color(0xFFEEEEEE),
                               ),
-                              style: TextStyle(
-                                color: txtColor,
-                                fontSize: 14,
-                              ),
+                              style: TextStyle(color: txtColor, fontSize: 14),
                             ),
                     ),
                   ],
@@ -208,6 +197,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 // Example usage
 class ExampleScreen extends StatefulWidget {
+  const ExampleScreen({super.key});
+
   @override
   State<ExampleScreen> createState() => _ExampleScreenState();
 }
@@ -251,18 +242,11 @@ class _ExampleScreenState extends State<ExampleScreen> {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.shopping_bag,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.shopping_bag, color: Colors.white, size: 20),
         ),
       ),
       body: const Center(
-        child: Text(
-          'Your App Content Here',
-          style: TextStyle(fontSize: 18),
-        ),
+        child: Text('Your App Content Here', style: TextStyle(fontSize: 18)),
       ),
     );
   }
@@ -270,6 +254,8 @@ class _ExampleScreenState extends State<ExampleScreen> {
 
 // Alternative usage with search tap (instead of typing)
 class ExampleWithSearchTap extends StatelessWidget {
+  const ExampleWithSearchTap({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,9 +269,7 @@ class ExampleWithSearchTap extends StatelessWidget {
           // Navigate to search screen
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const SearchScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const SearchScreen()),
           );
         },
       ),
@@ -295,7 +279,7 @@ class ExampleWithSearchTap extends StatelessWidget {
 }
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

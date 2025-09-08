@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:elecktro_ecommerce/app/modules/product_details/product_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
 
 class ProductDetailsBinding implements Bindings {
   @override
