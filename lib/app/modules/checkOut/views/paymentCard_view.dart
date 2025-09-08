@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class PaymentCardView extends StatefulWidget {
   const PaymentCardView({super.key});
@@ -402,7 +404,8 @@ class _PaymentCardViewState extends State<PaymentCardView> {
             flex: 2,
             child: ElevatedButton(
               onPressed: () {
-                // Handle payment confirmation
+                // Navigate to success screen after confirming payment
+                Get.offAllNamed(Routes.success);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00C896),

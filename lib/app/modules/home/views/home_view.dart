@@ -90,16 +90,24 @@ class HomeView extends StatelessWidget {
           children: [
             // Add top padding to account for status bar
             SizedBox(height: MediaQuery.of(context).padding.top),
-            // Banner Section
-            const BannerCard(
-              items: [
-                'assets/banner/pic1.png',
-                'assets/banner/pic2.png',
-                'assets/banner/pic3.png',
-                'assets/banner/pic4.png',
-                'assets/banner/pic5.png',
-              ],
-              currentIndex: 0,
+            // Banner Section with auto-sliding
+            GetBuilder<HomeController>(
+              builder: (controller) {
+                return BannerCard(
+                  key: const ValueKey('banner_slider'),
+                  items: const [
+                    'assets/banner/pic1.png',
+                    'assets/banner/pic2.png',
+                    'assets/banner/pic3.png',
+                    'assets/banner/pic4.png',
+                    'assets/banner/pic5.png',
+                  ],
+                  currentIndex: controller.currentBannerIndex.value,
+                  onPageChanged: (index) {
+                    controller.updateBannerIndex(index);
+                  },
+                );
+              },
             ),
             const SizedBox(height: 16),
 
@@ -140,26 +148,9 @@ class HomeView extends StatelessWidget {
             // Popular Products Grid
             SizedBox(
               height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: 6,
-                itemBuilder: (context, index) {
+              child: Builder(
+                builder: (context) {
                   // List of product data
-                  // Define colors first
-                  final colors = [
-                    Colors.blue[200]!,
-                    Colors.purple[200]!,
-                    Colors.red[200]!,
-                    Colors.teal[200]!,
-                    Colors.orange[200]!,
-                  ];
-
-                  // Ensure we have at least one color
-                  final color = colors.isNotEmpty
-                      ? colors[index % colors.length]
-                      : Colors.grey[200]!;
-
                   const products = [
                     {
                       'id': 'prod_001',
@@ -198,16 +189,37 @@ class HomeView extends StatelessWidget {
                     },
                   ];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: ProductCard(
-                      name: products[index]['name'] as String,
-                      productId: products[index]['id'] as String,
-                      brand: products[index]['brand'] as String,
-                      price: products[index]['price'] as String,
-                      imageUrl: products[index]['imageUrl'],
-                      bgColor: color,
-                    ),
+                  // Define colors for product cards
+                  final colors = [
+                    Colors.blue[200]!,
+                    Colors.purple[200]!,
+                    Colors.red[200]!,
+                    Colors.teal[200]!,
+                    Colors.orange[200]!,
+                  ];
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      // Ensure we have at least one color
+                      final color = colors.isNotEmpty
+                          ? colors[index % colors.length]
+                          : Colors.grey[200]!;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: ProductCard(
+                          name: products[index]['name'] as String,
+                          productId: products[index]['id'] as String,
+                          brand: products[index]['brand'] as String,
+                          price: products[index]['price'] as String,
+                          imageUrl: products[index]['imageUrl'],
+                          bgColor: color,
+                        ),
+                      );
+                    },
                   );
                 },
               ),

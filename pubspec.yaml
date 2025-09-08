@@ -68,6 +68,7 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
+    - assets/auth/
     - assets/banner/
     - assets/icons/onboarding/
     - assets/icons/home/

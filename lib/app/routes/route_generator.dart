@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/modules/auth/views/authview.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/views/cart_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/view.dart';
 import 'package:elecktro_ecommerce/app/modules/checkOut/views/checkout_view.dart';
@@ -35,6 +36,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => PaymentCardView());
       case Routes.success:
         return MaterialPageRoute(builder: (_) => SuccessView());
+      case Routes.auth:
+        return MaterialPageRoute(builder: (_) => AuthView());
 
       default:
         // If there is no such named route

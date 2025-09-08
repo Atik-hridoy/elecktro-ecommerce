@@ -16,9 +16,9 @@ class SuccessView extends StatelessWidget {
             children: [
               const Spacer(flex: 2),
 
-              // ElektroNic Logo and Shopping Bags
-              Image.asset(
-                'assets/icons/Group 290580.svg', // Replace with your image path
+              // ElektroNic Logo and Shopping Bags (SVG)
+              SvgPicture.asset(
+                'assets/icons/Group 290580.svg',
                 width: 200,
                 height: 150,
                 fit: BoxFit.contain,
@@ -27,14 +27,7 @@ class SuccessView extends StatelessWidget {
               const SizedBox(height: 20),
 
               // ElektroNic Text
-              const Text(
-                'ElektroNic',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green,
-                ),
-              ),
+
 
               const SizedBox(height: 40),
 
