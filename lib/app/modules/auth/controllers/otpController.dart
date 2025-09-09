@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class OtpController extends GetxController {
   // Controllers for each OTP digit (6 digits)
@@ -65,13 +66,9 @@ class OtpController extends GetxController {
   void verifyOtp() {
     final otp = otpControllers.map((controller) => controller.text).join();
     if (otp.length == 5) {
-      // TODO: Implement OTP verification logic
-      Get.snackbar(
-        'Success',
-        'OTP verified successfully',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // TODO: Add your OTP verification logic here
+      // For now, we'll just navigate to checkout on successful verification
+      Get.offAllNamed(Routes.checkout);
     } else {
       Get.snackbar(
         'Error',

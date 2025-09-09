@@ -1,10 +1,12 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/controllers/authController.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:elecktro_ecommerce/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 import 'app/providers/language_provider.dart';
 import 'app/theme/app_theme.dart';
@@ -14,8 +16,12 @@ import 'package:responsive_framework/responsive_framework.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Initialize storage
+  await GetStorage.init();
+  
   // Initialize controllers
   Get.put(HomeController());
+  Get.put(AuthController());
   
   // Initialize services
   await Get.putAsync(() => NavigationService.init());

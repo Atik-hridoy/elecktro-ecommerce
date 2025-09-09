@@ -505,7 +505,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Implement add to cart functionality
+                    controller.onAddToCart();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFC107),

@@ -14,6 +14,7 @@ import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_binding.dar
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/bindings/profile_binding.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/views/account_view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/views/profile_view.dart';
 import 'package:elecktro_ecommerce/app/modules/splash/splash_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/splash/splash_view.dart';
@@ -88,6 +89,11 @@ class AppPages {
       name: Routes.otp,
       page: () => const OtpView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.account,
+      page: () => const AccountView(),
+      binding: ProfileBinding(),
     ),
 
   ];
