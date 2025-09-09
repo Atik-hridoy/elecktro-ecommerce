@@ -6,6 +6,7 @@ import 'package:elecktro_ecommerce/app/modules/checkOut/views/paymentCard_view.d
 import 'package:elecktro_ecommerce/app/modules/home/views/home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/product_view.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/views/account_view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/views/profile_view.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,9 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => SuccessView());
       case Routes.auth:
         return MaterialPageRoute(builder: (_) => AuthView());
+      case Routes.account:
+        return MaterialPageRoute(builder: (_) => AccountView());
+
 
       default:
         // If there is no such named route

@@ -13,5 +13,7 @@ abstract class Routes {
   static const success = '/success';
   static const auth = '/auth';
   static const otp = '/otp';
+  static const orderHistory = '/order-history';
+  static const account = '/account';
  
 }

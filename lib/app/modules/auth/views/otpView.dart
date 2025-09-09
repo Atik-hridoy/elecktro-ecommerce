@@ -71,7 +71,7 @@ class OtpView extends GetView<OtpController> {
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              'We have sent a verification code to your phone number',
+                              'Please Confirm your Mobile Phone Verification',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Poppins',
@@ -137,7 +137,7 @@ class OtpView extends GetView<OtpController> {
                               child: Text(
                                 controller.canResend.value 
                                     ? 'Didn\'t receive code? Send again' 
-                                    : 'Resend code in ${controller.remainingTime.value} seconds',
+                                    : 'Resend code in ${(controller.remainingTime.value ~/ 60).toString().padLeft(2, '0')}:${(controller.remainingTime.value % 60).toString().padLeft(2, '0')}',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   color: controller.canResend.value 

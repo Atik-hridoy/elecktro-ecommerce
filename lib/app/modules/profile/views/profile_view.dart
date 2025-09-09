@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -38,89 +39,84 @@ class ProfileView extends GetView<ProfileController> {
           child: Column(
             children: [
               // Profile Header Section
-              Container(
-                width: double.infinity, // Make it full width
-                padding: const EdgeInsets.all(
-                  16,
-                ), // Match the menu items padding
-                margin: const EdgeInsets.only(
-                  bottom: 16,
-                ), // Space between profile card & menu items
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Profile Picture
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                          width: 2,
+              GestureDetector(
+                onTap: () => Get.toNamed(Routes.account),
+                child: Container(
+                  width: double.infinity, // Make it full width
+                  padding: const EdgeInsets.all(16), // Match the menu items padding
+                  margin: const EdgeInsets.only(bottom: 16), // Space between profile card & menu items
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Profile Picture
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                            width: 2,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/profile/profile_picture.jpg', // Replace with actual path
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey.shade300,
+                                child: const Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: Colors.grey,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      child: ClipOval(
-                        child: Image.asset(
-                          'assets/images/profile/profile_picture.jpg', // Replace with actual path
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey.shade300,
-                              child: const Icon(
-                                Icons.person,
-                                size: 40,
-                                color: Colors.grey,
-                              ),
-                            );
-                          },
+                      const SizedBox(height: 12),
+                      // Name
+                      const Text(
+                        'Asad Ujjaman',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Name
-                    const Text(
-                      'Asad Ujjaman',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                      const SizedBox(height: 4),
+                      // Address
+                      Text(
+                        '20 Cooper Square, N...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Address
-                    Text(
-                      '20 Cooper Square, N...',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ), // Added missing closing bracket for GestureDetector
 
               const SizedBox(height: 20),
 
               // Menu Items
               _buildMenuItem(
                 icon: Icons.favorite_outline,
-                title: 'Wish list',
+                title: 'Wishlist',
                 onTap: () {
                   // Navigate to wish list
                   print('Navigate to wish list');

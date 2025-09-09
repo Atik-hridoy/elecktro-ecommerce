@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/controllers/authController.dart';
 
 class ProductDetailsController extends GetxController {
   // Product data
@@ -7,14 +8,14 @@ class ProductDetailsController extends GetxController {
   final isLoading = true.obs;
   final isProcessing = false.obs;
   
-  // Check if user is logged in (TODO: Replace with actual auth check)
-  bool get isUserLoggedIn => false;
-
   @override
   void onInit() {
     super.onInit();
     loadProductDetails();
   }
+  
+  // Check if user is logged in
+  bool get isUserLoggedIn => AuthController.to.isLoggedIn;
 
   // Load product details
   Future<void> loadProductDetails() async {
@@ -30,37 +31,29 @@ class ProductDetailsController extends GetxController {
   }
 
   // Handle buy now action
-  void onBuyNow() async {
-    if (isProcessing.value) return;
-    
-    try {
-      isProcessing.value = true;
-      
-      if (!isUserLoggedIn) {
-        // Redirect to login/signup with return URL
-        Get.offAllNamed(
-          Routes.auth,
-          arguments: {
-            'returnTo': Routes.productDetails,
-            'product': product,
-          },
-        );
-        return;
-      }
-      
-      // User is logged in, proceed to checkout
-      Get.toNamed(
-        Routes.checkout,
-        arguments: {
-          'product': product,
-          'quantity': 1, // Default quantity
-        },
-      );
-      
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to process your request');
-    } finally {
-      isProcessing.value = false;
+  void onBuyNow() {
+    if (!isUserLoggedIn) {
+      // If user is not logged in, navigate to auth screen
+      Get.toNamed(Routes.auth, arguments: {'redirectTo': Routes.checkout});
+      return;
     }
+    // Proceed to checkout if user is logged in
+    Get.toNamed(Routes.checkout);
+  }
+  
+  // Handle add to cart action
+  void onAddToCart() {
+    if (!isUserLoggedIn) {
+      // If user is not logged in, navigate to auth screen
+      Get.toNamed(Routes.auth, arguments: {'redirectTo': Routes.cart});
+      return;
+    }
+    // Add to cart logic here
+    Get.snackbar(
+      'Success',
+      'Product added to cart',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
   }
 }
