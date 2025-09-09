@@ -2,6 +2,10 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// A responsive product card widget with a Material 3 design.
+///
+/// Displays product information including name, brand, price, and rating.
+/// Features dynamic UI elements for discounts and favorite status.
 class ProductCard extends StatelessWidget {
   final String name;
   final String brand;
@@ -10,14 +14,13 @@ class ProductCard extends StatelessWidget {
   final String? discount;
   final double rating;
   final int reviewCount;
-  final Color bgColor;
   final bool showRating;
   final bool showDiscountBadge;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onAddToCart;
   final bool isFavorite;
   final bool showAddToCart;
-  final String productId; // Add productId parameter
+  final String productId;
 
   const ProductCard({
     super.key,
@@ -28,7 +31,6 @@ class ProductCard extends StatelessWidget {
     this.discount,
     this.rating = 0.0,
     this.reviewCount = 0,
-    this.bgColor = const Color(0xFFF5F5F5),
     this.showRating = true,
     this.showDiscountBadge = false,
     this.onFavoriteTap,
@@ -38,226 +40,110 @@ class ProductCard extends StatelessWidget {
     required this.productId,
   });
 
-  void _navigateToProductDetails() {
-    Get.toNamed(
-      Routes.productDetails,
-      parameters: {
-        'name': name,
-        'brand': brand,
-        'price': price,
-        if (imageUrl != null) 'imageUrl': imageUrl!,
-        if (discount != null) 'discount': discount!,
-      },
-    );
-  }
-
-  // Helper method to build rating stars
-  Widget _buildPlaceholderIcon() {
-    return const Center(
-      child: Icon(Icons.devices, size: 32, color: Colors.white),
-    );
-  }
-
-  Widget _buildRatingStars(double rating) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        return Icon(
-          index < rating.floor() ? Icons.star : Icons.star_border,
-          size: 14,
-          color: Colors.amber,
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _navigateToProductDetails,
-      child: Container(
-        width: 150,
-        margin: const EdgeInsets.only(right: 12, bottom: 2),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    void navigateToProductDetails() {
+      Get.toNamed(
+        Routes.productDetails,
+        parameters: {
+          'productId': productId,
+          'name': name,
+          'brand': brand,
+          'price': price,
+          if (imageUrl != null) 'imageUrl': imageUrl!,
+          if (discount != null) 'discount': discount!,
+        },
+      );
+    }
+
+    return SizedBox(
+      width: 180, // Provide a fixed width to the card
+      child: Card(
+      elevation: 1, // Use a non-zero elevation for a shadow effect
+      color: colorScheme.surface, // Elevated cards use the surface color
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: navigateToProductDetails,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image container with fixed height
-            SizedBox(
-              height: 116,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
-                    ),
-                    child: imageUrl != null
-                        ? ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12),
-                            ),
-                            child: imageUrl!.startsWith('http')
-                                ? Image.network(
-                                    imageUrl!,
-                                    fit: BoxFit.contain,
-                                    height: 100,
-                                    width: double.infinity,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            _buildPlaceholderIcon(),
-                                  )
-                                : Image.asset(
-                                    imageUrl!,
-                                    fit: BoxFit.contain,
-                                    height: 100,
-                                    width: double.infinity,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            _buildPlaceholderIcon(),
-                                  ),
-                          )
-                        : _buildPlaceholderIcon(),
+            // --- IMAGE SECTION ---
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 4 / 3, // Use a more compact aspect ratio
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    color: colorScheme.surface,
+                    child: _buildProductImage(),
                   ),
-                  // Discount badge
-                  if (showDiscountBadge && discount != null)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '$discount% OFF',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                ),
+                // --- FAVORITE BUTTON ---
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? colorScheme.error : colorScheme.onSurfaceVariant,
                     ),
-                  // Favorite button
+                    onPressed: onFavoriteTap,
+                  ),
+                ),
+                // --- DISCOUNT BADGE ---
+                if (showDiscountBadge && discount != null)
                   Positioned(
-                    top: 6,
-                    right: 6,
-                    child: GestureDetector(
-                      onTap: onFavoriteTap,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              spreadRadius: 0.5,
-                              blurRadius: 3,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          size: 18,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                        ),
-                      ),
+                    top: 8,
+                    left: 8,
+                    child: Badge(
+                      backgroundColor: colorScheme.errorContainer,
+                      textColor: colorScheme.onErrorContainer,
+                      label: Text('$discount% OFF'),
+                      largeSize: 20,
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
-            // Content with adjusted padding
+            // --- DETAILS SECTION ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.all(8.0), // Reduced padding
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                      height: 1.2,
-                    ),
+                    style: textTheme.titleSmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     brand,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (showRating) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        _buildRatingStars(rating),
-                        const SizedBox(width: 4),
-                        Text(
-                          '($reviewCount)',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 4), // Reduced spacing
+                    _buildRating(context, rating, reviewCount),
                   ],
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 6), // Reduced spacing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         price,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                        style: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
                       ),
                       if (showAddToCart && onAddToCart != null)
-                        GestureDetector(
-                          onTap: onAddToCart,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Icon(
-                              Icons.add_shopping_cart,
-                              size: 18,
-                              color: Colors.green,
-                            ),
-                          ),
+                        IconButton.filledTonal(
+                          onPressed: onAddToCart,
+                          icon: const Icon(Icons.add_shopping_cart),
+                          iconSize: 18,
                         ),
                     ],
                   ),
@@ -267,6 +153,65 @@ class ProductCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
+    );
+  }
+
+  /// Builds the product image, handling network, asset, and placeholder cases.
+  Widget _buildProductImage() {
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return const Center(child: Icon(Icons.image_not_supported_outlined, size: 32));
+    }
+
+    final isNetworkImage = imageUrl!.startsWith('http');
+
+    if (isNetworkImage) {
+      return Image.network(
+        imageUrl!,
+        fit: BoxFit.contain, // Ensures the full image is visible
+        errorBuilder: (context, error, stackTrace) =>
+            const Center(child: Icon(Icons.broken_image_outlined, size: 32)),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl!,
+        fit: BoxFit.contain, // Ensures the full image is visible
+        errorBuilder: (context, error, stackTrace) =>
+            const Center(child: Icon(Icons.broken_image_outlined, size: 32)),
+      );
+    }
+  }
+
+  /// Builds the rating display row.
+  Widget _buildRating(BuildContext context, double rating, int reviewCount) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Icon(Icons.star, color: Colors.amber, size: 16),
+        const SizedBox(width: 4),
+        Text(
+          rating.toStringAsFixed(1),
+          style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '($reviewCount)',
+          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+      ],
     );
   }
 }

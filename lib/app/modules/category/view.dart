@@ -161,8 +161,6 @@ class CategoryView extends GetView<CategoryController> {
                     name: 'Product ${index + 1}',
                     brand: 'Brand ${index + 1}',
                     price: '\$${(index + 1) * 99}.99',
-                    bgColor: Colors.primaries[index % Colors.primaries.length]
-                        .withOpacity(0.7),
                     onFavoriteTap: () {},
                     isFavorite: false,
                   );

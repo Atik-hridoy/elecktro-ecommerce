@@ -12,6 +12,8 @@ import 'package:elecktro_ecommerce/app/modules/home/bindings/home_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/home/views/home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_view.dart';
+import 'package:elecktro_ecommerce/app/modules/order_history/bindings.dart';
+import 'package:elecktro_ecommerce/app/modules/order_history/history_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/bindings/profile_binding.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/views/account_view.dart';
@@ -92,8 +94,13 @@ class AppPages {
     ),
     GetPage(
       name: Routes.account,
-      page: () => const AccountView(),
+      page: () => AccountView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.history,
+      page: () => const HistoryView(),
+      binding: HistoryBinding(),
     ),
 
   ];

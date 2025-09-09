@@ -1,59 +1,63 @@
 import 'package:get/get.dart';
-import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
-import 'package:elecktro_ecommerce/app/modules/auth/controllers/authController.dart';
 
+/// Manages the state for the ProductDetailsView.
 class ProductDetailsController extends GetxController {
-  // Product data
-  final product = {}.obs;
+  // --- Product Data Properties ---
+  final RxString productId = ''.obs;
+  final RxString name = ''.obs;
+  final RxString brand = ''.obs;
+  final RxString price = ''.obs;
+  final RxString imageUrl = ''.obs;
+  final RxString discount = ''.obs;
+
+  // --- UI State ---
   final isLoading = true.obs;
-  final isProcessing = false.obs;
-  
+  final RxInt quantity = 1.obs;
+  final RxInt selectedSizeIndex = 3.obs;
+  final RxInt selectedColorIndex = 0.obs;
+  final RxInt selectedImageIndex = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
-    loadProductDetails();
+    _loadProductDetailsFromParameters();
   }
-  
-  // Check if user is logged in
-  bool get isUserLoggedIn => AuthController.to.isLoggedIn;
 
-  // Load product details
-  Future<void> loadProductDetails() async {
+  void _loadProductDetailsFromParameters() {
     try {
       isLoading.value = true;
-      // TODO: Implement actual product details loading
-      // product.value = await ProductRepository.getProductDetails(productId);
+      final parameters = Get.parameters;
+      productId.value = parameters['productId'] ?? 'N/A';
+      name.value = parameters['name'] ?? 'Product Not Found';
+      brand.value = parameters['brand'] ?? 'N/A';
+      price.value = parameters['price'] ?? '--';
+      imageUrl.value = parameters['imageUrl'] ?? '';
+      discount.value = parameters['discount'] ?? '';
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load product details');
+      Get.snackbar('Error', 'Failed to load product details: ${e.toString()}');
+      name.value = 'Error Loading Product';
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Handle buy now action
-  void onBuyNow() {
-    if (!isUserLoggedIn) {
-      // If user is not logged in, navigate to auth screen
-      Get.toNamed(Routes.auth, arguments: {'redirectTo': Routes.checkout});
-      return;
+  // --- UI Actions ---
+  void selectSize(int index) => selectedSizeIndex.value = index;
+  void selectColor(int index) => selectedColorIndex.value = index;
+  void selectImage(int index) => selectedImageIndex.value = index;
+  void incrementQuantity() => quantity.value++;
+  void decrementQuantity() {
+    if (quantity.value > 1) {
+      quantity.value--;
     }
-    // Proceed to checkout if user is logged in
-    Get.toNamed(Routes.checkout);
   }
-  
-  // Handle add to cart action
+
+  // --- Business Logic Actions ---
+  void onBuyNow() {
+    Get.snackbar('Info', 'Buy Now clicked for ${name.value}');
+  }
+
   void onAddToCart() {
-    if (!isUserLoggedIn) {
-      // If user is not logged in, navigate to auth screen
-      Get.toNamed(Routes.auth, arguments: {'redirectTo': Routes.cart});
-      return;
-    }
-    // Add to cart logic here
-    Get.snackbar(
-      'Success',
-      'Product added to cart',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+    Get.snackbar('Success', '${name.value} added to cart');
   }
 }
