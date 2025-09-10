@@ -69,6 +69,7 @@ class ProductCard extends StatelessWidget {
         onTap: navigateToProductDetails,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Use minimum space
           children: [
             // --- IMAGE SECTION ---
             Stack(
@@ -108,11 +109,13 @@ class ProductCard extends StatelessWidget {
               ],
             ),
             // --- DETAILS SECTION ---
-            Padding(
-              padding: const EdgeInsets.all(8.0), // Reduced padding
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(6.0), // Further reduced padding
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Text(
                     name,
                     style: textTheme.titleSmall,
@@ -149,11 +152,13 @@ class ProductCard extends StatelessWidget {
                   ),
                 ],
               ),
+              ),
+              ),
             ),
           ],
+        )
         ),
       ),
-    ),
     );
   }
 

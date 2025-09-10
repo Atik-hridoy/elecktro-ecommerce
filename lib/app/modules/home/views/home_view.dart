@@ -1,4 +1,5 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,9 +30,7 @@ class HomeView extends StatelessWidget {
                 phoneNumber: '+1 234 567 890',
                 searchHint: 'Search products...',
                 onNotificationTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifications clicked')),
-                  );
+                  Get.toNamed(Routes.notification);
                 },
                 onProfileTap: () {
                   homeController.updateIndex(3); // Navigate to profile

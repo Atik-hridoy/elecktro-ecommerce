@@ -8,7 +8,7 @@ class HistoryView extends GetView<HistoryController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
@@ -44,6 +44,7 @@ class HistoryView extends GetView<HistoryController> {
               Tab(text: 'Pending'),
               Tab(text: 'To Ship'),
               Tab(text: 'Completed'),
+              Tab(text: 'Cancelled'),
             ],
           ),
         ),
@@ -52,6 +53,7 @@ class HistoryView extends GetView<HistoryController> {
             _buildOrderList('pending'),
             _buildOrderList('to_ship'),
             _buildOrderList('completed'),
+            _buildOrderList('cancelled'),
           ],
         ),
       ),
@@ -70,6 +72,8 @@ class HistoryView extends GetView<HistoryController> {
           return order['status'].toString().toLowerCase() == 'to ship';
         case 'completed':
           return order['status'].toString().toLowerCase() == 'completed';
+        case 'cancelled':
+          return order['status'].toString().toLowerCase() == 'cancelled';
         default:
           return false;
       }

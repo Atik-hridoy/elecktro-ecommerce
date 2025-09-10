@@ -153,6 +153,44 @@ class HistoryController extends GetxController {
         'quantity': '2',
         'total': 130,
       },
+      
+      // Cancelled Orders
+      {
+        'id': '#3478121',
+        'status': 'Cancelled',
+        'address': '100 Times Square, NYC',
+        'date': '26 Aug, 2025',
+        'product_name': 'Wireless Mouse',
+        'quantity': '1',
+        'total': 25,
+      },
+      {
+        'id': '#3478122',
+        'status': 'Cancelled',
+        'address': '200 Broadway, NY',
+        'date': '25 Aug, 2025',
+        'product_name': 'USB Cable',
+        'quantity': '3',
+        'total': 15,
+      },
+      {
+        'id': '#3478123',
+        'status': 'Cancelled',
+        'address': '300 Wall Street, NYC',
+        'date': '24 Aug, 2025',
+        'product_name': 'Phone Charger',
+        'quantity': '2',
+        'total': 30,
+      },
+      {
+        'id': '#3478124',
+        'status': 'Cancelled',
+        'address': '400 Fifth Avenue, NY',
+        'date': '23 Aug, 2025',
+        'product_name': 'Laptop Sleeve',
+        'quantity': '1',
+        'total': 20,
+      },
     ];
   }
 

@@ -23,7 +23,7 @@ class CategoryView extends GetView<CategoryController> {
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(
-            200,
+            250,
           ), // Increased height to accommodate both search and categories
           child: Container(
             decoration: BoxDecoration(
