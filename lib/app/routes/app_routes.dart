@@ -13,7 +13,16 @@ abstract class Routes {
   static const success = '/success';
   static const auth = '/auth';
   static const otp = '/otp';
-  static const orderHistory = '/order-history';
+  static const history = '/history';
+  static const notification = '/notification';
   static const account = '/account';
+  static const wishlist = '/wishlist';
+  static const accountSettings = '/account-settings';
+  static const about = '/about';
+  static const work = '/work';
+  static const frequently = '/frequently';
+  static const termsAndConditions = '/terms-and-conditions';
+  static const faq = '/faq';
+  static const support = '/support';
  
 }

@@ -118,8 +118,8 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.favorite_outline,
                 title: 'Wishlist',
                 onTap: () {
-                  // Navigate to wish list
-                  print('Navigate to wish list');
+                  Get.toNamed(Routes.wishlist);
+                  print('Navigate to wishlist');
                 },
               ),
 
@@ -127,7 +127,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.shopping_cart_outlined,
                 title: 'Dealing History',
                 onTap: () {
-                  // Navigate to dealing history
+                  Get.toNamed(Routes.history);
                   print('Navigate to dealing history');
                 },
               ),
@@ -136,8 +136,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.settings_outlined,
                 title: 'Account Setting',
                 onTap: () {
-                  // Navigate to account settings
-                  print('Navigate to account settings');
+                  Get.toNamed(Routes.accountSettings);
                 },
               ),
 
@@ -145,8 +144,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.info_outline,
                 title: 'About',
                 onTap: () {
-                  // Navigate to about
-                  print('Navigate to about');
+                  Get.toNamed(Routes.about);
                 },
               ),
 
@@ -154,8 +152,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.work_outline,
                 title: 'Work Functionality',
                 onTap: () {
-                  // Navigate to work functionality
-                  print('Navigate to work functionality');
+                  Get.toNamed(Routes.work);
                 },
               ),
 
@@ -163,8 +160,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.description_outlined,
                 title: 'Terms & Conditions',
                 onTap: () {
-                  // Navigate to terms
-                  print('Navigate to terms');
+                  Get.toNamed(Routes.termsAndConditions);
                 },
               ),
 
@@ -172,8 +168,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.help_outline,
                 title: 'FAQ',
                 onTap: () {
-                  // Navigate to FAQ
-                  print('Navigate to FAQ');
+                  Get.toNamed(Routes.faq);
                 },
               ),
 
@@ -181,8 +176,7 @@ class ProfileView extends GetView<ProfileController> {
                 icon: Icons.support_outlined,
                 title: 'Support',
                 onTap: () {
-                  // Navigate to support
-                  print('Navigate to support');
+                  Get.toNamed(Routes.support);
                 },
               ),
 

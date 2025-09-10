@@ -1,4 +1,5 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,9 +30,7 @@ class HomeView extends StatelessWidget {
                 phoneNumber: '+1 234 567 890',
                 searchHint: 'Search products...',
                 onNotificationTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifications clicked')),
-                  );
+                  Get.toNamed(Routes.notification);
                 },
                 onProfileTap: () {
                   homeController.updateIndex(3); // Navigate to profile
@@ -112,9 +111,14 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Category Section
-            CategoryList(
-              categories: homeController.categories,
-            ), // Use the controller's categories
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              clipBehavior: Clip.antiAlias,
+              elevation: 1,
+              child: CategoryList(
+                categories: homeController.categories,
+              ),
+            ),
 
             const SizedBox(height: 24),
 
@@ -216,7 +220,7 @@ class HomeView extends StatelessWidget {
                           brand: products[index]['brand'] as String,
                           price: products[index]['price'] as String,
                           imageUrl: products[index]['imageUrl'],
-                          bgColor: color,
+                          
                         ),
                       );
                     },
@@ -257,36 +261,42 @@ class HomeView extends StatelessWidget {
                       'name': 'Wireless Keyboard',
                       'brand': 'KeyMaster',
                       'price': '\$59',
+                      'imageUrl': 'assets/images/6.jpeg',
                     },
                     {
                       'id': 'prod_007',
                       'name': 'Gaming Mouse',
                       'brand': 'GameGear',
                       'price': '\$79',
+                      'imageUrl': 'assets/images/7.jpeg',
                     },
                     {
                       'id': 'prod_008',
                       'name': 'USB Hub',
                       'brand': 'PortPlus',
                       'price': '\$25',
+                      'imageUrl': 'assets/images/8.jpeg',
                     },
                     {
                       'id': 'prod_009',
                       'name': 'Laptop Stand',
                       'brand': 'ErgoTech',
                       'price': '\$35',
+                      'imageUrl': 'assets/images/1.jpeg',
                     },
                     {
                       'id': 'prod_010',
                       'name': 'Screen Protector',
                       'brand': 'ShieldMax',
                       'price': '\$12',
+                      'imageUrl': 'assets/images/2.jpeg',
                     },
                     {
                       'id': 'prod_011',
                       'name': 'Laptop Sleeve',
                       'brand': 'UrbanGear',
                       'price': '\$25',
+                      'imageUrl': 'assets/images/3.jpeg',
                     },
                   ];
 
@@ -297,7 +307,7 @@ class HomeView extends StatelessWidget {
                       name: recommendedProducts[index]['name'] as String,
                       brand: recommendedProducts[index]['brand'] as String,
                       price: recommendedProducts[index]['price'] as String,
-                      bgColor: Colors.grey[200]!,
+                      imageUrl: recommendedProducts[index]['imageUrl'] as String?,
                     ),
                   );
                 },

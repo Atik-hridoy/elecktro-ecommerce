@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class AccountView extends GetView<AccountController> {
-  const AccountView({super.key});
+  AccountView({super.key}) {
+    Get.put(AccountController());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class AccountView extends GetView<AccountController> {
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          'My Account',
+          'Edit Profile',
           style: TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -40,7 +42,7 @@ class AccountView extends GetView<AccountController> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
@@ -59,7 +61,7 @@ class AccountView extends GetView<AccountController> {
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/images/profile_placeholder.jpg', // Replace with actual image
+                        'assets/images/profile_placeholder.jpg',
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
@@ -76,29 +78,29 @@ class AccountView extends GetView<AccountController> {
                   ),
                   const SizedBox(height: 16),
                   // Name
-                  const Text(
-                    'Asad Ujjaman',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Obx(() => Text(
+                        controller.fullName.value,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      )),
                   const SizedBox(height: 4),
                   // Address
-                  Text(
-                    '20 Cooper Square, N...',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  Obx(() => Text(
+                        controller.address.value,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      )),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Profile Details Section
             Container(
               width: double.infinity,
@@ -108,7 +110,7 @@ class AccountView extends GetView<AccountController> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
@@ -148,19 +150,18 @@ class AccountView extends GetView<AccountController> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Profile Details Items
+
                   _buildDetailItem('Registration no', '#131213542253'),
-                  _buildDetailItem('Name', 'Asad Ujjaman'),
-                  _buildDetailItem('Contact No', '+099999'),
-                  _buildDetailItem('Gender', 'Male'),
-                  _buildDetailItem('Date of birth', '17 dec, 2024'),
+                  Obx(() => _buildDetailItem('Name', controller.fullName.value)),
+                  Obx(() => _buildDetailItem('Contact No', controller.phone.value)),
+                  Obx(() => _buildDetailItem('Gender', controller.gender.value)),
+                  Obx(() => _buildDetailItem('Date of birth', controller.dateOfBirth.value)),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Address Section
             Container(
               width: double.infinity,
@@ -170,7 +171,7 @@ class AccountView extends GetView<AccountController> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
@@ -218,14 +219,14 @@ class AccountView extends GetView<AccountController> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    '76/4 R no. 60/1 Rue des Saints-Paris, 75005 Paris',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      height: 1.4,
-                    ),
-                  ),
+                  Obx(() => Text(
+                        controller.address.value,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                          height: 1.4,
+                        ),
+                      )),
                 ],
               ),
             ),
@@ -262,8 +263,8 @@ class AccountView extends GetView<AccountController> {
   }
 
   void _showEditDetailsDialog(BuildContext context) {
-    String selectedDate = '17 dec, 2024';
-    
+    String selectedDate = controller.dateOfBirth.value;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -296,7 +297,7 @@ class AccountView extends GetView<AccountController> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // First Name
                     const Text(
                       'First Name',
@@ -315,7 +316,7 @@ class AccountView extends GetView<AccountController> {
                         border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: TextFormField(
-                        initialValue: 'Asad',
+                        controller: controller.fullNameController,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
@@ -325,7 +326,7 @@ class AccountView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Last Name
                     const Text(
                       'Last Name',
@@ -344,7 +345,7 @@ class AccountView extends GetView<AccountController> {
                         border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: TextFormField(
-                        initialValue: 'Ujjaman',
+                        controller: controller.lastNameController,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
@@ -373,7 +374,7 @@ class AccountView extends GetView<AccountController> {
                         border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: TextFormField(
-                        initialValue: '+099999',
+                        controller: controller.phoneController,
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s\(\)]')),
@@ -385,16 +386,10 @@ class AccountView extends GetView<AccountController> {
                           hintText: 'Enter your phone no.',
                         ),
                         style: const TextStyle(fontSize: 14),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your phone no';
-                          }
-                          return null;
-                        },
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Gender
                     const Text(
                       'Gender',
@@ -413,7 +408,7 @@ class AccountView extends GetView<AccountController> {
                         border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: TextFormField(
-                        initialValue: 'Male',
+                        controller: controller.genderController,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
@@ -423,7 +418,7 @@ class AccountView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Date of Birth
                     const Text(
                       'Date of Birth',
@@ -438,7 +433,7 @@ class AccountView extends GetView<AccountController> {
                       onTap: () async {
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: DateTime(2024, 12, 17), // Default date
+                          initialDate: DateTime.now(),
                           firstDate: DateTime(1900),
                           lastDate: DateTime.now(),
                           builder: (context, child) {
@@ -455,14 +450,14 @@ class AccountView extends GetView<AccountController> {
                             );
                           },
                         );
-                        
+
                         if (pickedDate != null) {
-                          // Format the date as "17 dec, 2024"
                           List<String> months = [
                             'jan', 'feb', 'mar', 'apr', 'may', 'jun',
                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
                           ];
-                          String formattedDate = '${pickedDate.day} ${months[pickedDate.month - 1]}, ${pickedDate.year}';
+                          String formattedDate =
+                              '${pickedDate.day} ${months[pickedDate.month - 1]}, ${pickedDate.year}';
                           setState(() {
                             selectedDate = formattedDate;
                           });
@@ -489,13 +484,20 @@ class AccountView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Confirm Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
+                          controller.updateProfile(
+                            newName:
+                                '${controller.fullNameController.text} ${controller.lastNameController.text}',
+                            newPhone: controller.phoneController.text,
+                            newGender: controller.genderController.text,
+                            newDob: selectedDate,
+                          );
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
@@ -556,8 +558,7 @@ class AccountView extends GetView<AccountController> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
-                // Address Label
+
                 const Text(
                   'Address',
                   style: TextStyle(
@@ -566,17 +567,7 @@ class AccountView extends GetView<AccountController> {
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Thies address will save for your delivery address',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.orange[400],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Address Input Field
+                const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
@@ -585,7 +576,7 @@ class AccountView extends GetView<AccountController> {
                     border: Border.all(color: Colors.grey[300]!),
                   ),
                   child: TextFormField(
-                    initialValue: '76/4 R no. 60/1 Rue des Saints-Paris, 75005 Paris',
+                    controller: controller.addressController,
                     maxLines: 3,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
@@ -597,13 +588,15 @@ class AccountView extends GetView<AccountController> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
-                // Confirm Button
+
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
+                      controller.updateProfile(
+                        newAddress: controller.addressController.text,
+                      );
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(

@@ -107,7 +107,7 @@ class SuccessView extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          Get.toNamed(Routes.orderHistory);
+                          Get.toNamed(Routes.history);
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF09B782),
