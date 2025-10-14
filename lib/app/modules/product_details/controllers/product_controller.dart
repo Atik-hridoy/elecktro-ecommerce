@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
 /// Manages the state for the ProductDetailsView.
@@ -54,7 +55,7 @@ class ProductDetailsController extends GetxController {
 
   // --- Business Logic Actions ---
   void onBuyNow() {
-    Get.snackbar('Info', 'Buy Now clicked for ${name.value}');
+    Get.toNamed(Routes.auth);
   }
 
   void onAddToCart() {

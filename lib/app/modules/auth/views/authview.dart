@@ -77,7 +77,7 @@ class AuthView extends GetView<AuthController> {
                             fontWeight: FontWeight.w400, // Regular
                             height: 21 / 14, // line-height / font-size
                             letterSpacing: 0,
-                          ),
+                          ), 
                         ),
                         const SizedBox(height: 24), // Space before phone input
                         Container(

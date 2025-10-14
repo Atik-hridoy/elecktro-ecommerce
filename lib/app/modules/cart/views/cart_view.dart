@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import '../controllers/cart_controller.dart';
 import '../../home/widget/navbar.dart';
 import 'cart_widget.dart';
@@ -173,7 +174,7 @@ class CartView extends GetView<CartController> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    // Handle checkout
+                                    Get.toNamed(Routes.checkout);
                                   },
                                   child: const Text(
                                     'Check Out',

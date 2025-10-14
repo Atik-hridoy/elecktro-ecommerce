@@ -27,12 +27,12 @@ import 'package:elecktro_ecommerce/app/modules/profile/account%20options/wishlis
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/wishlist/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/account_settings/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/account_settings/binding.dart';
-import 'package:elecktro_ecommerce/app/modules/about/view.dart';
-import 'package:elecktro_ecommerce/app/modules/about/binding.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/about/view.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/about/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/work/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/work/binding.dart';
-import 'package:elecktro_ecommerce/app/modules/frequently/view.dart';
-import 'package:elecktro_ecommerce/app/modules/frequently/binding.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/frequently/view.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/frequently/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/tearms_and_conditions/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/tearms_and_conditions/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/faq/view.dart';
