@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// A reusable bottom navigation bar with customizable appearance and behavior.
-///
-/// This widget provides a consistent navigation experience across the app
-/// with support for up to 4 navigation items.
-class ReusableNavBar extends StatelessWidget {
-  /// The current index of the selected [BottomNavigationBarItem].
-  final int currentIndex;
 
-  /// Called when one of the [items] is tapped.
+class ReusableNavBar extends StatelessWidget {
+  final int currentIndex;
   final ValueChanged<int> onTap;
 
   /// The color of the selected [BottomNavigationBarItem].
@@ -45,7 +39,7 @@ class ReusableNavBar extends StatelessWidget {
   }) : assert(
          items.length >= 2 && items.length <= 4,
          'Must have between 2-4 items',
-       );
+       ); 
 
   /// Creates a navigation bar with SVG icons.
   ///
@@ -95,7 +89,7 @@ class ReusableNavBar extends StatelessWidget {
         borderRadius: borderRadius ?? defaultBorderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, -2),

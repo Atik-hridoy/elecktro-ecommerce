@@ -1,5 +1,5 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
-import 'package:elecktro_ecommerce/app/modules/auth/controllers/authController.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/controllers/authSignInController.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:elecktro_ecommerce/l10n/app_localizations.dart';
@@ -21,7 +21,7 @@ void main() async {
   
   // Initialize controllers
   Get.put(HomeController());
-  Get.put(AuthController());
+  Get.put(AuthSignInController());
   
   // Initialize services
   await Get.putAsync(() => NavigationService.init());

@@ -307,7 +307,7 @@ class HomeView extends StatelessWidget {
                       name: recommendedProducts[index]['name'] as String,
                       brand: recommendedProducts[index]['brand'] as String,
                       price: recommendedProducts[index]['price'] as String,
-                      imageUrl: recommendedProducts[index]['imageUrl'] as String?,
+                      imageUrl: recommendedProducts[index]['imageUrl'],
                     ),
                   );
                 },
