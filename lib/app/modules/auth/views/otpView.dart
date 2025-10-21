@@ -4,12 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/controllers/otpController.dart';
 
 class OtpView extends GetView<OtpController> {
-  final String email;
-  
-  const OtpView({super.key, required this.email});
+  const OtpView({super.key});
   
   @override
-  OtpController get controller => Get.put(OtpController(email: email), permanent: true);
+  OtpController get controller => Get.find<OtpController>();
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +77,7 @@ class OtpView extends GetView<OtpController> {
 
                             // Subtitle
                             Text(
-                              'Enter the OTP sent to your email\n$email',
+                              'Enter the OTP sent to your email\n${controller.email}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontFamily: 'Poppins',

@@ -114,9 +114,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.otp,
-      page: () {
-        return OtpView(email: LocalStorage.myEmail,);
-      },
+      page: () => const OtpView(),
       binding: AuthBinding(),
     ),
     GetPage(

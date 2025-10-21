@@ -54,30 +54,77 @@ class AuthVerifyOtpService extends GetxService {
   // Verify OTP
   Future<Map<String, dynamic>> verifyOtp({
     required String email,
-    required int oneTimeCode,
+    required String oneTimeCode,
   }) async {
     try {
+      // Convert OTP to number if it's a valid number
+      final otpNumber = int.tryParse(oneTimeCode);
+      
+      if (otpNumber == null) {
+        throw Exception('Invalid OTP format. Must be a number.');
+      }
+
+      AppLogger.debug(
+        'Sending OTP verification request',
+        tag: 'AuthVerifyOtpService',
+        details: {
+          'email': email,
+          'oneTimeCode': otpNumber,
+          'endpoint': AppUrls.verifyOtp,
+        },
+      );
+
       final response = await _dio.post(
         AppUrls.verifyOtp,
         data: {
-          'email': email,
-          'oneTimeCode': oneTimeCode,
+          'email': email.trim(),
+          'oneTimeCode': otpNumber, // Sending as number
+        },
+      );
+
+      AppLogger.debug(
+        'Received OTP verification response',
+        tag: 'AuthVerifyOtpService',
+        details: {
+          'statusCode': response.statusCode ?? 200,
+          'response': response.data,
         },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final accessToken = response.data['data']?['accessToken'];
+        final refreshToken = response.data['data']?['refreshToken'];
+
+        AppLogger.debug(
+          'OTP verification successful',
+          tag: 'Auth',
+          details: {
+            'hasAccessToken': accessToken != null,
+            'hasRefreshToken': refreshToken != null,
+          },
+        );
+
         return {
           'success': true,
           'message': response.data['message'] ?? 'OTP verified successfully',
           'data': response.data['data'] ?? response.data,
-          'accessToken': response.data['data']?['accessToken'],
-          'refreshToken': response.data['data']?['refreshToken'],
+          'accessToken': accessToken,
+          'refreshToken': refreshToken,
         };
       } else {
+AppLogger.debug(
+          'OTP verification failed',
+          tag: 'Auth',
+          details: {
+            'statusCode': response.statusCode ?? 200,
+            'message': response.data['message'] ?? 'No message from server',
+          },
+        );
+        
         return {
           'success': false,
           'message': response.data['message'] ?? 'OTP verification failed',
-          'statusCode': response.statusCode,
+          'statusCode': response.statusCode ?? 200,
         };
       }
     } on DioException catch (e) {
@@ -86,7 +133,7 @@ class AuthVerifyOtpService extends GetxService {
         'message': e.response?.data?['message'] ?? 
                   e.message ?? 
                   'Network error during OTP verification',
-        'statusCode': e.response?.statusCode,
+        'statusCode': e.response?.statusCode ?? 0,
       };
     } catch (e, stackTrace) {
       AppLogger.error(

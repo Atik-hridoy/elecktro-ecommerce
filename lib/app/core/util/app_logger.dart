@@ -33,7 +33,7 @@ class AppLogger {
   // ========== GENERAL LOGGING ==========
 
   /// Debug log (Blue)
-  static void debug(String message, {String? tag}) {
+  static void debug(String message, {String? tag, required Map<String, Object> details}) {
     _log(LogLevel.debug, message, tag: tag);
   }
 
@@ -310,7 +310,10 @@ class AppLogger {
   /// Log state changes
   static void state(String stateName, dynamic value) {
     if (!_enableLogs) return;
-    debug('State Changed: $stateName = $value', tag: 'State');
+    debug('State Changed: $stateName = $value', tag: 'State', details: {
+      'stateName': stateName,
+      'value': value,
+    });
   }
 
   // ========== LIFECYCLE LOGGING ==========
@@ -318,7 +321,7 @@ class AppLogger {
   /// Log widget lifecycle
   static void lifecycle(String widgetName, String event) {
     if (!_enableLogs) return;
-    debug('$widgetName: $event', tag: 'Lifecycle');
+    info('$widgetName: $event', tag: 'Lifecycle');
   }
 }
 

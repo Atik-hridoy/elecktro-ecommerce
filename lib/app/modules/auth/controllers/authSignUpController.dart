@@ -28,8 +28,14 @@ class AuthSignUpController extends GetxController {
       final response = await _authService.registerSeller(email: email);
 
       if (response['success'] == true) {
-        // Navigate to OTP verification screen
-        Get.toNamed(Routes.otp, arguments: {'email': email});
+        // Navigate to OTP verification screen for registration
+        Get.toNamed(
+          Routes.otp, 
+          arguments: {
+            'email': email,
+            'isRegistration': true,
+          }
+        );
       } else {
         errorMessage.value = response['message'] ?? 'Registration failed';
         Get.snackbar(

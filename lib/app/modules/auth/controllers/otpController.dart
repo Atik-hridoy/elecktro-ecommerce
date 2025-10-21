@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
@@ -11,7 +12,12 @@ class OtpController extends GetxController {
   final AuthVerifyOtpService _otpService = AuthVerifyOtpService();
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  
   final String email;
+  final bool isRegistration; // Flag to differentiate between registration and login
+  
+  // Reactive getter for the email
+  String get emailValue => email;
 
   // Controllers for each OTP digit (5 digits)
   final List<TextEditingController> otpControllers = List.generate(
@@ -25,13 +31,19 @@ class OtpController extends GetxController {
   final canResend = false.obs;
   Timer? _timer;
 
-  OtpController({required this.email});
+  OtpController({required this.email, this.isRegistration = false});
 
   @override
   void onInit() async {
     super.onInit();
     await _otpService.init();
     startTimer();
+    
+    // Log the OTP verification context
+    AppLogger.info(
+      'OTP verification initialized - Email: $email, Registration: $isRegistration',
+      tag: 'OtpController'
+    );
   }
 
   @override
@@ -112,9 +124,17 @@ class OtpController extends GetxController {
     if (isLoading.value) return;
 
     final otp = otpControllers.map((controller) => controller.text).join();
-    if (otp.length != 5) {
+    
+    // Validate OTP format
+    if (otp.length != 5 || int.tryParse(otp) == null) {
       errorMessage.value = 'Please enter a valid 5-digit OTP';
-      AppLogger.warning('Invalid OTP length: ${otp.length} digits');
+      AppLogger.warning('Invalid OTP format: $otp');
+      Get.snackbar(
+        'Error',
+        errorMessage.value,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
 
@@ -122,16 +142,21 @@ class OtpController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       
-      // Keep OTP as string since the API expects it that way
-      final otpCode = otp;
-      AppLogger.debug('Verifying OTP for email: $email');
+      AppLogger.info(
+        'Verifying OTP for ${isRegistration ? 'registration' : 'login'} - Email: $email',
+        tag: 'OtpController',
+        
+      );
       
       final response = await _otpService.verifyOtp(
-        email: email,
-        oneTimeCode: int.parse(otpCode), // Parse to int for the service
+        email: email.trim(),
+        oneTimeCode: otp,
       );
 
-      AppLogger.info('OTP verification response received', tag: 'Auth');
+      AppLogger.info(
+        'OTP verification successful',
+        tag: 'OtpController',
+      );
       
       if (response['success'] == true) {
         final accessToken = response['accessToken'];
@@ -140,7 +165,7 @@ class OtpController extends GetxController {
         if (accessToken == null || refreshToken == null) {
           throw Exception('Access token or refresh token is missing in the response');
         }
-
+        
         // Store tokens and user data
         await Future.wait([
           LocalStorage.setString(LocalStorageKeys.token, accessToken),
@@ -150,36 +175,61 @@ class OtpController extends GetxController {
         ]);
 
         AppLogger.success(
-          'OTP verified and tokens stored successfully',
-          tag: 'Auth',
+          'OTP verified and ${isRegistration ? 'account created' : 'login'} successful',
+          tag: 'OtpController',
         );
         
-        AppLogger.debug('User logged in with email: $email');
-        AppLogger.debug('Access token stored: ${accessToken.substring(0, 10)}...');
+        // Show success message
+        Get.snackbar(
+          'Success',
+          isRegistration 
+              ? 'Account created successfully!'
+              : 'Login successful!',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
         
         // Navigate to home screen
         Get.offAllNamed(Routes.home);
       } else {
-        errorMessage.value = response['message'] ?? 'OTP verification failed';
+        final errorMsg = response['message'] ?? 'OTP verification failed';
+        errorMessage.value = errorMsg;
         Get.snackbar(
           'Error',
-          errorMessage.value,
+          errorMsg,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
-    } catch (e, stackTrace) {
-      final errorMsg = e is FormatException 
-          ? 'Invalid OTP format. Please enter a valid 5-digit number.'
-          : 'An error occurred: ${e.toString()}';
-          
+    } catch (e) {
+      String errorMsg = 'Failed to verify OTP. Please try again.';
+      
+      if (e is DioException) {
+        // Handle Dio errors
+        if (e.response?.statusCode == 400) {
+          errorMsg = e.response?.data?['message'] ?? 'Invalid OTP. Please check and try again.';
+        } else if (e.response?.statusCode == 401) {
+          errorMsg = 'Session expired. Please request a new OTP.';
+        } else if (e.response?.statusCode == 429) {
+          errorMsg = 'Too many attempts. Please try again later.';
+        } else if (e.type == DioExceptionType.connectionTimeout) {
+          errorMsg = 'Connection timeout. Please check your internet connection.';
+        }
+      } else if (e is FormatException) {
+        errorMsg = 'Invalid OTP format. Please enter a valid 5-digit number.';
+      }
+      
       errorMessage.value = errorMsg;
       
-      AppLogger.error(
-        'OTP Verification Failed',
-        error: e,
-        stackTrace: stackTrace,
-        tag: 'Auth',
+      AppLogger.debug(
+        'OTP verification failed',
+        tag: 'OtpController',
+        details: {
+          'email': email,
+          'isRegistration': isRegistration,
+          'errorType': e.runtimeType.toString(),
+          'errorMessage': e.toString(),
+        },
       );
       
       Get.snackbar(
@@ -187,7 +237,7 @@ class OtpController extends GetxController {
         errorMsg,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 5),
       );
     } finally {
       isLoading.value = false;

@@ -40,10 +40,13 @@ class AuthSignInController extends GetxController {
         await prefs.setString(LocalStorageKeys.myEmail, email);
         await LocalStorage.getAllPrefData(); // Refresh local storage data
         
-        // Navigate to OTP screen
+        // Navigate to OTP screen for login
         Get.toNamed(
           Routes.otp,
-          arguments: email,
+          arguments: {
+            'email': email,
+            'isRegistration': false,
+          },
         );
       } else {
         errorMessage.value = response['message'] ?? 'Failed to send OTP';
