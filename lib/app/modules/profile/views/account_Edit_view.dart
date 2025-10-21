@@ -491,13 +491,7 @@ class AccountView extends GetView<AccountController> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          controller.updateProfile(
-                            newName:
-                                '${controller.fullNameController.text} ${controller.lastNameController.text}',
-                            newPhone: controller.phoneController.text,
-                            newGender: controller.genderController.text,
-                            newDob: selectedDate,
-                          );
+                          controller.updateProfile();
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
@@ -592,12 +586,33 @@ class AccountView extends GetView<AccountController> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      controller.updateProfile(
-                        newAddress: controller.addressController.text,
-                      );
-                      Navigator.of(context).pop();
+                  child: Obx(() => ElevatedButton(
+                    onPressed: controller.isLoading.value ? null : () async {
+                      try {
+                        // Call updateProfile which now includes the address
+                        await controller.updateProfile();
+                        
+                        // Show success message and close dialog
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Address updated successfully'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        // Show error message if something goes wrong
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to update address: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
@@ -616,6 +631,7 @@ class AccountView extends GetView<AccountController> {
                     ),
                   ),
                 ),
+                )
               ],
             ),
           ),

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../views/model/update_profile_model.dart';
+import '../views/services/update_profile_service.dart';
 
 class AccountController extends GetxController {
+  // Services
+  final UpdateProfileService _profileService = UpdateProfileService();
+  
+  // Loading state
+  final RxBool isLoading = false.obs;
+  
   // User profile data
   final RxString fullName = 'Asad Ujjaman'.obs;
   final RxString email = 'asad@example.com'.obs;
@@ -33,27 +41,55 @@ class AccountController extends GetxController {
     passwordController.text = password.value;
   }
 
-  void updateProfile({
-    String? newName,
-    String? newEmail,
-    String? newPhone,
-    String? newAddress,
-    String? newGender,
-    String? newDob,
-  }) {
-    if (newName != null && newName.isNotEmpty) fullName.value = newName;
-    if (newEmail != null && newEmail.isNotEmpty) email.value = newEmail;
-    if (newPhone != null && newPhone.isNotEmpty) phone.value = newPhone;
-    if (newAddress != null && newAddress.isNotEmpty) address.value = newAddress;
-    if (newGender != null && newGender.isNotEmpty) gender.value = newGender;
-    if (newDob != null && newDob.isNotEmpty) dateOfBirth.value = newDob;
+  Future<void> updateProfile() async {
+    try {
+      isLoading.value = true;
+      
+      // Create the profile model from form data
+      final profileData = UpdateProfileModel(
+        firstName: fullNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        gender: genderController.text.trim().toLowerCase(),
+        address: addressController.text.trim(), // Include address in the update
+      );
 
-    Get.snackbar(
-      'Success',
-      'Profile updated successfully',
-      backgroundColor: Colors.green[50],
-      colorText: Colors.green[800],
-    );
+      // Call the update service
+      final response = await _profileService.updateProfile(
+        profileData: profileData,
+        // If you have an image file, pass it here
+        // profileImage: imageFile,
+      );
+
+      if (response['success'] == true) {
+        // Update local state on success
+        fullName.value = '${profileData.firstName} ${profileData.lastName}';
+        email.value = emailController.text.trim();
+        phone.value = phoneController.text.trim();
+        address.value = addressController.text.trim();
+        gender.value = genderController.text.trim();
+        
+        Get.snackbar(
+          'Success',
+          'Profile updated successfully',
+          backgroundColor: Colors.green[50],
+          colorText: Colors.green[800],
+        );
+        
+        // Optionally navigate back
+        Get.back();
+      } else {
+        throw Exception(response['error'] ?? 'Failed to update profile');
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString().replaceAll('Exception: ', ''),
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void updatePassword(String newPassword) {

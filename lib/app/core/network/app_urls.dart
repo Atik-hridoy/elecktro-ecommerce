@@ -9,4 +9,8 @@ class AppUrls {
   static const String verifyOtp = 'auth/verify-otp';
 
   static const String updateProfile = 'users/complete';
+
+  // profile
+
+  static const String completeProfile = 'users/complete';
 }
