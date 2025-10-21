@@ -1,12 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_keys.dart';
+import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
+import '../services/otp_service.dart';
 
 class OtpController extends GetxController {
-  // Controllers for each OTP digit (6 digits)
+  final AuthVerifyOtpService _otpService = AuthVerifyOtpService();
+  final RxBool isLoading = false.obs;
+  final RxString errorMessage = ''.obs;
+  final String email;
+
+  // Controllers for each OTP digit (5 digits)
   final List<TextEditingController> otpControllers = List.generate(
-    6,
+    5,
     (index) => TextEditingController(),
   );
 
@@ -16,9 +25,12 @@ class OtpController extends GetxController {
   final canResend = false.obs;
   Timer? _timer;
 
+  OtpController({required this.email});
+
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
+    await _otpService.init();
     startTimer();
   }
 
@@ -32,11 +44,19 @@ class OtpController extends GetxController {
   }
 
   // Handle OTP input changes
-  void onOtpChange(int index, String value, BuildContext context) {
-    if (value.length == 1 && index < otpControllers.length - 1) {
+  void onOtpChange(dynamic index, String value, BuildContext context) {
+    // Convert index to int if it's a string
+    final idx = index is int ? index : int.tryParse(index.toString()) ?? 0;
+    
+    if (value.length == 1 && idx < otpControllers.length - 1) {
       FocusScope.of(context).nextFocus();
-    } else if (value.isEmpty && index > 0) {
+    } else if (value.isEmpty && idx > 0) {
       FocusScope.of(context).previousFocus();
+    }
+    
+    // Auto-verify when all OTP digits are entered
+    if (value.isNotEmpty && idx == otpControllers.length - 1) {
+      verifyOtp();
     }
   }
 
@@ -55,27 +75,122 @@ class OtpController extends GetxController {
   }
 
   // Resend OTP
-  void resendOtp() {
-    if (canResend.value) {
-      // TODO: Implement resend OTP logic
+  Future<void> resendOtp() async {
+    if (!canResend.value) return;
+    
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      // Call the sign-in service to resend OTP
+      // This assumes you have a method in your auth service to resend OTP
+      // You might need to implement this based on your API
+      // For now, we'll just restart the timer
       startTimer();
+      
+      Get.snackbar(
+        'Success',
+        'OTP has been resent to your email',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      errorMessage.value = 'Failed to resend OTP. Please try again.';
+      Get.snackbar(
+        'Error',
+        errorMessage.value,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 
   // Verify OTP
-  void verifyOtp() {
+  Future<void> verifyOtp() async {
+    if (isLoading.value) return;
+
     final otp = otpControllers.map((controller) => controller.text).join();
-    if (otp.length == 5) {
-      // TODO: Add your OTP verification logic here
-      // For now, we'll just navigate to checkout on successful verification
-      Get.offAllNamed(Routes.checkout);
-    } else {
+    if (otp.length != 5) {
+      errorMessage.value = 'Please enter a valid 5-digit OTP';
+      AppLogger.warning('Invalid OTP length: ${otp.length} digits');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      // Keep OTP as string since the API expects it that way
+      final otpCode = otp;
+      AppLogger.debug('Verifying OTP for email: $email');
+      
+      final response = await _otpService.verifyOtp(
+        email: email,
+        oneTimeCode: int.parse(otpCode), // Parse to int for the service
+      );
+
+      AppLogger.info('OTP verification response received', tag: 'Auth');
+      
+      if (response['success'] == true) {
+        final accessToken = response['accessToken'];
+        final refreshToken = response['refreshToken'];
+        
+        if (accessToken == null || refreshToken == null) {
+          throw Exception('Access token or refresh token is missing in the response');
+        }
+
+        // Store tokens and user data
+        await Future.wait([
+          LocalStorage.setString(LocalStorageKeys.token, accessToken),
+          LocalStorage.setString(LocalStorageKeys.refreshToken, refreshToken),
+          LocalStorage.setString(LocalStorageKeys.myEmail, email),
+          LocalStorage.setBool(LocalStorageKeys.isLogIn, true),
+        ]);
+
+        AppLogger.success(
+          'OTP verified and tokens stored successfully',
+          tag: 'Auth',
+        );
+        
+        AppLogger.debug('User logged in with email: $email');
+        AppLogger.debug('Access token stored: ${accessToken.substring(0, 10)}...');
+        
+        // Navigate to home screen
+        Get.offAllNamed(Routes.home);
+      } else {
+        errorMessage.value = response['message'] ?? 'OTP verification failed';
+        Get.snackbar(
+          'Error',
+          errorMessage.value,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e, stackTrace) {
+      final errorMsg = e is FormatException 
+          ? 'Invalid OTP format. Please enter a valid 5-digit number.'
+          : 'An error occurred: ${e.toString()}';
+          
+      errorMessage.value = errorMsg;
+      
+      AppLogger.error(
+        'OTP Verification Failed',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'Auth',
+      );
+      
       Get.snackbar(
-        'Error',
-        'Please enter a valid OTP',
+        'Verification Failed',
+        errorMsg,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 4),
       );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

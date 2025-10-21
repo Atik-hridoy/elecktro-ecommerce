@@ -12,6 +12,7 @@ abstract class Routes {
   static const paymentCard = '/payment-card';
   static const success = '/success';
   static const auth = '/auth';
+  static const authSignIn = '/auth-sign-in';
   static const otp = '/otp';
   static const history = '/history';
   static const notification = '/notification';

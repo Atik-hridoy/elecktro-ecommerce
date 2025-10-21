@@ -1,4 +1,5 @@
-import 'package:elecktro_ecommerce/app/modules/auth/views/authview.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/views/authSignInView.dart';
+import 'package:elecktro_ecommerce/app/modules/auth/views/authSignUpView.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/views/cart_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/view.dart';
 import 'package:elecktro_ecommerce/app/modules/checkOut/views/checkout_view.dart';
@@ -8,7 +9,7 @@ import 'package:elecktro_ecommerce/app/modules/home/views/home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/notification/notification_view.dart';
 import 'package:elecktro_ecommerce/app/modules/onboarding/onboarding_view.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/product_view.dart';
-import 'package:elecktro_ecommerce/app/modules/profile/views/account_view.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/views/account_Edit_view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/views/profile_view.dart';
 import 'package:elecktro_ecommerce/app/modules/support/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/tearms_and_conditions/view.dart';
@@ -43,7 +44,9 @@ class RouteGenerator {
       case Routes.success:
         return MaterialPageRoute(builder: (_) => SuccessView());
       case Routes.auth:
-        return MaterialPageRoute(builder: (_) => AuthView());
+        return MaterialPageRoute(builder: (_) => AuthSignUpView());
+      case Routes.authSignIn:
+        return MaterialPageRoute(builder: (_) => AuthSignInView());
       case Routes.account:
         return MaterialPageRoute(builder: (_) => AccountView());
       case Routes.notification:
