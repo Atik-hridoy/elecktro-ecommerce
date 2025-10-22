@@ -89,22 +89,28 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                       const SizedBox(height: 12),
                       // Name
-                      const Text(
-                        'Asad Ujjaman',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
+                      Obx(() => Text(
+                            controller.name.value,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                       ),
                       const SizedBox(height: 4),
                       // Address
-                      Text(
-                        '20 Cooper Square, N...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
+                      Obx(() => Text(
+                            controller.address.value,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                       ),
                     ],
                   ),

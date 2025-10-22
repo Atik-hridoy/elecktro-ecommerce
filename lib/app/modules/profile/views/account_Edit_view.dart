@@ -151,11 +151,11 @@ class AccountView extends GetView<AccountController> {
                   ),
                   const SizedBox(height: 20),
 
-                  _buildDetailItem('Registration no', '#131213542253'),
+                  Obx(() => _buildDetailItem('Registration No', controller.registrationNo.value)),
                   Obx(() => _buildDetailItem('Name', controller.fullName.value)),
-                  Obx(() => _buildDetailItem('Contact No', controller.phone.value)),
-                  Obx(() => _buildDetailItem('Gender', controller.gender.value)),
-                  Obx(() => _buildDetailItem('Date of birth', controller.dateOfBirth.value)),
+                  // Contact No and Date of Birth are not in the current model
+                  // You can add them later when they're available in the API response
+                  Obx(() => _buildDetailItem('Gender', controller.gender.value.capitalizeFirst ?? '')),
                 ],
               ),
             ),

@@ -2,21 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/model/update_profile_model.dart';
 import '../views/services/update_profile_service.dart';
+import '../views/services/get_profile_service.dart';
+import '../views/model/get_profile_model.dart';
 
 class AccountController extends GetxController {
   // Services
   final UpdateProfileService _profileService = UpdateProfileService();
+  final GetProfileService _getProfileService = GetProfileService();
   
   // Loading state
   final RxBool isLoading = false.obs;
   
   // User profile data
-  final RxString fullName = 'Asad Ujjaman'.obs;
-  final RxString email = 'asad@example.com'.obs;
-  final RxString phone = '+1 234 567 8900'.obs;
-  final RxString address = '20 Cooper Square, New York'.obs;
-  final RxString gender = 'Male'.obs;
-  final RxString dateOfBirth = '17 Dec, 1990'.obs;
+  final RxString fullName = ''.obs;
+  final RxString email = ''.obs;
+  final RxString phone = ''.obs;
+  final RxString address = ''.obs;
+  final RxString gender = ''.obs;
+  final RxString registrationNo = ''.obs;
+  final RxString dateOfBirth = ''.obs;
   final RxString password = '••••••••'.obs;
 
   // Form controllers
@@ -31,14 +35,32 @@ class AccountController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initialize form controllers with current values
-    fullNameController.text = fullName.value.split(" ").first;
-    lastNameController.text = fullName.value.split(" ").last;
-    emailController.text = email.value;
-    phoneController.text = phone.value;
-    addressController.text = address.value;
-    genderController.text = gender.value;
-    passwordController.text = password.value;
+    fetchProfileData();
+  }
+
+  Future<void> fetchProfileData() async {
+    try {
+      isLoading.value = true;
+      final profileData = await _getProfileService.getProfile();
+      
+      if (profileData != null) {
+        // Update reactive variables with profile data
+        fullName.value = '${profileData.data.firstName} ${profileData.data.lastName}';
+        gender.value = profileData.data.gender;
+        address.value = profileData.data.address;
+        registrationNo.value = profileData.data.registrationNo;
+        
+        // Update form controllers
+        fullNameController.text = profileData.data.firstName;
+        lastNameController.text = profileData.data.lastName;
+        genderController.text = profileData.data.gender;
+        addressController.text = profileData.data.address;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load profile: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> updateProfile() async {

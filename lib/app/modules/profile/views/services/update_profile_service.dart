@@ -97,10 +97,13 @@ class UpdateProfileService {
 
       final responseData = json.decode(response.body);
 
-      // Log API response
-      AppLogger.info(
-        'API Response (${response.statusCode}) in ${duration.inMilliseconds}ms',
-        tag: tag,
+    
+      AppLogger.apiResponse(
+        method: 'POST',
+        endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfile}',
+        statusCode: response.statusCode,
+        responseData: responseData,
+        duration: duration,
       );
       
       if (kDebugMode) {
