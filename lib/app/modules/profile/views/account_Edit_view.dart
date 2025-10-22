@@ -1,4 +1,4 @@
-import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

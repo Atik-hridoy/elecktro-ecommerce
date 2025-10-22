@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../views/model/update_profile_model.dart';
 import '../views/services/update_profile_service.dart';
 import '../views/services/get_profile_service.dart';
-import '../views/model/get_profile_model.dart';
+
 
 class AccountController extends GetxController {
   // Services
