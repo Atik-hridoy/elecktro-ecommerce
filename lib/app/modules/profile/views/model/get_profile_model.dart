@@ -27,6 +27,7 @@ class ProfileData {
   final String registrationNo;
   final String gender;
   final String address;
+  final String phone;
 
   ProfileData({
     required this.firstName,
@@ -34,6 +35,7 @@ class ProfileData {
     required this.registrationNo,
     required this.gender,
     required this.address,
+    required this.phone,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class ProfileData {
       registrationNo: json['registrationNo'] as String? ?? '',
       gender: json['gender'] as String? ?? '',
       address: json['address'] as String? ?? '',
+      phone: json['phone'] as String? ?? '',
     );
   }
 }

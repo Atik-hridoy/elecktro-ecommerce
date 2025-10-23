@@ -49,12 +49,14 @@ class AccountController extends GetxController {
         gender.value = profileData.data.gender;
         address.value = profileData.data.address;
         registrationNo.value = profileData.data.registrationNo;
+        phone.value = profileData.data.phone;
         
         // Update form controllers
         fullNameController.text = profileData.data.firstName;
         lastNameController.text = profileData.data.lastName;
         genderController.text = profileData.data.gender;
         addressController.text = profileData.data.address;
+        phoneController.text = profileData.data.phone;
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to load profile: $e');

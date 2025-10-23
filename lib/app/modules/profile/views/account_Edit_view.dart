@@ -153,7 +153,7 @@ class AccountView extends GetView<AccountController> {
 
                   Obx(() => _buildDetailItem('Registration No', controller.registrationNo.value)),
                   Obx(() => _buildDetailItem('Name', controller.fullName.value)),
-                  Obx(() => _buildDetailItem('Contact No', controller.phone.value.isNotEmpty ? controller.phone.value : 'Not set')),
+                  Obx(() => _buildDetailItem('Contact No', controller.phone.value.isNotEmpty ? controller.phone.value : '')),
                   Obx(() => _buildDetailItem('Gender', controller.gender.value.capitalizeFirst ?? '')),
                 ],
               ),
