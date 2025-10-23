@@ -153,8 +153,7 @@ class AccountView extends GetView<AccountController> {
 
                   Obx(() => _buildDetailItem('Registration No', controller.registrationNo.value)),
                   Obx(() => _buildDetailItem('Name', controller.fullName.value)),
-                  // Contact No and Date of Birth are not in the current model
-                  // You can add them later when they're available in the API response
+                  Obx(() => _buildDetailItem('Contact No', controller.phone.value.isNotEmpty ? controller.phone.value : 'Not set')),
                   Obx(() => _buildDetailItem('Gender', controller.gender.value.capitalizeFirst ?? '')),
                 ],
               ),

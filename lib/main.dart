@@ -5,6 +5,7 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:elecktro_ecommerce/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
@@ -34,11 +35,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => LanguageProvider(),
-      child: Consumer<LanguageProvider>(
-        builder: (context, languageProvider, _) {
-          return GetMaterialApp(
+    return ScreenUtilInit(
+      designSize: const Size(375, 812), // Your design size (iPhone 13 size)
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return ChangeNotifierProvider(
+          create: (_) => LanguageProvider(),
+          child: Consumer<LanguageProvider>(
+            builder: (context, languageProvider, _) {
+              return GetMaterialApp(
             title: 'Elecktro',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme.copyWith(
@@ -91,9 +97,11 @@ class MyApp extends StatelessWidget {
             getPages: AppPages.routes,
             defaultTransition: Transition.noTransition,
             transitionDuration: Duration.zero,
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

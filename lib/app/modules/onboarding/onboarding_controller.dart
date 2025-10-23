@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
@@ -53,9 +54,15 @@ class OnboardingController extends GetxController {
     );
   }
   
-  void navigateToHome() {
+  void navigateToHome() async {
     _cancelTimers();
-    Get.offAllNamed(Routes.home);
+    // Check if profile is already completed
+    await LocalStorage.getAllPrefData();
+    if (LocalStorage.isProfileComplete()) {
+      Get.offAllNamed(Routes.auth);
+    } else {
+      Get.offAllNamed(Routes.updateProfile);
+    }
   }
   
   // Start auto scroll timer

@@ -12,6 +12,7 @@ class AppUrls {
 
   // profile
 
-  static const String completeProfile = 'users/complete';
+
   static const String getProfile = 'users/profile';
+  static const String updateProfileInsideApp = 'users/profile';
 }

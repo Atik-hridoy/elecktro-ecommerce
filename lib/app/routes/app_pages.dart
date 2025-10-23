@@ -1,4 +1,3 @@
-import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/bindings/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/views/authSignInView.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/views/authSignUpView.dart';
@@ -41,6 +40,8 @@ import 'package:elecktro_ecommerce/app/modules/profile/account%20options/faq/vie
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/faq/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/support/view.dart';
 import 'package:elecktro_ecommerce/app/modules/support/binding.dart';
+import 'package:elecktro_ecommerce/app/modules/update_profile/binding.dart';
+import 'package:elecktro_ecommerce/app/modules/update_profile/update_profileview.dart';
 import 'package:get/get.dart';
 
 import '../modules/success/bindings.dart';
@@ -61,6 +62,11 @@ class AppPages {
       name: Routes.onboarding,
       page: () => const OnboardingView(),
       binding: OnboardingBinding(),
+    ),
+    GetPage(
+      name: Routes.updateProfile,
+      page: () => const ProfileInfoView(),
+      binding: UpdateProfileBinding(),
     ),
     GetPage(
       name: Routes.home,

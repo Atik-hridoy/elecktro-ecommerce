@@ -18,7 +18,7 @@ class UpdateProfileService {
 
   // Update user profile with form data using UpdateProfileModel
   Future<Map<String, dynamic>> updateProfile({
-    required UpdateProfileModel profileData,
+    required UpdateProfileModelInsideApp profileData,
     File? profileImage,
   }) async {
     const String tag = 'UpdateProfileService';
@@ -26,8 +26,8 @@ class UpdateProfileService {
     try {
       // Log start of API call
       AppLogger.apiRequest(
-        method: 'POST',
-        endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfile}',
+        method: 'PATCH',
+        endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfileInsideApp}',
         body: profileData.toJson(),
       );
 
@@ -43,8 +43,8 @@ class UpdateProfileService {
 
       // Create multipart request
       var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${AppUrls.baseUrl}${AppUrls.updateProfile}'),
+        'PATCH',
+        Uri.parse('${AppUrls.baseUrl}${AppUrls.updateProfileInsideApp}'),
       );
 
       // Add headers
@@ -99,8 +99,8 @@ class UpdateProfileService {
 
     
       AppLogger.apiResponse(
-        method: 'POST',
-        endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfile}',
+        method: 'PATCH',
+        endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfileInsideApp}',
         statusCode: response.statusCode,
         responseData: responseData,
         duration: duration,

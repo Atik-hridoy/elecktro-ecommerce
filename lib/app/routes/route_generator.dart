@@ -14,6 +14,7 @@ import 'package:elecktro_ecommerce/app/modules/profile/views/profile_view.dart';
 import 'package:elecktro_ecommerce/app/modules/support/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/tearms_and_conditions/view.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/account%20options/wishlist/view.dart';
+import 'package:elecktro_ecommerce/app/modules/update_profile/update_profileview.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:elecktro_ecommerce/app/modules/splash/splash_view.dart';
@@ -59,6 +60,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => FaqView());
       case Routes.support:
         return MaterialPageRoute(builder: (_) => SupportView());
+      case Routes.updateProfile:
+        return MaterialPageRoute(builder: (_) => ProfileInfoView());
 
       default:
         // If there is no such named route

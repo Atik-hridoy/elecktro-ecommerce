@@ -189,8 +189,13 @@ class OtpController extends GetxController {
           colorText: Colors.white,
         );
         
-        // Navigate to home screen
-        Get.offAllNamed(Routes.home);
+        // Check if profile is already completed
+        await LocalStorage.getAllPrefData();
+        if (LocalStorage.isProfileComplete()) {
+          Get.offAllNamed(Routes.auth);
+        } else {
+          Get.offAllNamed(Routes.updateProfile);
+        }
       } else {
         final errorMsg = response['message'] ?? 'OTP verification failed';
         errorMessage.value = errorMsg;

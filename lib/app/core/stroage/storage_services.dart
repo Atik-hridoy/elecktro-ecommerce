@@ -9,6 +9,7 @@ class LocalStorage {
   static String myImage = "";
   static String myName = "";
   static String myEmail = "";
+  static bool isProfileCompleted = false;
 
   // Create Local Storage Instance
   static SharedPreferences? preferences;
@@ -30,8 +31,7 @@ class LocalStorage {
     myImage = localStorage.getString(LocalStorageKeys.myImage) ?? "";
     myName = localStorage.getString(LocalStorageKeys.myName) ?? "";
     myEmail = localStorage.getString(LocalStorageKeys.myEmail) ?? "";
-
-    
+    isProfileCompleted = localStorage.getBool(LocalStorageKeys.isProfileCompleted) ?? false;
   }
 
   /// Remove All Data From SharedPreferences
@@ -53,6 +53,7 @@ class LocalStorage {
     localStorage.setString(LocalStorageKeys.myName, "");
     localStorage.setString(LocalStorageKeys.myEmail, "");
     localStorage.setBool(LocalStorageKeys.isLogIn, false);
+    localStorage.setBool(LocalStorageKeys.isProfileCompleted, false);
   }
 
   // Save Data To SharedPreferences
@@ -69,5 +70,16 @@ class LocalStorage {
   static Future<void> setInt(String key, int value) async {
     final localStorage = await _getStorage();
     await localStorage.setInt(key, value);
+  }
+
+  // Check if profile is completed
+  static bool isProfileComplete() {
+    return isProfileCompleted;
+  }
+
+  // Mark profile as completed
+  static Future<void> markProfileAsCompleted() async {
+    isProfileCompleted = true;
+    await setBool(LocalStorageKeys.isProfileCompleted, true);
   }
 }

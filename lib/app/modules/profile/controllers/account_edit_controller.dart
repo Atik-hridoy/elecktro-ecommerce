@@ -1,6 +1,6 @@
+import 'package:elecktro_ecommerce/app/modules/profile/views/model/update_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../views/model/update_profile_model.dart';
 import '../views/services/update_profile_service.dart';
 import '../views/services/get_profile_service.dart';
 
@@ -68,11 +68,12 @@ class AccountController extends GetxController {
       isLoading.value = true;
       
       // Create the profile model from form data
-      final profileData = UpdateProfileModel(
+      final profileData = UpdateProfileModelInsideApp(
         firstName: fullNameController.text.trim(),
         lastName: lastNameController.text.trim(),
         gender: genderController.text.trim().toLowerCase(),
-        address: addressController.text.trim(), // Include address in the update
+        address: addressController.text.trim(),
+        phone: phoneController.text.trim(),
       );
 
       // Call the update service

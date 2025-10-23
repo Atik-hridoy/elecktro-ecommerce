@@ -25,5 +25,6 @@ abstract class Routes {
   static const termsAndConditions = '/terms-and-conditions';
   static const faq = '/faq';
   static const support = '/support';
+  static const updateProfile = '/update-profile';
  
 }
