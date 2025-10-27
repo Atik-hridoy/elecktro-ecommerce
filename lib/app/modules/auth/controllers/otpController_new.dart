@@ -16,9 +16,6 @@ class OtpController extends GetxController {
   final String email;
   final bool isRegistration; // Flag to differentiate between registration and login
   
-  // Reactive getter for the email
-  String get emailValue => email;
-
   // Controllers for each OTP digit (5 digits)
   final List<TextEditingController> otpControllers = List.generate(
     5,
@@ -190,7 +187,6 @@ class OtpController extends GetxController {
         );
         
         // Navigate based on the flow
-        await LocalStorage.getAllPrefData();
         if (isRegistration) {
           // For registration flow, go to update profile
           Get.offAllNamed(
@@ -200,17 +196,15 @@ class OtpController extends GetxController {
               'isFirstTime': true,
             },
           );
-        } else if (LocalStorage.isProfileComplete()) {
-          // For login flow with complete profile, go to home
-          Get.offAllNamed(Routes.home);
         } else {
-          // For login flow with incomplete profile, go to update profile
-          Get.offAllNamed(Routes.updateProfile);
+          // For login flow, go to home
+          Get.offAllNamed(Routes.home);
         }
       } else {
         // Handle verification failure
         final errorMsg = response['message'] ?? 'OTP verification failed';
         errorMessage.value = errorMsg;
+        AppLogger.error('OTP verification failed: $errorMsg', tag: 'OtpController');
         Get.snackbar(
           'Error',
           errorMsg,
@@ -219,42 +213,14 @@ class OtpController extends GetxController {
         );
       }
     } catch (e) {
-      String errorMsg = 'Failed to verify OTP. Please try again.';
-      
-      if (e is DioException) {
-        // Handle Dio errors
-        if (e.response?.statusCode == 400) {
-          errorMsg = e.response?.data?['message'] ?? 'Invalid OTP. Please check and try again.';
-        } else if (e.response?.statusCode == 401) {
-          errorMsg = 'Session expired. Please request a new OTP.';
-        } else if (e.response?.statusCode == 429) {
-          errorMsg = 'Too many attempts. Please try again later.';
-        } else if (e.type == DioExceptionType.connectionTimeout) {
-          errorMsg = 'Connection timeout. Please check your internet connection.';
-        }
-      } else if (e is FormatException) {
-        errorMsg = 'Invalid OTP format. Please enter a valid 5-digit number.';
-      }
-      
-      errorMessage.value = errorMsg;
-      
-      AppLogger.debug(
-        'OTP verification failed',
-        tag: 'OtpController',
-        details: {
-          'email': email,
-          'isRegistration': isRegistration,
-          'errorType': e.runtimeType.toString(),
-          'errorMessage': e.toString(),
-        },
-      );
-      
+      final errorMsg = 'An error occurred during OTP verification: $e';
+      errorMessage.value = 'An error occurred. Please try again.';
+      AppLogger.error(errorMsg, tag: 'OtpController');
       Get.snackbar(
-        'Verification Failed',
-        errorMsg,
+        'Error',
+        errorMessage.value,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: const Duration(seconds: 5),
       );
     } finally {
       isLoading.value = false;

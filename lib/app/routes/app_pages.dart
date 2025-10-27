@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/bindings/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/views/authSignInView.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/views/authSignUpView.dart';
@@ -42,6 +43,7 @@ import 'package:elecktro_ecommerce/app/modules/support/view.dart';
 import 'package:elecktro_ecommerce/app/modules/support/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/update_profile/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/update_profile/update_profileview.dart';
+// ignore: depend_on_referenced_packages
 import 'package:get/get.dart';
 
 import '../modules/success/bindings.dart';
@@ -120,7 +122,18 @@ class AppPages {
     ),
     GetPage(
       name: Routes.otp,
-      page: () => const OtpView(),
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>?;
+        if (args == null || !args.containsKey('email') || !args.containsKey('isRegistration')) {
+          // If no arguments provided, redirect to sign-in
+          Get.offAllNamed(Routes.authSignIn);
+          return SizedBox.shrink();
+        }
+        return OtpView(
+          email: args['email'] as String,
+          isRegistration: args['isRegistration'] as bool,
+        );
+      },
       binding: AuthBinding(),
     ),
     GetPage(

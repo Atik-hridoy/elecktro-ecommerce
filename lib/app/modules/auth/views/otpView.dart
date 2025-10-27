@@ -3,11 +3,38 @@ import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/controllers/otpController.dart';
 
-class OtpView extends GetView<OtpController> {
-  const OtpView({super.key});
+class OtpView extends StatefulWidget {
+  final String email;
+  final bool isRegistration;
+  
+  const OtpView({
+    Key? key,
+    required this.email,
+    required this.isRegistration,
+  }) : super(key: key);
   
   @override
-  OtpController get controller => Get.find<OtpController>();
+  _OtpViewState createState() => _OtpViewState();
+}
+
+class _OtpViewState extends State<OtpView> {
+  late final OtpController controller;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the controller with the email and registration flag
+    controller = Get.put(OtpController(
+      email: widget.email,
+      isRegistration: widget.isRegistration,
+    ));
+  }
+  
+  @override
+  void dispose() {
+    Get.delete<OtpController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
