@@ -61,6 +61,7 @@ class ProductDetailsController extends GetxController {
       rating.value = double.tryParse(parameters['rating'] ?? '0.0') ?? 0.0;
       reviewCount.value = int.tryParse(parameters['reviewCount'] ?? '0') ?? 0;
       print('productId ID: ${productId.value}');
+
       getProductDetails();
     } catch (e) {
       Get.snackbar('Error', 'Failed to load product details: ${e.toString()}');
@@ -77,13 +78,37 @@ class ProductDetailsController extends GetxController {
       isLoading.value = true;
       final token = LocalStorage.token;
       dio.options.headers['Authorization'] = 'Bearer $token';
-      final response = await dio.get(AppUrls.baseUrl + AppUrls.getProductDetails + productId.value, options: Options(validateStatus: (status) => true));
+      final response = await dio.get(
+        '${AppUrls.baseUrl}${AppUrls.getProductDetails}${productId.value}',
+        options: Options(validateStatus: (status) => true),
+      );
+
       if (response.statusCode == 200) {
         productResponse.value = ProductResponse.fromJson(response.data);
-        print(productResponse.value?.data?.id);
+        print('Product Response: ${productResponse.value}');
+        // Update seller information from the API response
+        final sellerData = productResponse.value?.data?.sellerId;
+        if (sellerData != null && sellerData is Map<String, dynamic>) {
+          seller.update((val) {
+            val?.id = sellerData['_id']?.toString() ?? '';
+            val?.firstName = sellerData['firstName']?.toString() ?? 'Seller';
+            val?.lastName = sellerData['lastName']?.toString() ?? '';
+          });
+        }
+        
+        // Update other product details
+        if (productResponse.value?.data != null) {
+          final product = productResponse.value!.data!;
+          name.value = product.name ?? 'Product Not Found';
+          brand.value = product.brand ?? 'N/A';
+          
+          // Update the first image as the main image if available
+          if (product.images != null && product.images!.isNotEmpty) {
+            imageUrl.value = product.images!.first;
+          }
+        }
       } else {
-       
-        Get.snackbar('Error', 'Failed to load seller details');
+        Get.snackbar('Error', 'Failed to load product details');
       }
     } catch (e) {
       print(e);

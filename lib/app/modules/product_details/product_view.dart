@@ -138,8 +138,8 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       children: [
                         const Text('Overview:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Protect the AirTag that\'s keeping track of all your important things. The Otterbox Rugged Case for AirTag provides durable protection from drops and dings. The AirTag that\'s attached to your keys and your pack is buffered from all that bouncing and banging around as you go about your day simply best on the move and AirTag from all that bouncing and banging around.',
+                        Text(
+                          controller.productResponse.value?.data?.overview ?? '',
                           style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
                         ),
                       ],
@@ -159,11 +159,15 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       children: [
                         const Text('Highlights:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 12),
-                        _buildHighlightItem('Drop tested: 10ft (3m)'),
-                        _buildHighlightItem('Dust-resistant rugged protection'),
-                        _buildHighlightItem('Includes two carabiners'),
-                        _buildHighlightItem('Includes lanyard for hands-free carrying'),
-                        _buildHighlightItem('Hassle-free customer service'),
+                        if (controller.productResponse.value?.data?.highlights != null)
+                          if (controller.productResponse.value!.data!.highlights is Map)
+                            ...(controller.productResponse.value!.data!.highlights as Map<String, dynamic>).entries
+                                .map((entry) => _buildHighlightItem('${entry.key}: ${entry.value}'))
+                                .toList()
+                          else if (controller.productResponse.value!.data!.highlights is String)
+                            _buildHighlightItem(controller.productResponse.value!.data!.highlights.toString())
+                        else
+                          _buildHighlightItem('No highlights available'),
                         const Divider(height: 32),
                         const Text('Tech Specs:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 12),
@@ -214,31 +218,90 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       height: 300,
       width: double.infinity,
       decoration: BoxDecoration(color: const Color(0xFF3C3C41), borderRadius: BorderRadius.circular(20)),
-      child: imageUrl.isEmpty
-          ? const Icon(Icons.image_not_supported_outlined, size: 64, color: Colors.white)
+      child: imageUrl.isEmpty || imageUrl.contains('placeholder.com')
+          ? const Icon(Icons.image_not_supported_outlined, size: 64, color: Colors.grey)
           : isNetwork
-              ? Image.network(imageUrl, fit: BoxFit.contain)
-              : Image.asset(imageUrl, fit: BoxFit.contain),
+              ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.broken_image,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                )
+              : Image.asset(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.broken_image,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                ),
     );
   }
 
   Widget _buildImageThumbnails() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(4, (index) {
-        return GestureDetector(
-          onTap: () => setState(() => selectedImageIndex = index),
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFF3C3C41),
-              borderRadius: BorderRadius.circular(12),
-              border: selectedImageIndex == index ? Border.all(color: Colors.blue, width: 2) : null,
+    final images = controller.productResponse.value?.data?.images ?? [];
+    
+    if (images.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(images.length, (index) {
+          return GestureDetector(
+            onTap: () => setState(() {
+              selectedImageIndex = index;
+              controller.imageUrl.value = images[index];
+            }),
+            child: Container(
+              width: 60,
+              height: 60,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: selectedImageIndex == index
+                      ? const Color(0xFFFFC107)
+                      : Colors.grey[300]!,
+                  width: 2,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  images[index],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.broken_image,
+                    color: Colors.grey,
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 

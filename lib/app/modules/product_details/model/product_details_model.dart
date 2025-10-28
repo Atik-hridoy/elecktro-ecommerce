@@ -36,7 +36,7 @@ class ProductResponse {
 
 class Product {
   final String? id;
-  final String? sellerId;
+  final Map<String, dynamic>? sellerId;
   final String? category;
   final Category? categoryId;
   final String? subCategory;
@@ -49,7 +49,7 @@ class Product {
   final List<SizeType>? sizeType;
   final String? specialCategory;
   final String? overview;
-  final String? highlights;
+  final dynamic highlights;
   final String? techSpecs;
   final bool? isDeleted;
   final String? status;
@@ -89,7 +89,11 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         id: json["_id"],
-        sellerId: json["sellerId"],
+        sellerId: json["sellerId"] is String 
+            ? {"id": json["sellerId"]}
+            : json["sellerId"] is Map 
+                ? Map<String, dynamic>.from(json["sellerId"] as Map)
+                : null,
         category: json["category"],
         categoryId: json["categoryId"] != null
             ? Category.fromJson(json["categoryId"])
@@ -111,7 +115,11 @@ class Product {
             : [],
         specialCategory: json["specialCategory"],
         overview: json["overview"] ?? "",
-        highlights: json["highlights"] ?? "",
+        highlights: json["highlights"] is String 
+            ? json["highlights"]
+            : json["highlights"] is Map 
+                ? Map<String, dynamic>.from(json["highlights"] as Map)
+                : null,
         techSpecs: json["techSpecs"] ?? "",
         isDeleted: json["isDeleted"],
         status: json["status"],
@@ -129,7 +137,9 @@ class Product {
 
   Map<String, dynamic> toJson() => {
         "_id": id,
-        "sellerId": sellerId,
+"sellerId": sellerId is Map 
+            ? Map<String, dynamic>.from(sellerId as Map)
+            : sellerId,
         "category": category,
         "categoryId": categoryId?.toJson(),
         "subCategory": subCategory,
@@ -142,7 +152,9 @@ class Product {
         "sizeType": sizeType?.map((x) => x.toJson()).toList(),
         "specialCategory": specialCategory,
         "overview": overview,
-        "highlights": highlights,
+        "highlights": highlights is Map 
+            ? Map<String, dynamic>.from(highlights as Map)
+            : highlights,
         "techSpecs": techSpecs,
         "isDeleted": isDeleted,
         "status": status,
