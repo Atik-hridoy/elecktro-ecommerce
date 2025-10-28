@@ -22,4 +22,5 @@ class AppUrls {
 
   // product
   static const String getProducts = 'products/';
+  static const String getProductDetails = 'products/single/';
 }

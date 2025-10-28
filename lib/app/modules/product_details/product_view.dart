@@ -1,7 +1,9 @@
+import 'package:elecktro_ecommerce/app/modules/product_details/custom%20widget/sellercard.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/custom widget/sellercard.dart';
 
 // This view is restored to the original user-provided style, with dynamic data connected.
 class ProductDetailsView extends StatefulWidget {
@@ -81,84 +83,28 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 _buildImageThumbnails(),
                 const SizedBox(height: 24),
                 Text(
-                  controller.name.value, 
+                  controller.productResponse.value?.data?.name ?? '', 
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
                 
                 Text(
-                  controller.brand.value, 
+                  controller.productResponse.value?.data?.brand ?? '', 
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
                 
                 // --- Seller Information Card ---
-                Card(
-                  elevation: 0,
-                  color: Colors.grey[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.grey,
-                          child: Icon(Icons.store, color: Colors.grey),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Seller',
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${controller.brand.value} Official Store',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '4.9/5',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    '98% Positive Feedback',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.chevron_right, color: Colors.grey),
-                          onPressed: () {
-                            // TODO: Navigate to seller profile
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                Obx(() => SellerCard(
+                  seller: controller.seller.value,
+                  rating: controller.rating.value,
+                  reviewCount: controller.reviewCount.value,
+                  onTap: () {
+                    // Handle seller card tap
+                    // You can navigate to seller profile page here
+                    // Get.toNamed(Routes.sellerProfile, arguments: controller.seller.value.id);
+                  },
+                )),
                 const SizedBox(height: 16),
                 
                 // --- Grouped into a Card ---
@@ -361,7 +307,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       children: [
         const Text('Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         const SizedBox(width: 16),
-        ...List.generate(colors.length, (index) {
+        ...List.generate(controller.productResponse.value?.data?.color?.length ?? 0, (index) {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(

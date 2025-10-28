@@ -1,5 +1,10 @@
+import 'package:dio/dio.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/model/product_details_model.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 
 /// Manages the state for the ProductDetailsView.
 class ProductDetailsController extends GetxController {
@@ -10,6 +15,16 @@ class ProductDetailsController extends GetxController {
   final RxString price = ''.obs;
   final RxString imageUrl = ''.obs;
   final RxString discount = ''.obs;
+  final Rx<ProductResponse?> productResponse = Rx<ProductResponse?>(null);
+  
+  // --- Seller Information ---
+  final seller = Seller(
+    id: '',
+    firstName: '',
+    lastName: '',
+  ).obs;
+  final rating = 0.0.obs;
+  final reviewCount = 0.obs;
 
   // --- UI State ---
   final isLoading = true.obs;
@@ -34,9 +49,45 @@ class ProductDetailsController extends GetxController {
       price.value = parameters['price'] ?? '--';
       imageUrl.value = parameters['imageUrl'] ?? '';
       discount.value = parameters['discount'] ?? '';
+      
+      // Initialize seller from parameters or defaults
+      seller.update((val) {
+        val?.id = parameters['sellerId'] ?? '';
+        val?.firstName = parameters['sellerFirstName'] ?? 'Seller';
+        val?.lastName = parameters['sellerLastName'] ?? '';
+      });
+      
+      // Parse rating and review count
+      rating.value = double.tryParse(parameters['rating'] ?? '0.0') ?? 0.0;
+      reviewCount.value = int.tryParse(parameters['reviewCount'] ?? '0') ?? 0;
+      print('productId ID: ${productId.value}');
+      getProductDetails();
     } catch (e) {
       Get.snackbar('Error', 'Failed to load product details: ${e.toString()}');
       name.value = 'Error Loading Product';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+  Future<void> getProductDetails() async {
+    try {
+      final dio = Dio();
+      isLoading.value = true;
+      final token = LocalStorage.token;
+      dio.options.headers['Authorization'] = 'Bearer $token';
+      final response = await dio.get(AppUrls.baseUrl + AppUrls.getProductDetails + productId.value, options: Options(validateStatus: (status) => true));
+      if (response.statusCode == 200) {
+        productResponse.value = ProductResponse.fromJson(response.data);
+        print(productResponse.value?.data?.id);
+      } else {
+       
+        Get.snackbar('Error', 'Failed to load seller details');
+      }
+    } catch (e) {
+      print(e);
+      Get.snackbar('Error', 'Failed to load seller details: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }

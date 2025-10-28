@@ -21,6 +21,7 @@ void main() async {
   // Initialize storage
   await GetStorage.init();
 
+
   // Register HTTP client
   Get.put(Dio());
 

@@ -85,10 +85,10 @@ class ProductDetailModel {
 }
 
 class Seller {
-  final String id;
-  final String? image;
-  final String firstName;
-  final String lastName;
+  String id;
+  String? image;
+  String firstName;
+  String lastName;
 
   Seller({
     required this.id,
