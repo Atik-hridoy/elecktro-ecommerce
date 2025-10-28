@@ -2,6 +2,7 @@ import 'package:elecktro_ecommerce/app/modules/product_details/custom%20widget/s
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/custom widget/sellercard.dart';
 
@@ -259,10 +260,15 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: List.generate(images.length, (index) {
+          final imagePath = images[index];
+          final imageUrl = imagePath.startsWith('http') 
+              ? imagePath 
+              : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
+              
           return GestureDetector(
             onTap: () => setState(() {
               selectedImageIndex = index;
-              controller.imageUrl.value = images[index];
+              controller.imageUrl.value = imageUrl;
             }),
             child: Container(
               width: 60,
@@ -280,7 +286,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  images[index],
+                  imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => const Icon(
                     Icons.broken_image,

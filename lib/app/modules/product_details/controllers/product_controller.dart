@@ -104,7 +104,11 @@ class ProductDetailsController extends GetxController {
           
           // Update the first image as the main image if available
           if (product.images != null && product.images!.isNotEmpty) {
-            imageUrl.value = product.images!.first;
+            // Prepend baseImageUrl if the path is not already a full URL
+            final imagePath = product.images!.first;
+            imageUrl.value = imagePath.startsWith('http') 
+                ? imagePath 
+                : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
           }
         }
       } else {
