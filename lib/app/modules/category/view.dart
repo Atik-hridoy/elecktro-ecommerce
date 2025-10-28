@@ -1,5 +1,7 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -23,7 +25,7 @@ class CategoryView extends GetView<CategoryController> {
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(
-            250,
+            220,
           ), // Increased height to accommodate both search and categories
           child: Container(
             decoration: BoxDecoration(
@@ -43,7 +45,7 @@ class CategoryView extends GetView<CategoryController> {
               children: [
                 // Search Box
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 60, 16, 10),
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Search categories...',
@@ -85,16 +87,16 @@ class CategoryView extends GetView<CategoryController> {
                 ),
 
                 // Category List
-                const SizedBox(height: 8),
+                
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: Align(alignment: Alignment.centerLeft),
                 ),
-                const SizedBox(height: 8),
+          
                 Expanded(
                   child: Obx(
                     () => CategoryList(
-                      categories: controller.filteredCategories.toList(),
+                      categories: Get.find<HomeController>().categories.toList(),
                     ),
                   ),
                 ),
@@ -141,31 +143,75 @@ class CategoryView extends GetView<CategoryController> {
               ),
 
               // Products Grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.7,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: 10, // Number of product cards
-                itemBuilder: (context, index) {
-                  return ProductCard(
-                    productId: 'Product ${index + 1}',
-                    name: 'Product ${index + 1}',
-                    brand: 'Brand ${index + 1}',
-                    price: '\$${(index + 1) * 99}.99',
-                    onFavoriteTap: () {},
-                    isFavorite: false,
+              Obx(() {
+                if (controller.isLoadingProducts.value) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
                   );
-                },
-              ),
+                }
+
+                final items = controller.products;
+                if (items.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text('No products found')),
+                  );
+                }
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final p = items[index];
+                    final imageUrl = p.images.isNotEmpty ? p.images.first : null;
+                    final price = p.sizeType.isNotEmpty ? p.sizeType.first.price : 0.0;
+                    final priceText = price > 0 ? '\$${price.toStringAsFixed(0)}' : '';
+
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(
+                          Routes.productDetails,
+                          arguments: {
+                            'id': p.id,
+                            'name': p.name,
+                            'brand': p.brand,
+                            'model': p.model,
+                            'imageUrl': imageUrl,
+                            'price': price.toString(),
+                            'category': p.specialCategory,
+                            'overview': p.overview,
+                            'highlights': p.highlights,
+                            'techSpecs': p.techSpecs,
+                            'colors': p.color,
+                            'sizes': p.sizeType,
+                          },
+                        );
+                      },
+                      child: ProductCard(
+                        productId: p.id,
+                        name: p.name,
+                        brand: p.brand,
+                        price: priceText,
+                        imageUrl: imageUrl,
+                        onFavoriteTap: () {},
+                        isFavorite: false,
+                      ),
+                    );
+                  },
+                );
+              }),
               const SizedBox(height: 16),
             ],
           ),

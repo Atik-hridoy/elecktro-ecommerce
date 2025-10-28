@@ -1,43 +1,15 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/home/services/get_category_on_home_view_service.dart';
+import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 class HomeController extends GetxController {
   var selectedIndex = 0.obs; // Observable variable for the selected index
   var currentBannerIndex = 0.obs; // Track current banner index
   Timer? _bannerTimer;
-  var categories = [
-    {
-      'title': 'Best Offers',
-      'bgColor': Colors.red,
-      'badge': 'SPECIAL\nUP TO',
-      'hasSpecial': true,
-    },
-    {
-      'title': 'Computers',
-      'bgColor': Colors.grey.shade300,
-      'badge': '',
-      'hasSpecial': false,
-    },
-    {
-      'title': 'Phones',
-      'bgColor': Colors.grey.shade300,
-      'badge': '',
-      'hasSpecial': false,
-    },
-    {
-      'title': 'Server Tools',
-      'bgColor': Colors.grey.shade300,
-      'badge': '',
-      'hasSpecial': false,
-    },
-    {
-      'title': 'Accessories',
-      'bgColor': Colors.grey.shade300,
-      'badge': '',
-      'hasSpecial': false,
-    },
-  ].obs;
+  final categories = <CategoryModel>[].obs;
+  late final ProductCategoryService _categoryService;
 
   // Method to update selected index
   void updateIndex(int index) {
@@ -50,6 +22,10 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _categoryService = Get.isRegistered<ProductCategoryService>()
+        ? Get.find<ProductCategoryService>()
+        : Get.put(ProductCategoryService());
+    fetchCategories();
     _startBannerTimer();
   }
   
@@ -92,5 +68,60 @@ class HomeController extends GetxController {
       return 0;
     }
     return currentBannerIndex.value + 1;
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      final res = await _categoryService.getProductCategories();
+      final body = res.body;
+      if (body is Map<String, dynamic>) {
+        final list = (body['data'] ?? body['categories'] ?? body['result']) as List?;
+        if (list != null) {
+          categories.assignAll(
+            list.map((e) {
+              final parsed = CategoryModel.fromJson(e as Map<String, dynamic>);
+              return CategoryModel(
+                id: parsed.id,
+                name: parsed.name,
+                thumbnail: _fullUrl(parsed.thumbnail),
+                subCategories: parsed.subCategories,
+              );
+            }).toList(),
+          );
+        } else {
+          categories.clear();
+        }
+      } else if (body is List) {
+        categories.assignAll(
+          body.map((e) {
+            final parsed = CategoryModel.fromJson(e as Map<String, dynamic>);
+            return CategoryModel(
+              id: parsed.id,
+              name: parsed.name,
+              thumbnail: _fullUrl(parsed.thumbnail),
+              subCategories: parsed.subCategories,
+            );
+          }).toList(),
+        );
+      } else {
+        categories.clear();
+      }
+    } catch (_) {
+      categories.clear();
+    }
+  }
+
+  String _fullUrl(String url) {
+    if (url.isEmpty) return url;
+    final lower = url.toLowerCase();
+    if (lower.startsWith('http://') || lower.startsWith('https://')) return url;
+    final base = AppUrls.baseImageUrl;
+    if (base.endsWith('/') && url.startsWith('/')) {
+      return base + url.substring(1);
+    }
+    if (!base.endsWith('/') && !url.startsWith('/')) {
+      return '$base/$url';
+    }
+    return base + url;
   }
 }

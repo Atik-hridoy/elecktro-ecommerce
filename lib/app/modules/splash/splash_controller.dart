@@ -1,24 +1,26 @@
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 
 class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _navigateToOnboarding();
+    _decideStartDestination();
   }
 
-  Future<void> _navigateToOnboarding() async {
+  Future<void> _decideStartDestination() async {
     try {
-      // Wait for 3 seconds
-      await Future.delayed(const Duration(seconds: 3));
-      
-      // Navigate to onboarding screen
-      Get.offAllNamed(Routes.onboarding);
-    } catch (e) {
-      // If there's an error, try again after a short delay
       await Future.delayed(const Duration(seconds: 1));
-      _navigateToOnboarding();
+      await LocalStorage.getAllPrefData();
+      if (LocalStorage.token.isNotEmpty || LocalStorage.isLogIn) {
+        Get.offAllNamed(Routes.home);
+      } else {
+        Get.offAllNamed(Routes.onboarding);
+      }
+    } catch (e) {
+      await Future.delayed(const Duration(seconds: 1));
+      _decideStartDestination();
     }
   }
 }

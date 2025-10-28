@@ -21,6 +21,8 @@ class ProductCard extends StatelessWidget {
   final bool isFavorite;
   final bool showAddToCart;
   final String productId;
+  final String? sellerName;
+  final String? sellerAvatarUrl;
 
   const ProductCard({
     super.key,
@@ -38,6 +40,8 @@ class ProductCard extends StatelessWidget {
     this.isFavorite = false,
     this.showAddToCart = true,
     required this.productId,
+    this.sellerName,
+    this.sellerAvatarUrl,
   });
 
   @override
@@ -55,6 +59,8 @@ class ProductCard extends StatelessWidget {
           'price': price,
           if (imageUrl != null) 'imageUrl': imageUrl!,
           if (discount != null) 'discount': discount!,
+          if (sellerName != null && sellerName!.isNotEmpty) 'sellerName': sellerName!,
+          if (sellerAvatarUrl != null && sellerAvatarUrl!.isNotEmpty) 'sellerAvatarUrl': sellerAvatarUrl!,
         },
       );
     }
@@ -77,7 +83,7 @@ class ProductCard extends StatelessWidget {
                 AspectRatio(
                   aspectRatio: 4 / 3, // Use a more compact aspect ratio
                   child: Container(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: EdgeInsets.zero,
                     color: colorScheme.surface,
                     child: _buildProductImage(),
                   ),
@@ -173,7 +179,7 @@ class ProductCard extends StatelessWidget {
     if (isNetworkImage) {
       return Image.network(
         imageUrl!,
-        fit: BoxFit.contain, // Ensures the full image is visible
+        fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) =>
             const Center(child: Icon(Icons.broken_image_outlined, size: 32)),
         loadingBuilder: (context, child, loadingProgress) {
@@ -191,7 +197,7 @@ class ProductCard extends StatelessWidget {
     } else {
       return Image.asset(
         imageUrl!,
-        fit: BoxFit.contain, // Ensures the full image is visible
+        fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) =>
             const Center(child: Icon(Icons.broken_image_outlined, size: 32)),
       );

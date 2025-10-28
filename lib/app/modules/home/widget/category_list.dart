@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
 
 /// A responsive widget that displays a list of categories.
 ///
 /// On small screens, it shows a horizontally scrollable list.
 /// On larger screens, it displays a wrapping grid of all categories.
 class CategoryList extends StatelessWidget {
-  final List<Map<String, dynamic>> categories;
+  final List<CategoryModel> categories;
 
   const CategoryList({super.key, required this.categories});
 
@@ -28,10 +29,8 @@ class CategoryList extends StatelessWidget {
               children: categories.map((category) {
                 return _buildCategoryItem(
                   context: context,
-                  title: category['title'],
-                  bgColor: category['bgColor'],
-                  badge: category['badge'],
-                  hasSpecial: category['hasSpecial'],
+                  title: category.name,
+                  thumbnail: category.thumbnail,
                 );
               }).toList(),
             ),
@@ -49,10 +48,8 @@ class CategoryList extends StatelessWidget {
                 final category = categories[index];
                 return _buildCategoryItem(
                   context: context,
-                  title: category['title'],
-                  bgColor: category['bgColor'],
-                  badge: category['badge'],
-                  hasSpecial: category['hasSpecial'],
+                  title: category.name,
+                  thumbnail: category.thumbnail,
                 );
               },
             ),
@@ -66,16 +63,9 @@ class CategoryList extends StatelessWidget {
   Widget _buildCategoryItem({
     required BuildContext context,
     required String title,
-    required Color bgColor,
-    required String badge,
-    required bool hasSpecial,
+    required String thumbnail,
   }) {
     final textTheme = Theme.of(context).textTheme;
-
-    // Determine a contrasting color for text/icons on the provided background color.
-    final onBgColor = ThemeData.estimateBrightnessForColor(bgColor) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
 
     return SizedBox(
       width: 80, // Fixed width for each item
@@ -92,29 +82,23 @@ class CategoryList extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // The colored container for the icon or special badge text
+                // The thumbnail container
                 Container(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: bgColor,
+                    color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: hasSpecial
-                        ? Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(
-                              badge,
-                              textAlign: TextAlign.center,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: onBgColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                    image: thumbnail.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(thumbnail),
+                            fit: BoxFit.cover,
                           )
-                        : Icon(Icons.category, size: 30, color: onBgColor),
+                        : null,
                   ),
+                  child: thumbnail.isEmpty
+                      ? const Icon(Icons.category, size: 30, color: Colors.black)
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 // The category title text

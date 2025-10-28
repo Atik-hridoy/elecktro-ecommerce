@@ -3,6 +3,7 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
 import '../widget/banner_card.dart';
@@ -17,17 +18,22 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize the controller if not already initialized
     final homeController = Get.find<HomeController>();
+    final accountController = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>()
+        : Get.put(AccountController());
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
-      child: Scaffold(
+      child: Obx(() => Scaffold(
         appBar: homeController.selectedIndex.value == 0
             ? CustomAppBar(
-                userName: 'John Doe',
-                phoneNumber: '+1 234 567 890',
+                userName: accountController.fullName.value.isNotEmpty
+                    ? accountController.fullName.value
+                    : 'Guest',
+                phoneNumber: accountController.phone.value,
                 searchHint: 'Search products...',
                 onNotificationTap: () {
                   Get.toNamed(Routes.notification);
@@ -76,7 +82,7 @@ class HomeView extends StatelessWidget {
             ],
           );
         }),
-      ),
+      )),
     );
   }
 
@@ -115,9 +121,9 @@ class HomeView extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
               clipBehavior: Clip.antiAlias,
               elevation: 1,
-              child: CategoryList(
-                categories: homeController.categories,
-              ),
+              child: Obx(() => CategoryList(
+                    categories: homeController.categories.toList(),
+                  )),
             ),
 
             const SizedBox(height: 24),

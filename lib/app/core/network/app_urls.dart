@@ -1,6 +1,7 @@
 class AppUrls {
 
   static const String baseUrl = 'http://10.10.7.62:7010/api/v1/';
+  static const String baseImageUrl = 'http://10.10.7.62:7010/';
 
   static const String createAccount = 'auth/register';
 
@@ -15,4 +16,10 @@ class AppUrls {
 
   static const String getProfile = 'users/profile';
   static const String updateProfileInsideApp = 'users/profile';
+
+  // category
+  static const String getProductsCategories = 'categories';
+
+  // product
+  static const String getProducts = 'products/';
 }

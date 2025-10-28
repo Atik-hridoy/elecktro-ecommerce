@@ -91,8 +91,77 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
+                
+                // --- Seller Information Card ---
+                Card(
+                  elevation: 0,
+                  color: Colors.grey[50],
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.grey,
+                          child: Icon(Icons.store, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Seller',
+                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${controller.brand.value} Official Store',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, color: Colors.amber, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '4.9/5',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    '98% Positive Feedback',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.green[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right, color: Colors.grey),
+                          onPressed: () {
+                            // TODO: Navigate to seller profile
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
                 // --- Grouped into a Card ---
-
                 Card(
                   elevation: 0,
                   color: Colors.grey[50],

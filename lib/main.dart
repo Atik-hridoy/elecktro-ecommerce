@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import 'app/providers/language_provider.dart';
 import 'app/theme/app_theme.dart';
 import 'app/widgets/responsive_layout.dart';
@@ -19,7 +20,10 @@ void main() async {
   
   // Initialize storage
   await GetStorage.init();
-  
+
+  // Register HTTP client
+  Get.put(Dio());
+
   // Initialize controllers
   Get.put(HomeController());
   Get.put(AuthSignInController());
