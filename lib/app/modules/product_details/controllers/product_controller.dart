@@ -2,6 +2,7 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:flutter/material.dart';
 
 /// Manages the state for the ProductDetailsView.
 class ProductDetailsController extends GetxController {
@@ -33,6 +34,57 @@ Rxn<ProductDetailModel> product = Rxn();
   final RxInt selectedSizeIndex = 3.obs;
   final RxInt selectedColorIndex = 0.obs;
   final RxInt selectedImageIndex = 0.obs;
+
+  // Get available sizes from the product
+  List<String>? get _availableSizes {
+    if (product.value?.sizeType == null) return null;
+    return product.value!.sizeType.map((sizeType) => sizeType.size).toList();
+  }
+  
+  // Get available colors from the product
+  List<Color> get _availableColors {
+    final colors = product.value?.color;
+    if (colors == null || colors.isEmpty) {
+      return [Colors.grey];
+    }
+    
+    // Convert hex color strings to Color objects
+    return colors.map((colorString) {
+      try {
+        if (colorString.isEmpty) return Colors.grey;
+        
+        String hexColor = colorString.trim();
+        
+        // Remove '#' if present
+        if (hexColor.startsWith('#')) {
+          hexColor = hexColor.substring(1);
+        }
+        
+        // Handle 3-digit hex (e.g., 'F00' for red)
+        if (hexColor.length == 3) {
+          hexColor = 'FF' + hexColor.split('').map((c) => c + c).join();
+        }
+        // Handle 6-digit hex (add FF for full opacity)
+        else if (hexColor.length == 6) {
+          hexColor = 'FF$hexColor';
+        }
+        // If not 3, 6, or 8 digits, return grey
+        else if (hexColor.length != 8) {
+          return Colors.grey;
+        }
+        
+        // Parse the hex color
+        final colorInt = int.tryParse(hexColor, radix: 16);
+        if (colorInt == null) {
+          return Colors.grey;
+        }
+        
+        return Color(colorInt);
+      } catch (e) {
+        return Colors.grey;
+      }
+    }).toList();
+  }
 
 
 
@@ -73,8 +125,74 @@ Rxn<ProductDetailModel> product = Rxn();
   }
 
   // --- Business Logic Actions ---
+  void updateQuantity(int newQuantity) {
+    if (newQuantity >= 1) {
+      quantity.value = newQuantity;
+    }
+  }
+
+  // Helper method to parse price from string to double
+  double _parsePrice(String priceStr) {
+    if (priceStr.isEmpty) return 0.0;
+    // Remove any non-numeric characters except decimal point and minus
+    final numericString = priceStr.replaceAll(RegExp(r'[^\d.-]'), '');
+    return double.tryParse(numericString) ?? 0.0;
+  }
+
   void onBuyNow() {
-    Get.toNamed(Routes.checkout);
+    if (product.value == null) {
+      Get.snackbar('Error', 'Product not loaded');
+      return;
+    }
+
+    // Get available sizes and colors
+    final sizes = _availableSizes ?? [];
+    final colors = _availableColors;
+    
+    // Get selected size and color with proper bounds checking
+    final selectedSize = sizes.isNotEmpty 
+        ? sizes[selectedSizeIndex.value.clamp(0, sizes.length - 1)] 
+        : 'One Size';
+        
+    final selectedColor = colors.isNotEmpty && product.value!.color.isNotEmpty
+        ? product.value!.color[selectedColorIndex.value.clamp(0, product.value!.color.length - 1)]
+        : 'Default';
+    
+    // Create cart item with all necessary details
+    final cartItem = {
+      'id': product.value!.id,
+      'name': product.value!.name,
+      'brand': product.value!.brand,
+      'price': _parsePrice(price.value),
+      'originalPrice': 0.0,
+      'quantity': quantity.value,
+      'size': selectedSize,
+      'color': selectedColor,
+      'image': product.value!.images.isNotEmpty ? product.value!.images[0] : '',
+      'productId': product.value!.id,
+      'sellerId': product.value!.sellerId.id,
+    };
+
+    // Navigate to checkout with the cart item
+    Get.toNamed(Routes.checkout, arguments: {
+      'directCheckout': true,
+      'cartItems': [cartItem],
+    });
+  }
+  
+  // Helper method to get color name from Color object
+  String _getColorName(Color color) {
+    if (color == Colors.red) return 'Red';
+    if (color == Colors.blue) return 'Blue';
+    if (color == Colors.green) return 'Green';
+    if (color == Colors.black) return 'Black';
+    if (color == Colors.white) return 'White';
+    if (color == Colors.yellow) return 'Yellow';
+    if (color == Colors.orange) return 'Orange';
+    if (color == Colors.purple) return 'Purple';
+    if (color == Colors.pink) return 'Pink';
+    if (color == Colors.grey) return 'Grey';
+    return 'Custom Color';
   }
 
   void onAddToCart() {
@@ -144,7 +262,7 @@ Rxn<ProductDetailModel> product = Rxn();
     if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
       final sizeType = productData.sizeType!.first;
       price.value = '\$${sizeType.price?.toStringAsFixed(2) ?? '0.00'}';
-      if (sizeType.discount != null && sizeType.discount! > 0) {
+      if (sizeType.discount != null && sizeType.discount > 0) {
         discount.value = '${sizeType.discount!.toStringAsFixed(0)}% OFF';
       }
     }

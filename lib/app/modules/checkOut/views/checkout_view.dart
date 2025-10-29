@@ -45,7 +45,7 @@ class CheckoutView extends GetView<CheckoutController> {
                     // Product items section
                     _buildProductItems(),
                     
-                    const ContactDetailsCard(),
+                    ContactDetailsCard(),
                     
                     const PaymentMethodCard(),
                     

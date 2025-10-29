@@ -33,8 +33,22 @@ class CheckoutController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // In a real app, you would fetch cart items from a service
-    _loadCartItems();
+    
+    // Check if we have direct checkout data
+    final args = Get.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      if (args['directCheckout'] == true && args['cartItems'] is List) {
+        // Clear existing cart and add the direct checkout item
+        cartItems.clear();
+        cartItems.addAll(List<Map<String, dynamic>>.from(args['cartItems']));
+      }
+    } else {
+      // Normal cart loading
+      _loadCartItems();
+    }
+    
+    _calculateSubtotal();
+    
     // Keep text field and reactive code in sync
     voucherTextController.text = voucherCode.value;
     voucherTextController.addListener(() {
@@ -94,8 +108,6 @@ class CheckoutController extends GetxController {
       cartItems[index] = Map<String, dynamic>.from(item);
       _calculateSubtotal();
     } else {
-      // Remove item if quantity is 0
-      removeItem(index);
     }
   }
   

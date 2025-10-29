@@ -6,10 +6,11 @@ import '../views/model/get_profile_model.dart';
 
 class ProfileController extends GetxController {
   // Services
-  final GetProfileService _profileService = Get.find<GetProfileService>();
+  final GetProfileService _profileService = Get.put<GetProfileService>(GetProfileService());
 
   // User information
   var name = ''.obs;
+  var email = ''.obs;
   var address = ''.obs;
   var isLoading = false.obs;
   var error = ''.obs;
@@ -30,9 +31,10 @@ class ProfileController extends GetxController {
       final profileData = await _profileService.getProfile();
       
       if (profileData != null && profileData.success) {
-        // Update the name and address from the API response
+        // Update the user information from the API response
         final fullName = '${profileData.data.firstName} ${profileData.data.lastName}'.trim();
         name.value = fullName;
+        email.value = profileData.data.email ?? ''; // Add this line to save email
         address.value = profileData.data.address;
         
         AppLogger.success('Profile data loaded successfully');
@@ -59,12 +61,16 @@ class ProfileController extends GetxController {
   // Update profile information
   void updateProfile({
     required String newName,
+    required String newEmail,
     required String newAddress,
   }) {
     // This method can be updated later to handle profile updates
     // For now, just update the local values
     if (newName.isNotEmpty) {
       name.value = newName;
+    }
+    if (newEmail.isNotEmpty) {
+      email.value = newEmail;
     }
     if (newAddress.isNotEmpty) {
       address.value = newAddress;

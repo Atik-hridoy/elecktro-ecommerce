@@ -23,24 +23,88 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   int quantity = 1;
   int selectedImageIndex = 0;
 
-  final List<String> sizes = ['S', 'M', 'L', 'XL'];
-  // Default colors to use if we run out of predefined colors
-  final List<Color> defaultColors = [
-    const Color(0xFF4CAF50), // Green
-    const Color(0xFF9E9E9E), // Gray
-    Colors.blue,
-    Colors.red,
-    Colors.yellow,
-    Colors.purple,
-    Colors.orange,
-    Colors.pink,
-    Colors.teal,
-    Colors.cyan,
-  ];
+  // Get available sizes from the product
+  List<String>? get _availableSizes {
+    if (controller.product.value?.sizeType == null) return null;
+    return controller.product.value!.sizeType.map((sizeType) => sizeType.size).toList();
+  }
   
-  // Function to get a color by index, cycling through the default colors if needed
-  Color _getColorByIndex(int index) {
-    return defaultColors[index % defaultColors.length];
+  // Get available colors from the product
+  List<Color> get _availableColors {
+    final colors = controller.product.value?.color;
+    if (colors == null || colors.isEmpty) {
+      debugPrint('No colors available, using default grey');
+      return [Colors.grey];
+    }
+    
+    debugPrint('Raw color strings: $colors');
+    
+    // Convert color strings to Color objects
+    return colors.map((colorString) {
+      try {
+        // Handle null or empty string
+        if (colorString.isEmpty) return Colors.grey;
+        
+        String hexColor = colorString.trim().toUpperCase();
+        
+        // Remove '#' if present
+        if (hexColor.startsWith('#')) {
+          hexColor = hexColor.substring(1);
+        }
+        
+        // Try to match common color names
+        final colorMap = <String, Color>{
+          'RED': Colors.red,
+          'GREEN': Colors.green,
+          'BLUE': Colors.blue,
+          'YELLOW': Colors.yellow,
+          'BLACK': Colors.black,
+          'WHITE': Colors.white,
+          'GRAY': Colors.grey,
+          'GREY': Colors.grey,
+          'ORANGE': Colors.orange,
+          'PURPLE': Colors.purple,
+          'PINK': Colors.pink,
+          'BROWN': Colors.brown,
+          'CYAN': Colors.cyan,
+          'TEAL': Colors.teal,
+          'AMBER': Colors.amber,
+        };
+        
+        // Check if it's a named color
+        if (colorMap.containsKey(hexColor)) {
+          return colorMap[hexColor]!;
+        }
+        
+        // Handle 3-digit hex (e.g., 'F00' for red)
+        if (hexColor.length == 3) {
+          hexColor = 'FF' + hexColor.split('').map((c) => c * 2).join();
+        }
+        // Handle 6-digit hex (add FF for full opacity)
+        else if (hexColor.length == 6) {
+          hexColor = 'FF$hexColor';
+        }
+        // Handle 8-digit hex (already has alpha)
+        else if (hexColor.length != 8) {
+          debugPrint('Invalid hex color length: $hexColor');
+          return Colors.grey;
+        }
+        
+        // Parse the hex color
+        final colorInt = int.tryParse(hexColor, radix: 16);
+        if (colorInt == null) {
+          debugPrint('Failed to parse hex color: $hexColor');
+          return Colors.grey;
+        }
+        
+        final color = Color(colorInt);
+        debugPrint('Converted $colorString to $color');
+        return color;
+      } catch (e) {
+        debugPrint('Error parsing color "$colorString": $e');
+        return Colors.grey;
+      }
+    }).toList();
   }
 
   @override
@@ -229,101 +293,193 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     );
   }
 
+  bool _isValidImageUrl(String? url) {
+    if (url == null || url.isEmpty) return false;
+    if (url.contains('placeholder.com') || url.contains('via.placeholder.com')) return false;
+    return true;
+  }
+
   Widget _buildMainProductImage() {
-    final imageUrl = controller.imageUrl.value;
-    final isNetwork = imageUrl.startsWith('http');
-    return Container(
+    final product = controller.product.value;
+    final images = product?.images ?? [];
+    
+    if (images.isEmpty) {
+      return Container(
+        width: double.infinity,
+        height: 300,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Icon(Icons.image_not_supported_outlined, size: 64, color: Colors.grey),
+        ),
+      );
+    }
+    
+    return SizedBox(
       height: 300,
-      width: double.infinity,
-      decoration: BoxDecoration(color: const Color(0xFF3C3C41), borderRadius: BorderRadius.circular(20)),
-      child: imageUrl.isEmpty || imageUrl.contains('placeholder.com')
-          ? const Icon(Icons.image_not_supported_outlined, size: 64, color: Colors.grey)
-          : isNetwork
-              ? Image.network(
-                  imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.broken_image,
-                    size: 64,
-                    color: Colors.grey,
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              itemCount: images.length,
+              controller: PageController(viewportFraction: 0.9),
+              onPageChanged: (index) {
+                setState(() {
+                  selectedImageIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final imageUrl = images[index];
+                final isNetwork = imageUrl.startsWith('http');
+                
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: _isValidImageUrl(imageUrl)
+                        ? isNetwork
+                            ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) => _buildImageError(),
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded / 
+                                            loadingProgress.expectedTotalBytes!
+                                          : null,
+                                    ),
+                                  );
+                                },
+                              )
+                            : Image.asset(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) => _buildImageError(),
+                              )
+                        : _buildImageError(),
                   ),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                )
-              : Image.asset(
-                  imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.broken_image,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                ),
+                );
+              },
+            ),
+          ),
+          if (images.length > 1) _buildPageIndicator(images.length),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildPageIndicator(int length) {
+    return SizedBox(
+      height: 20,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(length, (index) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: index == selectedImageIndex ? 20.0 : 8.0,
+            height: 8.0,
+            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              color: index == selectedImageIndex 
+                  ? const Color(0xFFFFC107) 
+                  : Colors.grey[300],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+  
+  Widget _buildImageError() {
+    return Container(
+      color: Colors.grey[100],
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.broken_image, size: 48, color: Colors.grey),
+            SizedBox(height: 8),
+            Text('Could not load image', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailError() {
+    return Container(
+      color: Colors.grey[200],
+      child: const Center(
+        child: Icon(Icons.broken_image, color: Colors.grey, size: 24),
+      ),
     );
   }
 
   Widget _buildImageThumbnails() {
     final images = controller.product.value?.images ?? [];
-    
-    if (images.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (images.isEmpty) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(images.length, (index) {
-          final imagePath = images[index];
-          final imageUrl = imagePath.startsWith('http') 
-              ? imagePath 
-              : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
-              
+    return SizedBox(
+      height: 80,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length,
+        itemBuilder: (context, index) {
+          final imageUrl = images[index];
+          final isNetwork = imageUrl.startsWith('http');
+          final isSelected = selectedImageIndex == index;
+          
           return GestureDetector(
-            onTap: () => setState(() {
-              selectedImageIndex = index;
-              controller.imageUrl.value = imageUrl;
-            }),
-            child: Container(
-              width: 60,
-              height: 60,
-              margin: const EdgeInsets.only(right: 12),
+            onTap: () => setState(() => selectedImageIndex = index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isSelected ? 80 : 70,
+              height: isSelected ? 80 : 70,
+              margin: EdgeInsets.only(right: 8, top: isSelected ? 0 : 5),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: selectedImageIndex == index
-                      ? const Color(0xFFFFC107)
-                      : Colors.grey[300]!,
-                  width: 2,
+                  color: isSelected ? const Color(0xFFFFC107) : Colors.grey[300]!,
+                  width: isSelected ? 2.5 : 2,
                 ),
+                boxShadow: [
+                  if (isSelected)
+                    BoxShadow(
+                      color: Colors.amber.withOpacity(0.2),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.broken_image,
-                    color: Colors.grey,
-                  ),
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    );
-                  },
-                ),
+                borderRadius: BorderRadius.circular(6),
+                child: _isValidImageUrl(imageUrl)
+                    ? isNetwork
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => _buildThumbnailError(),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => _buildThumbnailError(),
+                          )
+                    : _buildThumbnailError(),
               ),
             ),
           );
-        }),
+        },
       ),
     );
   }
@@ -348,9 +504,20 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         ),
         Row(
           children: [
-            IconButton(onPressed: quantity > 1 ? () => setState(() => quantity--) : null, icon: const Icon(Icons.remove)),
-            Text(quantity.toString(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            IconButton(onPressed: () => setState(() => quantity++), icon: const Icon(Icons.add)),
+            IconButton(
+              onPressed: controller.quantity > 1 
+                  ? () => controller.updateQuantity(controller.quantity.value - 1)
+                  : null, 
+              icon: const Icon(Icons.remove)
+            ),
+            Obx(() => Text(
+              '${controller.quantity.value}', 
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+            )),
+            IconButton(
+              onPressed: () => controller.updateQuantity(controller.quantity.value + 1),
+              icon: const Icon(Icons.add)
+            ),
           ],
         ),
       ],
@@ -358,9 +525,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   }
 
   Widget _buildSizeSelector() {
+    final sizes = _availableSizes ?? ['S', 'M', 'L', 'XL'];
+    
     return Row(
       children: [
-        const Text('Size/Type:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        const Text('Size:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         const SizedBox(width: 16),
         ...List.generate(sizes.length, (index) {
           return Padding(
@@ -370,14 +539,16 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
               child: Container(
                 width: 40,
                 height: 40,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selectedSizeIndex == index ? Colors.blue : Colors.grey[200],
+                  color: selectedSizeIndex == index ? Colors.black : Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
-                  child: Text(
-                    sizes[index],
-                    style: TextStyle(color: selectedSizeIndex == index ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+                child: Text(
+                  sizes[index],
+                  style: TextStyle(
+                    color: selectedSizeIndex == index ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -389,11 +560,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   }
 
   Widget _buildColorSelector() {
+    final colors = _availableColors;
+    
     return Row(
       children: [
         const Text('Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         const SizedBox(width: 16),
-        ...List.generate(controller.product.value?.color?.length ?? 0, (index) {
+        ...List.generate(colors.length, (index) {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
@@ -402,21 +575,16 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _getColorByIndex(index),
+                  color: colors[index],
                   shape: BoxShape.circle,
-                  border: selectedColorIndex == index ? Border.all(color: Colors.black, width: 3) : Border.all(color: Colors.grey[300]!, width: 1),
+                  border: selectedColorIndex == index 
+                      ? Border.all(color: Colors.black, width: 3) 
+                      : Border.all(color: Colors.grey[300]!, width: 1),
                 ),
               ),
             ),
           );
         }),
-        const SizedBox(width: 8),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(color: Colors.grey[200], shape: BoxShape.circle),
-          child: const Icon(Icons.add, color: Colors.blue),
-        ),
       ],
     );
   }

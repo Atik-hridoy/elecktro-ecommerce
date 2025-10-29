@@ -18,7 +18,7 @@ class CartItemTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -27,17 +27,28 @@ class CartItemTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFF2D3748),
+              color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
+              image: item['image'] != null && item['image'].toString().isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(
+                        item['image'],
+                      ),
+                      fit: BoxFit.cover,
+                      onError: (exception, stackTrace) => const Icon(Icons.error),
+                    )
+                  : null,
             ),
-            child: const Icon(
-              Icons.local_offer,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: item['image'] == null || item['image'].toString().isEmpty
+                ? const Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey,
+                    size: 24,
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -53,7 +64,7 @@ class CartItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${item['brand'] ?? 'Trkil'} / ${item['size'] ?? 'XL'} / ${item['color'] ?? 'Black'}',
+                  '${item['brand'] ?? ''} / ${item['size'] ?? 'One Size'} / ${item['color'] ?? 'Default'}',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],

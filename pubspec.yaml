@@ -68,7 +68,6 @@ flutter:
 
   # Assets
   assets:
-    - assets/translations/
     - assets/images/
     - assets/icons/
     - assets/auth/

@@ -1,58 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/controllers/profile_controller.dart';
 
 class ContactDetailsCard extends StatelessWidget {
-  const ContactDetailsCard({super.key});
+  ContactDetailsCard({super.key});
+  
+  final ProfileController _profileController = Get.put<ProfileController>(ProfileController());
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Contact Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _showAddAddressModal(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+    return Obx(() {
+      final name = _profileController.name.value;
+      final address = _profileController.address.value;
+      final email = _profileController.email.value;
+      
+      return Card(
+        margin: const EdgeInsets.all(16),
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Contact Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: const Text(
-                    'New Address',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ElevatedButton(
+                    onPressed: () => _showAddAddressModal(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'New Address',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildContactField('Contact No', '+963 932 509 736'),
-            _buildContactField('Email', 'asaduljamannahtuz@gmail.com'),
-            _buildContactField('Address', 'P. O. Box 50332, Damasc, Newyork'),
-            _buildContactField('Address Category', 'Home'),
-            _buildContactField('Note', 'N/A'),
-          ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildContactField('Name', name),
+              _buildContactField('Email', email),
+              _buildContactField('Address', address.isNotEmpty ? address : 'No address provided'),
+              _buildContactField('Address Category', 'Home'),
+              _buildContactField('Note', 'N/A')
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildContactField(String label, String value) {
@@ -86,11 +95,36 @@ class ContactDetailsCard extends StatelessWidget {
   }
 
   void _showAddAddressModal(BuildContext context) {
-    final TextEditingController contactController = TextEditingController(text: '+963 932 509 736');
-    final TextEditingController emailController = TextEditingController(text: 'asaduljamannahtuz@gmail.com');
-    final TextEditingController addressController = TextEditingController();
+    final ProfileController profileController = Get.put<ProfileController>(ProfileController());
+    final TextEditingController nameController = TextEditingController(text: profileController.name.value);
+    final TextEditingController emailController = TextEditingController(text: profileController.email.value);
+    final TextEditingController addressController = TextEditingController(text: profileController.address.value);
     final TextEditingController noteController = TextEditingController();
     String selectedCategory = 'Home';
+    
+    final _formKey = GlobalKey<FormState>();
+
+    void _saveProfile() {
+      if (_formKey.currentState!.validate()) {
+    // Update the profile controller with new values
+    profileController.updateProfile(
+      newName: nameController.text.trim(),
+      newEmail: emailController.text.trim(),
+      newAddress: addressController.text.trim(),
+    );
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Profile updated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        
+        // Close the dialog
+        Navigator.of(context).pop();
+      }
+    }
 
     showDialog(
       context: context,
@@ -103,38 +137,50 @@ class ContactDetailsCard extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(maxHeight: 600),
             padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Add Address',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Edit Contact Details',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, size: 24),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _buildModalField(label: 'Contact No*', controller: contactController, isRequired: true),
-                  _buildModalField(label: 'Email*', controller: emailController, isRequired: true),
-                  _buildModalField(
-                    label: 'Address* (this content will show in Card)',
-                    controller: addressController,
-                    hintText: 'zip code, city, street, address',
-                    isRequired: true,
-                  ),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.close, size: 24),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildModalField(
+                      label: 'Full Name',
+                      controller: nameController,
+                      isRequired: true,
+                    ),
+                    _buildModalField(
+                      label: 'Email',
+                      controller: emailController,
+                      isRequired: true,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    _buildModalField(
+                      label: 'Address',
+                      controller: addressController,
+                      hintText: 'Enter your full address',
+                      isRequired: true,
+                      maxLines: 2,
+                    ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -178,21 +224,13 @@ class ContactDetailsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildModalField(label: 'Note (Optional)', controller: noteController, isRequired: false),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Get.snackbar(
-                          'Success',
-                          'Address added successfully',
-                          backgroundColor: Colors.green,
-                          colorText: Colors.white,
-                        );
-                      },
+                      onPressed: _saveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
+                        backgroundColor: Colors.orange,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -200,11 +238,11 @@ class ContactDetailsCard extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Confirm',
+                        'Save Changes',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -213,6 +251,7 @@ class ContactDetailsCard extends StatelessWidget {
               ),
             ),
           ),
+          )
         );
       },
     );
@@ -223,12 +262,14 @@ class ContactDetailsCard extends StatelessWidget {
     required TextEditingController controller,
     String? hintText,
     bool isRequired = false,
+    TextInputType? keyboardType,
+    int? maxLines = 1,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          '$label${isRequired ? ' *' : ''}',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -236,8 +277,16 @@ class ContactDetailsCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          validator: (value) {
+            if (isRequired && (value == null || value.isEmpty)) {
+              return 'This field is required';
+            }
+            return null;
+          },
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(color: Colors.grey[400]),
@@ -254,6 +303,7 @@ class ContactDetailsCard extends StatelessWidget {
               borderSide: BorderSide(color: Colors.blue),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            errorStyle: const TextStyle(fontSize: 12),
           ),
         ),
         const SizedBox(height: 16),
