@@ -1,12 +1,11 @@
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
+import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// A responsive product card widget with a Material 3 design.
-///
-/// Displays product information including name, brand, price, and rating.
-/// Features dynamic UI elements for discounts and favorite status.
+
 class ProductCard extends StatelessWidget {
+  final ProductDetailModel? product;
   final String name;
   final String brand;
   final String price;
@@ -26,6 +25,7 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({
     super.key,
+    this.product,
     required this.name,
     required this.brand,
     required this.price,
@@ -44,25 +44,44 @@ class ProductCard extends StatelessWidget {
     this.sellerAvatarUrl,
   });
 
+  // Helper method to get sizes from product
+  List<String>? get _sizes {
+    if (product?.sizeType == null) return null;
+    return product!.sizeType.map((sizeType) => sizeType.size).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     void navigateToProductDetails() {
-      Get.toNamed(
-        Routes.productDetails,
-        parameters: {
-          'productId': productId,
+      if (product != null) {
+        // If we have the full product model, pass it directly
+        Get.toNamed(
+          Routes.productDetails,
+          arguments: product,
+        );
+      } else {
+        // Fallback to individual properties
+        final productData = {
+          'id': productId,
           'name': name,
           'brand': brand,
           'price': price,
-          if (imageUrl != null) 'imageUrl': imageUrl!,
-          if (discount != null) 'discount': discount!,
-          if (sellerName != null && sellerName!.isNotEmpty) 'sellerName': sellerName!,
-          if (sellerAvatarUrl != null && sellerAvatarUrl!.isNotEmpty) 'sellerAvatarUrl': sellerAvatarUrl!,
-        },
-      );
+          'imageUrl': [imageUrl],
+          'discount': discount,
+          'rating': rating,
+          'reviewCount': reviewCount,
+          'sellerName': sellerName,
+          'sellerAvatarUrl': sellerAvatarUrl,
+        };
+        
+        Get.toNamed(
+          Routes.productDetails,
+          arguments: productData,
+        );
+      }
     }
 
     return SizedBox(
@@ -139,7 +158,32 @@ class ProductCard extends StatelessWidget {
                     const SizedBox(height: 4), // Reduced spacing
                     _buildRating(context, rating, reviewCount),
                   ],
-                  const SizedBox(height: 6), // Reduced spacing
+                  const SizedBox(height: 4), // Reduced spacing
+                  if (_sizes?.isNotEmpty ?? false) ...[
+                    SizedBox(
+                      height: 24,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: _sizes!.length,
+                        itemBuilder: (context, index) => Container(
+                          margin: const EdgeInsets.only(right: 4, bottom: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _sizes![index],
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,

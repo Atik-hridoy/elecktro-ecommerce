@@ -174,36 +174,27 @@ class CategoryView extends GetView<CategoryController> {
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    final p = items[index];
-                    final imageUrl = p.images.isNotEmpty ? p.images.first : null;
-                    final price = p.sizeType.isNotEmpty ? p.sizeType.first.price : 0.0;
+                    final product = items[index];
+                    final imageUrl = product.images.isNotEmpty ? product.images.first : null;
+                    final price = product.sizeType.isNotEmpty ? product.sizeType.first.price : 0.0;
+                    final discount = product.sizeType.isNotEmpty ? product.sizeType.first.discount : 0.0;
                     final priceText = price > 0 ? '\$${price.toStringAsFixed(0)}' : '';
 
                     return GestureDetector(
                       onTap: () {
                         Get.toNamed(
                           Routes.productDetails,
-                          arguments: {
-                            'id': p.id,
-                            'name': p.name,
-                            'brand': p.brand,
-                            'model': p.model,
-                            'imageUrl': imageUrl,
-                            'price': price.toString(),
-                            'category': p.specialCategory,
-                            'overview': p.overview,
-                            'highlights': p.highlights,
-                            'techSpecs': p.techSpecs,
-                            'colors': p.color,
-                            'sizes': p.sizeType,
-                          },
+                          arguments: product, // Pass the full product object
                         );
                       },
+                      
                       child: ProductCard(
-                        productId: p.id,
-                        name: p.name,
-                        brand: p.brand,
+                        product: product,
+                        productId: product.id,
+                        name: product.name,
+                        brand: product.brand,
                         price: priceText,
+                        discount: discount.toString(),
                         imageUrl: imageUrl,
                         onFavoriteTap: () {},
                         isFavorite: false,

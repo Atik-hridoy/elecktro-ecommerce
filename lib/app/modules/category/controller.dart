@@ -18,15 +18,7 @@ class CategoryController extends GetxController {
   void onInit() {
     super.onInit();
     // Initialize with sample data
-    categories.addAll([
-      CategoryModel(id: '1', name: 'Electronics', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '2', name: 'Fashion', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '3', name: 'Home', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '4', name: 'Beauty', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '5', name: 'Sports', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '6', name: 'Books', thumbnail: '', subCategories: const []),
-      CategoryModel(id: '7', name: 'Toys', thumbnail: '', subCategories: const []),
-    ]);
+    
     filteredCategories.assignAll(categories);
 
     // Fetch products for grid
@@ -46,7 +38,7 @@ class CategoryController extends GetxController {
   Future<void> fetchProducts() async {
     if (isLoadingProducts.value || _hasLoadedProducts) return;
     final service = Get.isRegistered<ProductService>()
-        ? Get.find<ProductService>()
+        ? Get.put<ProductService>(ProductService())
         : Get.put(ProductService());
     try {
       isLoadingProducts.value = true;

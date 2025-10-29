@@ -1,13 +1,13 @@
-import 'package:dio/dio.dart';
-import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
-import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
-import 'package:elecktro_ecommerce/app/modules/product_details/model/product_details_model.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 /// Manages the state for the ProductDetailsView.
 class ProductDetailsController extends GetxController {
+ /////////////  data
+Rxn<ProductDetailModel> product = Rxn();
+
   // --- Product Data Properties ---
   final RxString productId = ''.obs;
   final RxString name = ''.obs;
@@ -15,7 +15,8 @@ class ProductDetailsController extends GetxController {
   final RxString price = ''.obs;
   final RxString imageUrl = ''.obs;
   final RxString discount = ''.obs;
-  final Rx<ProductResponse?> productResponse = Rx<ProductResponse?>(null);
+  
+  // final Rx<ProductResponse?> productResponse = Rx<ProductResponse?>(null);
   
   // --- Seller Information ---
   final seller = Seller(
@@ -33,36 +34,22 @@ class ProductDetailsController extends GetxController {
   final RxInt selectedColorIndex = 0.obs;
   final RxInt selectedImageIndex = 0.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _loadProductDetailsFromParameters();
-  }
+
 
   void _loadProductDetailsFromParameters() {
     try {
       isLoading.value = true;
-      final parameters = Get.parameters;
-      productId.value = parameters['productId'] ?? 'N/A';
-      name.value = parameters['name'] ?? 'Product Not Found';
-      brand.value = parameters['brand'] ?? 'N/A';
-      price.value = parameters['price'] ?? '--';
-      imageUrl.value = parameters['imageUrl'] ?? '';
-      discount.value = parameters['discount'] ?? '';
+      final argData = Get.arguments;
+      print("kaj kora na kan ");
+      print(argData);
+      if(argData != null && argData is ProductDetailModel){
+        product.value = argData;  
+      }else{
+/////////////  error 
+      }
       
-      // Initialize seller from parameters or defaults
-      seller.update((val) {
-        val?.id = parameters['sellerId'] ?? '';
-        val?.firstName = parameters['sellerFirstName'] ?? 'Seller';
-        val?.lastName = parameters['sellerLastName'] ?? '';
-      });
-      
-      // Parse rating and review count
-      rating.value = double.tryParse(parameters['rating'] ?? '0.0') ?? 0.0;
-      reviewCount.value = int.tryParse(parameters['reviewCount'] ?? '0') ?? 0;
-      print('productId ID: ${productId.value}');
 
-      getProductDetails();
+
     } catch (e) {
       Get.snackbar('Error', 'Failed to load product details: ${e.toString()}');
       name.value = 'Error Loading Product';
@@ -72,55 +59,7 @@ class ProductDetailsController extends GetxController {
   }
 
 
-  Future<void> getProductDetails() async {
-    try {
-      final dio = Dio();
-      isLoading.value = true;
-      final token = LocalStorage.token;
-      dio.options.headers['Authorization'] = 'Bearer $token';
-      final response = await dio.get(
-        '${AppUrls.baseUrl}${AppUrls.getProductDetails}${productId.value}',
-        options: Options(validateStatus: (status) => true),
-      );
-
-      if (response.statusCode == 200) {
-        productResponse.value = ProductResponse.fromJson(response.data);
-        print('Product Response: ${productResponse.value}');
-        // Update seller information from the API response
-        final sellerData = productResponse.value?.data?.sellerId;
-        if (sellerData != null && sellerData is Map<String, dynamic>) {
-          seller.update((val) {
-            val?.id = sellerData['_id']?.toString() ?? '';
-            val?.firstName = sellerData['firstName']?.toString() ?? 'Seller';
-            val?.lastName = sellerData['lastName']?.toString() ?? '';
-          });
-        }
-        
-        // Update other product details
-        if (productResponse.value?.data != null) {
-          final product = productResponse.value!.data!;
-          name.value = product.name ?? 'Product Not Found';
-          brand.value = product.brand ?? 'N/A';
-          
-          // Update the first image as the main image if available
-          if (product.images != null && product.images!.isNotEmpty) {
-            // Prepend baseImageUrl if the path is not already a full URL
-            final imagePath = product.images!.first;
-            imageUrl.value = imagePath.startsWith('http') 
-                ? imagePath 
-                : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
-          }
-        }
-      } else {
-        Get.snackbar('Error', 'Failed to load product details');
-      }
-    } catch (e) {
-      print(e);
-      Get.snackbar('Error', 'Failed to load seller details: ${e.toString()}');
-    } finally {
-      isLoading.value = false;
-    }
-  }
+ 
 
   // --- UI Actions ---
   void selectSize(int index) => selectedSizeIndex.value = index;
@@ -135,10 +74,97 @@ class ProductDetailsController extends GetxController {
 
   // --- Business Logic Actions ---
   void onBuyNow() {
-    Get.toNamed(Routes.auth);
+    Get.toNamed(Routes.checkout);
   }
 
   void onAddToCart() {
     Get.snackbar('Success', '${name.value} added to cart');
+  }
+
+    @override
+  void onInit() {
+    super.onInit();
+    _loadProductDetails();
+  }
+
+  void _loadProductDetails() {
+    try {
+      isLoading.value = true;
+      final dynamic args = Get.arguments;
+      
+      if (args == null) {
+        throw Exception('No product data provided');
+      }
+
+      if (args is ProductDetailModel) {
+        _updateFromProductModel(args);
+      } else if (args is Map) {
+        _updateFromMap(args);
+      } else {
+        throw Exception('Invalid product data format');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load product details');
+      Get.back();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _updateFromProductModel(ProductDetailModel productData) {
+    product.value = productData;
+    productId.value = productData.id ?? '';
+    name.value = productData.name ?? 'Product Not Found';
+    brand.value = productData.brand ?? 'N/A';
+    
+    // Handle images
+    if (productData.images != null && productData.images!.isNotEmpty) {
+      // Format all image URLs
+      final formattedImages = productData.images!.map((imagePath) => 
+        imagePath.startsWith('http') 
+            ? imagePath 
+            : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}'
+      ).toList();
+      
+      // Update the product with formatted images
+      product.value = productData.copyWith(images: formattedImages);
+      
+      // Set the first image as the main image URL
+      if (formattedImages.isNotEmpty) {
+        imageUrl.value = formattedImages.first;
+      }
+    }
+    
+    // Handle seller info
+    if (productData.sellerId != null) {
+      seller.value = productData.sellerId!;
+    }
+    
+    // Handle price and discount
+    if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
+      final sizeType = productData.sizeType!.first;
+      price.value = '\$${sizeType.price?.toStringAsFixed(2) ?? '0.00'}';
+      if (sizeType.discount != null && sizeType.discount! > 0) {
+        discount.value = '${sizeType.discount!.toStringAsFixed(0)}% OFF';
+      }
+    }
+  }
+
+  void _updateFromMap(Map<dynamic, dynamic> data) {
+    productId.value = data['id']?.toString() ?? '';
+    name.value = data['name']?.toString() ?? 'Product Not Found';
+    brand.value = data['brand']?.toString() ?? 'N/A';
+    price.value = data['price']?.toString() ?? '\$0.00';
+    imageUrl.value = data['imageUrl']?.toString() ?? '';
+    discount.value = data['discount']?.toString() ?? '';
+    
+    // Update seller info if available
+    if (data['sellerName'] != null) {
+      seller.value = Seller(
+        id: data['sellerId']?.toString() ?? '',
+        firstName: data['sellerName']?.toString() ?? '',
+        lastName: data['sellerLastName']?.toString() ?? '',
+      );
+    }
   }
 }

@@ -1,10 +1,10 @@
 import 'package:elecktro_ecommerce/app/modules/product_details/custom%20widget/sellercard.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/widgets/product_build_row_review_item.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
-import 'package:elecktro_ecommerce/app/modules/product_details/custom widget/sellercard.dart';
 
 // This view is restored to the original user-provided style, with dynamic data connected.
 class ProductDetailsView extends StatefulWidget {
@@ -24,7 +24,24 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   int selectedImageIndex = 0;
 
   final List<String> sizes = ['S', 'M', 'L', 'XL'];
-  final List<Color> colors = [const Color(0xFF4CAF50), const Color(0xFF9E9E9E)];
+  // Default colors to use if we run out of predefined colors
+  final List<Color> defaultColors = [
+    const Color(0xFF4CAF50), // Green
+    const Color(0xFF9E9E9E), // Gray
+    Colors.blue,
+    Colors.red,
+    Colors.yellow,
+    Colors.purple,
+    Colors.orange,
+    Colors.pink,
+    Colors.teal,
+    Colors.cyan,
+  ];
+  
+  // Function to get a color by index, cycling through the default colors if needed
+  Color _getColorByIndex(int index) {
+    return defaultColors[index % defaultColors.length];
+  }
 
   @override
   void initState() {
@@ -84,13 +101,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 _buildImageThumbnails(),
                 const SizedBox(height: 24),
                 Text(
-                  controller.productResponse.value?.data?.name ?? '', 
+                  controller.product.value?.name ?? '', 
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
                 
                 Text(
-                  controller.productResponse.value?.data?.brand ?? '', 
+                  controller.product.value?.brand ?? '', 
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
@@ -140,7 +157,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         const Text('Overview:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 8),
                         Text(
-                          controller.productResponse.value?.data?.overview ?? '',
+                          controller.product.value?.overview ?? '',
                           style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
                         ),
                       ],
@@ -160,13 +177,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       children: [
                         const Text('Highlights:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 12),
-                        if (controller.productResponse.value?.data?.highlights != null)
-                          if (controller.productResponse.value!.data!.highlights is Map)
-                            ...(controller.productResponse.value!.data!.highlights as Map<String, dynamic>).entries
+                        if (controller.product.value?.highlights != null)
+                          if (controller.product.value!.highlights is Map)
+                            ...(controller.product.value!.highlights as Map<String, dynamic>).entries
                                 .map((entry) => _buildHighlightItem('${entry.key}: ${entry.value}'))
                                 .toList()
-                          else if (controller.productResponse.value!.data!.highlights is String)
-                            _buildHighlightItem(controller.productResponse.value!.data!.highlights.toString())
+                          else if (controller.product.value!.highlights is String)
+                            _buildHighlightItem(controller.product.value!.highlights.toString())
                         else
                           _buildHighlightItem('No highlights available'),
                         const Divider(height: 32),
@@ -198,11 +215,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildReviewItem('Hadi H', 'Just the thing', 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 4.9, 'Aug 14, 2021'),
+                ProductBuildRowReviewItem(name: 'Hadi H', title: 'Just the thing', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: 'Aug 14, 2021'),
                 const SizedBox(height: 16),
-                _buildReviewItem('Kim Shine', '', 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 4.9, ''),
+                ProductBuildRowReviewItem(name: 'Kim Shine', title: '', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: ''),
                 const SizedBox(height: 16),
-                _buildReviewItem('Matilda Brown', 'Just the thing', 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 4.9, 'Aug 14, 2021'),
+                ProductBuildRowReviewItem(name: 'Matilda Brown', title: 'Just the thing', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: 'Aug 14, 2021'),
                 const SizedBox(height: 100),
               ],
             ),
@@ -250,7 +267,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   }
 
   Widget _buildImageThumbnails() {
-    final images = controller.productResponse.value?.data?.images ?? [];
+    final images = controller.product.value?.images ?? [];
     
     if (images.isEmpty) {
       return const SizedBox.shrink();
@@ -376,7 +393,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       children: [
         const Text('Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         const SizedBox(width: 16),
-        ...List.generate(controller.productResponse.value?.data?.color?.length ?? 0, (index) {
+        ...List.generate(controller.product.value?.color?.length ?? 0, (index) {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
@@ -385,7 +402,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: colors[index],
+                  color: _getColorByIndex(index),
                   shape: BoxShape.circle,
                   border: selectedColorIndex == index ? Border.all(color: Colors.black, width: 3) : Border.all(color: Colors.grey[300]!, width: 1),
                 ),
@@ -483,115 +500,6 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   }
 
   Widget _buildReviewItem(String name, String title, String review, double rating, String date) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey[300],
-                child: Text(name.split(' ').map((e) => e[0]).join(''), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                    if (title.isNotEmpty)
-                      Text(title, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 16),
-                  const SizedBox(width: 4),
-                  Text(rating.toString(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(review, style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4)),
-          const SizedBox(height: 12),
-          Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(12),
-            shadowColor: Colors.black.withValues(alpha: 0.2),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[100]!),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.photo_camera, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 6),
-                      Text('Photos from review', style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 80,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 3,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8),
-                                image: const DecorationImage(
-                                  image: NetworkImage('https://via.placeholder.com/80x80'),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.1)],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (date.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(date, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-          ],
-        ],
-      ),
-    );
+    return ProductBuildRowReviewItem(name: name, title: title, review: review, rating: rating, date: date);
   }
 }

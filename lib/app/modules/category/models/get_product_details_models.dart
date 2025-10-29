@@ -26,7 +26,7 @@ class ProductDetailModel {
 
   ProductDetailModel({
     required this.id,
-    required this.sellerId,
+    this.sellerId = const Seller(),
     required this.category,
     required this.categoryId,
     required this.subCategory,
@@ -53,13 +53,13 @@ class ProductDetailModel {
 
   factory ProductDetailModel.fromJson(Map<String, dynamic> json) {
     return ProductDetailModel(
-      id: json['_id'] ?? '',
-      sellerId: Seller.fromJson(json['sellerId'] ?? {}),
+      id: "${json['_id'] ?? ''}",
+      sellerId: json['sellerId']  != null && json['sellerId']  is Map ?  Seller.fromJson(json['sellerId'] ?? {}) : Seller(),
       category: json['category'] ?? '',
       categoryId: CategoryId.fromJson(json['categoryId'] ?? {}),
       subCategory: json['subCategory'] ?? '',
       subCategoryId: json['subCategoryId'] ?? '',
-      images: List<String>.from(json['images'] ?? []),
+      images: json['images'] != null && json['images'] is List ? (json['images'] as List).map((e) => e.toString()).toList() : [],
       name: json['name'] ?? '',
       model: json['model'] ?? '',
       brand: json['brand'] ?? '',
@@ -82,19 +82,73 @@ class ProductDetailModel {
       isBookmarked: json['isBookmarked'] ?? false,
     );
   }
+
+  ProductDetailModel copyWith({
+    String? id,
+    Seller? sellerId,
+    String? category,
+    CategoryId? categoryId,
+    String? subCategory,
+    String? subCategoryId,
+    List<String>? images,
+    String? name,
+    String? model,
+    String? brand,
+    List<String>? color,
+    List<SizeType>? sizeType,
+    String? specialCategory,
+    String? overview,
+    String? highlights,
+    String? techSpecs,
+    bool? isDeleted,
+    String? status,
+    int? totalStock,
+    double? rating,
+    int? reviewCount,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isBookmarked,
+  }) {
+    return ProductDetailModel(
+      id: id ?? this.id,
+      sellerId: sellerId ?? this.sellerId,
+      category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
+      subCategory: subCategory ?? this.subCategory,
+      subCategoryId: subCategoryId ?? this.subCategoryId,
+      images: images ?? List<String>.from(this.images),
+      name: name ?? this.name,
+      model: model ?? this.model,
+      brand: brand ?? this.brand,
+      color: color ?? List<String>.from(this.color),
+      sizeType: sizeType ?? List<SizeType>.from(this.sizeType),
+      specialCategory: specialCategory ?? this.specialCategory,
+      overview: overview ?? this.overview,
+      highlights: highlights ?? this.highlights,
+      techSpecs: techSpecs ?? this.techSpecs,
+      isDeleted: isDeleted ?? this.isDeleted,
+      status: status ?? this.status,
+      totalStock: totalStock ?? this.totalStock,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+    );
+  }
 }
 
 class Seller {
-  String id;
-  String? image;
-  String firstName;
-  String lastName;
+ final String id;
+ final   String? image;
+ final String firstName;
+ final String lastName;
 
-  Seller({
-    required this.id,
-    this.image,
-    required this.firstName,
-    required this.lastName,
+ const Seller({
+     this.id = "",
+    this.image = "",
+     this.firstName = "",
+     this.lastName = "",
   });
 
   factory Seller.fromJson(Map<String, dynamic> json) {
