@@ -1,7 +1,9 @@
+import 'package:elecktro_ecommerce/app/modules/home/controllers/bookmark_controller.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 
 
 class ProductCard extends StatelessWidget {
@@ -54,6 +56,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final bookmarkController = Get.put<BookmarkController>(BookmarkController());
 
     void navigateToProductDetails() {
       if (product != null) {
@@ -109,16 +112,32 @@ class ProductCard extends StatelessWidget {
                 ),
                 // --- FAVORITE BUTTON ---
                 Positioned(
-                  top: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? colorScheme.error : colorScheme.onSurfaceVariant,
-                    ),
-                    onPressed: onFavoriteTap,
-                  ),
-                ),
+  top: 4,
+  right: 4,
+  child: GetBuilder<BookmarkController>(
+    builder: (controller) {
+      final isBookmarked = controller.isBookmarked(productId);
+      final isLoading = controller.isLoading(productId);
+      
+      return IconButton(
+        icon: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(
+                isBookmarked ? Icons.favorite : Icons.favorite_border,
+                color: isBookmarked ? Colors.red : colorScheme.onSurfaceVariant,
+              ),
+        onPressed: () => controller.toggleBookmark(productId),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        iconSize: 24,
+      );
+    },
+  ),
+),
                 // --- DISCOUNT BADGE ---
                 if (showDiscountBadge && discount != null)
                   Positioned(

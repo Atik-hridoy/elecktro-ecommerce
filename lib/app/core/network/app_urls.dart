@@ -27,6 +27,7 @@ class AppUrls {
   
   static const String getProducts = 'products/';
   static const String getProductDetails = 'products/single/';
+  static const String postBookmark = 'bookmarks/';
 
   // paymentSession
 
