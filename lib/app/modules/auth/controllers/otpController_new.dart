@@ -186,6 +186,11 @@ class OtpController extends GetxController {
           colorText: Colors.white,
         );
         
+        // Save login state
+        await LocalStorage.setBool(LocalStorageKeys.isLogIn, true);
+        await LocalStorage.setString(LocalStorageKeys.myEmail, email);
+        await LocalStorage.getAllPrefData();
+        
         // Navigate based on the flow
         if (isRegistration) {
           // For registration flow, go to update profile
@@ -197,8 +202,22 @@ class OtpController extends GetxController {
             },
           );
         } else {
-          // For login flow, go to home
-          Get.offAllNamed(Routes.home);
+          // For login flow, check if profile is complete
+          final isProfileComplete = await LocalStorage.isProfileComplete();
+          
+          if (isProfileComplete) {
+            // If profile is complete, go to home
+            Get.offAllNamed(Routes.home);
+          } else {
+            // If profile is incomplete, go to update profile
+            Get.offAllNamed(
+              Routes.updateProfile,
+              arguments: {
+                'email': email,
+                'isFirstTime': false,
+              },
+            );
+          }
         }
       } else {
         // Handle verification failure

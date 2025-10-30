@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class BannerCard extends StatefulWidget {
-  final List<String> items;
+  final List<Map<String, dynamic>> items;
   final int currentIndex;
   final ValueChanged<int>? onPageChanged;
   
@@ -87,6 +87,123 @@ class _BannerCardState extends State<BannerCard> {
     });
   }
 
+  void _restartAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _startAutoScroll();
+  }
+
+  Widget _buildPageIndicator() {
+  if (widget.items.isEmpty) return const SizedBox.shrink();
+  
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: List<Widget>.generate(
+      widget.items.length,
+      (index) => _buildIndicator(index == _currentPage, index), // Pass index as second parameter
+    ),
+  );
+}
+
+Widget _buildIndicator(bool isActive, int index) {
+  return GestureDetector(
+    onTap: () {
+      if (_currentPage != index) {
+        _isUserScrolling = true;
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        ).then((_) {
+          if (mounted) {
+            setState(() {
+              _currentPage = index;
+              _isUserScrolling = false;
+            });
+            widget.onPageChanged?.call(index);
+            _restartAutoScroll();
+          }
+        });
+      }
+    },
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: isActive ? 24 : 8,
+      height: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        color: isActive ? const Color(0xFF044D37) : Colors.grey.shade300,
+      ),
+    ),
+  );
+}
+
+  Widget _buildPageView() {
+    if (widget.items.isEmpty) {
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: const Center(
+          child: Text('No banners available', style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
+
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: widget.items.length,
+      onPageChanged: (index) {
+        if (!_isUserScrolling) return;
+        setState(() {
+          _currentPage = index;
+        });
+        widget.onPageChanged?.call(index);
+        _restartAutoScroll();
+      },
+      itemBuilder: (context, index) {
+        final banner = widget.items[index];
+        final imageUrl = banner['image_url']?.toString() ?? '';
+        
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: imageUrl.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => _buildErrorWidget(),
+                  )
+                : _buildErrorWidget(),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildErrorWidget() {
+    return Container(
+      color: Colors.grey[200],
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image, size: 48, color: Colors.grey),
+            SizedBox(height: 8),
+            Text('Failed to load image', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -106,84 +223,13 @@ class _BannerCardState extends State<BannerCard> {
                 _isUserScrolling = false;
                 _startAutoScroll();
               },
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  if (_currentPage != index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                    widget.onPageChanged?.call(index);
-                    // Restart auto-scroll timer after user interaction
-                    _autoScrollTimer?.cancel();
-                    if (!_isUserScrolling) {
-                      _startAutoScroll();
-                    }
-                  }
-                },
-                itemCount: widget.items.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.items[index],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        placeholder: (context, url) => Container(
-                          color: Colors.grey[200],
-                          child: const Center(child: CircularProgressIndicator()),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.error_outline, size: 40, color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+              child: _buildPageView(),
             ),
           ),
           const SizedBox(height: 12),
           // Page indicators
-          if (widget.items.length > 1)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                widget.items.length,
-                (index) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    ).then((_) {
-                      widget.onPageChanged?.call(index);
-                      // Restart auto-scroll after manual navigation
-                      _autoScrollTimer?.cancel();
-                      _startAutoScroll();
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: _currentPage == index ? 24 : 8,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: _currentPage == index 
-                          ? const Color(0xFF044D37) // Using app's primary color
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                ),
-              ).toList(),
-            ),
+          _buildPageIndicator(),
+
         ],
       ),
     );

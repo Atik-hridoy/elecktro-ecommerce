@@ -13,9 +13,16 @@ class SplashController extends GetxController {
     try {
       await Future.delayed(const Duration(seconds: 1));
       await LocalStorage.getAllPrefData();
-      if (LocalStorage.token.isNotEmpty || LocalStorage.isLogIn) {
-        Get.offAllNamed(Routes.home);
+      
+      if (LocalStorage.token.isNotEmpty && LocalStorage.isLogIn) {
+        // If logged in with valid token
+        if (await LocalStorage.isProfileComplete()) {
+          Get.offAllNamed(Routes.home);
+        } else {
+          Get.offAllNamed(Routes.updateProfile);
+        }
       } else {
+        // If not logged in or token invalid
         Get.offAllNamed(Routes.onboarding);
       }
     } catch (e) {

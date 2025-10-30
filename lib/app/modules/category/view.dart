@@ -1,7 +1,6 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
-import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

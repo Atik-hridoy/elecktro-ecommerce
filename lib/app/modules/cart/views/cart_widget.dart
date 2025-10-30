@@ -1,330 +1,304 @@
 import 'package:flutter/material.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import '../models/cart_model.dart';
 
 class CartProductCard extends StatefulWidget {
   final String productName;
-  final String brand;
+  final String? brand;
   final String size;
   final String color;
-  final String currentPrice;
-  final String? originalPrice;
-  final String? imagePath;
-  final Widget? productImage;
-  final VoidCallback? onTap;
-  final VoidCallback? onAddToCart;
+  final double price;
+  final int quantity;
+  final List<String> images;
   final VoidCallback? onRemoveFromCart;
-  final List<PopupMenuEntry>? menuItems;
-  final Color? backgroundColor;
-  final double? width;
-  final double? height;
+  final Function(int newQuantity)? onQuantityChanged;
+  final bool isSelected;
+  final Function(bool?)? onSelect;
 
   const CartProductCard({
     super.key,
     required this.productName,
-    required this.brand,
-    required this.size,
-    required this.color,
-    required this.currentPrice,
-    this.originalPrice,
-    this.imagePath,
-    this.productImage,
-    this.onTap,
-    this.onAddToCart,
+    this.brand,
+    this.size = 'One Size',
+    this.color = 'Black',
+    required this.price,
+    this.quantity = 1,
+    this.images = const [],
     this.onRemoveFromCart,
-    this.menuItems,
-    this.backgroundColor,
-    this.width,
-    this.height,
+    this.onQuantityChanged,
+    this.isSelected = false,
+    this.onSelect,
   });
 
   @override
-  _CartProductCardState createState() => _CartProductCardState();
+  State<CartProductCard> createState() => _CartProductCardState();
+
+  factory CartProductCard.fromCartProduct({
+    required CartProduct product,
+    required VoidCallback onRemove,
+    required Function(int) onQuantityChanged,
+    bool isSelected = false,
+    Function(bool?)? onSelect,
+  }) {
+    return CartProductCard(
+      productName: product.name ?? 'Product',
+      brand: product.brand,
+      size: product.size,
+      color: product.color,
+      price: product.price,
+      quantity: product.quantity,
+      images: product.images,
+      onRemoveFromCart: onRemove,
+      onQuantityChanged: onQuantityChanged,
+      isSelected: isSelected,
+      onSelect: onSelect,
+    );
+  }
 }
 
 class _CartProductCardState extends State<CartProductCard> {
-  int quantity = 1; // Starting quantity for the product
-  bool isChecked = false; // To manage checkbox state
+  late int _quantity;
+  late bool _isChecked;
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = widget.quantity;
+    _isChecked = widget.isSelected;
+  }
 
   // Increment quantity
   void _incrementQuantity() {
+    final newQuantity = _quantity + 1;
     setState(() {
-      quantity++;
+      _quantity = newQuantity;
     });
+    widget.onQuantityChanged?.call(newQuantity);
   }
 
   // Decrement quantity
   void _decrementQuantity() {
-    if (quantity > 1) {
+    if (_quantity > 1) {
+      final newQuantity = _quantity - 1;
       setState(() {
-        quantity--;
+        _quantity = newQuantity;
       });
+      widget.onQuantityChanged?.call(newQuantity);
     }
   }
 
   // Toggle the checkbox state
   void _toggleCheckbox(bool? value) {
-    setState(() {
-      isChecked = value ?? false;
-    });
+    if (value != null) {
+      setState(() {
+        _isChecked = value;
+      });
+      widget.onSelect?.call(value);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        width: widget.width ?? double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-        child: IntrinsicHeight(
-          child: Container(
-            decoration: BoxDecoration(
-              color: widget.backgroundColor ?? Colors.white,
-              borderRadius: BorderRadius.circular(12), // More rectangular corners
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Checkbox
+            if (widget.onSelect != null)
+              Checkbox(
+                value: _isChecked,
+                onChanged: _toggleCheckbox,
+                activeColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
                 ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Product Image Section wrapped in a Stack
-                Stack(
-                  children: [
-                    Container(
-                      width: 100, // Slightly wider image container
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(6),
-                          bottomLeft: Radius.circular(6),
-                        ),
-                      ),
-                      child: _buildProductImage(),
-                    ),
-                    // Checkbox over the image at the top-left (shifted closer to the edge)
-                    Positioned(
-                      top: 4, // Adjusted value to move the checkbox closer to the top
-                      left: 4, // Adjusted value to move the checkbox closer to the left
-                      child: Checkbox(
-                        value: isChecked,
-                        onChanged: _toggleCheckbox,
-                        activeColor: Colors.grey, // Gray color for the checkbox
-                        checkColor: Colors.white, // White check mark
-                      ),
-                    ),
-                  ],
-                ),
+              )
+            else
+              const SizedBox(width: 40),
 
-                // Product Details Section
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Top row with product name and menu
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.productName,
-                                    style: const TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      height: 1.5,
-                                      color: Colors.black,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${widget.brand} / ${widget.size} / ${widget.color}',
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 12,
-                                      height: 1.5,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Add the 3-dot options button at the top-right corner
-                            PopupMenuButton(
-                              icon: const Icon(Icons.more_vert, size: 20, color: Colors.grey),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 120),
-                              itemBuilder: (context) => widget.menuItems ?? [],
-                            ),
-                          ],
+            // Product Image
+            _buildProductImage(),
+            const SizedBox(width: 12),
+
+            // Product Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Name and Remove Button
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.productName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const Spacer(),
-                        // Bottom section with price and actions
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildPriceSection(),
-                            _buildQuantitySection(),
-                          ],
+                      ),
+                      if (widget.onRemoveFromCart != null)
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: widget.onRemoveFromCart,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          iconSize: 20,
                         ),
-                      ],
-                    ),
+                    ],
                   ),
-                ),
-              ],
+
+                  // Brand
+                  if (widget.brand != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 4),
+                      child: Text(
+                        widget.brand!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+
+                  // Size and Color
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      if (widget.size.isNotEmpty)
+                        _buildAttributeChip('Size: ${widget.size}'),
+                      if (widget.color.isNotEmpty)
+                        _buildAttributeChip('Color: ${widget.color}'),
+                    ],
+                  ),
+
+                  // Price and Quantity
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildPriceSection(),
+                      _buildQuantitySection(),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
-
-  // Dynamically build the product image
-  Widget _buildProductImage() {
-  if (widget.productImage != null) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(12),
-        bottomLeft: Radius.circular(12),
-      ),
-      child: Center( // <-- Center the image
-        child: widget.productImage!,
-      ),
-    );
-  } else if (widget.imagePath != null) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(12),
-        bottomLeft: Radius.circular(12),
-      ),
-      child: Center( // <-- Center the image
-        child: Image.asset(
-          widget.imagePath!,
-          fit: BoxFit.contain, // <-- Use contain to prevent cropping
-          width: 60, // optional: adjust width
-          height: 60, // optional: adjust height
-        ),
-      ),
-    );
-  } else {
-    return const Center(
-      child: Icon(
-        Icons.image,
-        color: Colors.grey,
-        size: 32,
-      ),
-    );
-  }
-}
-
 
   // Dynamically build the price section
   Widget _buildPriceSection() {
-    return Row(
-      children: [
-        Text(
-          widget.currentPrice,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600, // Bold for price
-            fontSize: 16, // Increased font size
-            height: 1.5,
-            letterSpacing: -0.0015,
-            color: Colors.black,
-          ),
-        ),
-        if (widget.originalPrice != null) ...[ 
-          const SizedBox(width: 8),
-          Text(
-            widget.originalPrice!,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w400,
-              fontSize: 14, // Increased font size
-              height: 1.5,
-              letterSpacing: -0.0015,
-              color: Colors.red.shade400,
-              decoration: TextDecoration.lineThrough,
-              decorationColor: Colors.red.shade400,
-            ),
-          ),
-        ],
-      ],
+    return Text(
+      '\$${widget.price.toStringAsFixed(2)}',
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
     );
   }
 
   // Dynamically build the action buttons (like favorite and add to cart)
-  Widget _buildQuantitySection() {
+  Widget _buildProductImage() {
     return Container(
-      padding: const EdgeInsets.all(8),
+      width: 80,
+      height: 80,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: widget.images.isNotEmpty
+          ? Image.network(
+              '${AppUrls.baseImageUrl}${widget.images[0].startsWith('/') ? widget.images[0].substring(1) : widget.images[0]}',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.image, color: Colors.grey),
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                );
+              },
+            )
+          : const Icon(Icons.image, color: Colors.grey),
+    );
+  }
+
+  Widget _buildQuantitySection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Decrease button
-          GestureDetector(
-            onTap: _decrementQuantity,
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(
-                Icons.remove,
-                color: Colors.black,
-                size: 16,
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.remove, size: 18),
+            onPressed: _decrementQuantity,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
-          const SizedBox(height: 4),
-          // Quantity display
+          
+          // Quantity
           Text(
-            '$quantity',
+            '$_quantity',
             style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
-          // Add button
-          GestureDetector(
-            onTap: _incrementQuantity,
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
+          
+          // Increase button
+          IconButton(
+            icon: const Icon(Icons.add, size: 18),
+            onPressed: _incrementQuantity,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAttributeChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(right: 4, bottom: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey[800],
+        ),
       ),
     );
   }

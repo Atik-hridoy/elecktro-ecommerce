@@ -2,6 +2,8 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/model/add_to_cart.dart';
 import 'package:flutter/material.dart';
 
 /// Manages the state for the ProductDetailsView.
@@ -34,6 +36,10 @@ Rxn<ProductDetailModel> product = Rxn();
   final RxInt selectedSizeIndex = 3.obs;
   final RxInt selectedColorIndex = 0.obs;
   final RxInt selectedImageIndex = 0.obs;
+
+  // Cart service
+  final CartService _cartService = CartService();
+  final RxBool isAddingToCart = false.obs;
 
   // Get available sizes from the product
   List<String>? get _availableSizes {
@@ -195,8 +201,49 @@ Rxn<ProductDetailModel> product = Rxn();
     return 'Custom Color';
   }
 
-  void onAddToCart() {
-    Get.snackbar('Success', '${name.value} added to cart');
+  Future<void> onAddToCart() async {
+    final currentProduct = product.value;
+    if (currentProduct == null) {
+      Get.snackbar('Error', 'Product information not available');
+      return;
+    }
+
+    try {
+      isAddingToCart.value = true;
+      
+      // Get available sizes and colors with proper bounds checking
+      final sizes = _availableSizes ?? ['M']; // Default to 'M' if sizes not available
+      final selectedSize = sizes[selectedSizeIndex.value.clamp(0, sizes.length - 1)];
+      
+      // Get the color string from product colors if available, otherwise use a default
+      final colorString = currentProduct.color.isNotEmpty && 
+                         selectedColorIndex.value < currentProduct.color.length
+          ? currentProduct.color[selectedColorIndex.value]
+          : '#000000';
+      
+      // Create AddToCartModel with selected options
+      final addToCartModel = AddToCartModel(
+        productId: currentProduct.id,
+        size: selectedSize,
+        price: _parsePrice(price.value),
+        quantity: quantity.value,
+        color: colorString,
+        images: currentProduct.images.toList(),
+      );
+
+      // Call the cart service
+      final result = await _cartService.addToCart(addToCartModel);
+      
+      if (result['success'] == true) {
+        Get.snackbar('Success', '${currentProduct.name} added to cart');
+      } else {
+        Get.snackbar('Error', result['message'] ?? 'Failed to add to cart');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An error occurred: ${e.toString()}');
+    } finally {
+      isAddingToCart.value = false;
+    }
   }
 
     @override

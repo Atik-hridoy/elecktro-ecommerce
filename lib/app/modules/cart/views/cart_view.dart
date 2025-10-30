@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
-import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
+import 'package:elecktro_ecommerce/app/modules/cart/views/cart_widget.dart';
+import 'package:elecktro_ecommerce/app/modules/home/widget/navbar.dart';
 import '../controllers/cart_controller.dart';
-import '../../home/widget/navbar.dart';
-import 'cart_widget.dart';
+
 import 'appbar.dart';
 
 class CartView extends GetView<CartController> {
@@ -14,6 +14,8 @@ class CartView extends GetView<CartController> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<CartController>();
+    
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -30,170 +32,171 @@ class CartView extends GetView<CartController> {
           shadowColor: const Color(0x33000000),
           showBackButton: false,
         ),
-        body: Obx(
-          () => controller.cartItems.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Your cart is empty',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                )
-              : Column(
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (controller.errorMessage.value.isNotEmpty) {
+            return Center(
+              child: Text(
+                controller.errorMessage.value,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+
+          if (controller.itemCount == 0) {
+            return const Center(
+              child: Text('Your cart is empty'),
+            );
+          }
+
+          return Column(
+            children: [
+              // Cart items count and select all
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
                   children: [
-                    // Row with Checkbox and Text showing how many cards are listed
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 4.0,
-                      ), // Reduced vertical space
-                      child: Row(
+                    Obx(() => Checkbox(
+                          value: controller.isAllSelected.value,
+                          onChanged: controller.toggleSelectAll,
+                          activeColor: Colors.black,
+                        )),
+                    Text(
+                      '${controller.itemCount} Items in Cart',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Cart items list
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (controller.errorMessage.value.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Checkbox with custom color (gray color)
-                          Checkbox(
-                            value: controller
-                                .isChecked
-                                .value, // Use the observable value
-                            onChanged: (bool? value) {
-                              controller.toggleCheckbox(
-                                value,
-                              ); // Toggle the checkbox state
-                            },
-                            activeColor: const Color(
-                              0xFF929292,
-                            ), // Set checkbox color to gray (#929292)
-                            checkColor: Colors
-                                .white, // White check mark inside checkbox
-                          ),
-                          Text(
-                            '${controller.cartItems.length} Items in Cart', // Display number of items
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              height: 1.2, // Reduced line height to 1.2
-                              letterSpacing: -0.5, // Letter spacing adjusted
-                            ),
+                          Text(controller.errorMessage.value),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => controller.fetchCart(),
+                            child: const Text('Retry'),
                           ),
                         ],
                       ),
-                    ),
-                    // Divider under the total items text
-                    Divider(
-                      color: Colors.grey.shade300, // Divider color
-                      thickness: 1, // Divider thickness
-                      indent: 16, // Indentation for the start of the divider
-                      endIndent: 16, // Indentation for the end of the divider
-                    ),
-                    // List of Cart Product Cards
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: controller.cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = controller.cartItems[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: 8,
-                            ), // Reduced bottom padding
-                            child: CartProductCard(
-                              productName: item['name'] ?? 'Product',
-                              brand: item['brand'] ?? 'Brand',
-                              size: item['size'] ?? 'M',
-                              color: item['color'] ?? 'Black',
-                              currentPrice:
-                                  '\$${item['price']?.toStringAsFixed(2) ?? '0.00'}',
-                              originalPrice: item['originalPrice'] != null
-                                  ? '\$${item['originalPrice']?.toStringAsFixed(2)}'
-                                  : null,
-                              imagePath: item['image'],
-                              onAddToCart: () {
-                                // Increase quantity
-                                controller.updateQuantity(
-                                  index,
-                                  (item['quantity'] ?? 1) + 1,
-                                );
-                              },
-                            ),
-                          );
+                    );
+                  }
+                  
+                  final products = controller.cart.value?.products ?? [];
+                  
+                  if (products.isEmpty) {
+                    return const Center(
+                      child: Text('Your cart is empty'),
+                    );
+                  }
+                  
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final item = products[index];
+                      return CartProductCard(
+                        key: ValueKey(item.id),
+                        productName: item.name ?? 'Product',
+                        brand: item.brand ?? 'Generic',
+                        size: item.size.isNotEmpty ? item.size : 'One Size',
+                        color: item.color.isNotEmpty ? item.color : 'Black',
+                        price: item.price,
+                        quantity: item.quantity,
+                        images: item.images,
+                        onRemoveFromCart: () {
+                          controller.removeFromCart(item.id);
                         },
-                      ),
+                      );
+                    },
+                  );
+                }),
+              ),
+              
+              // Checkout section
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, -2),
                     ),
-                    // Cart total and checkout card
-                    if (controller.cartItems.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total:',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          elevation: 4.0,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 20,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Left side: Subtotal
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Subtotal',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Obx(
-                                      () => Text(
-                                        '\$${controller.totalAmount.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // Right side: Checkout Button
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF044D37),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                      horizontal: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Get.toNamed(Routes.checkout);
-                                  },
-                                  child: const Text(
-                                    'Check Out',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                        ),
+                        Obx(() => Text(
+                              '\$${controller.totalAmount.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle checkout
+                          // Get.toNamed(Routes.CHECKOUT);
+                          Get.snackbar('Checkout', 'Proceeding to checkout');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'Proceed to Checkout',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
+                    ),
                   ],
                 ),
-        ),
+              ),
+            ],
+          );
+        }),
         bottomNavigationBar: buildBottomNavigationBar(),
       ),
     );

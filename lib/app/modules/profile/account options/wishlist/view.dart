@@ -1,24 +1,21 @@
+import 'package:elecktro_ecommerce/app/modules/home/controllers/bookmark_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/home/widget/product_card.dart';
-import 'package:elecktro_ecommerce/app/modules/profile/account%20options/wishlist/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// Import your ProductCard widget
-// import 'package:elecktro_ecommerce/widgets/product_card.dart';
-// Import the controller
-// import 'package:elecktro_ecommerce/controllers/wishlist_controller.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 class WishlistView extends StatelessWidget {
   const WishlistView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Get or create the controller instance
-    final WishlistController controller = Get.put(WishlistController());
+    // Get the BookmarkController
+    final BookmarkController controller = Get.find<BookmarkController>();
 
     return Scaffold(
       appBar: _buildAppBar(controller),
       body: Obx(() {
-        if (controller.wishlistItems.isEmpty) {
+        if (controller.bookmarks.isEmpty) {
           return _buildEmptyWishlist(context);
         }
 
@@ -28,9 +25,9 @@ class WishlistView extends StatelessWidget {
   }
 
   /// Build the app bar with wishlist count
-  PreferredSizeWidget _buildAppBar(WishlistController controller) {
+  PreferredSizeWidget _buildAppBar(BookmarkController controller) {
     return AppBar(
-      title: Obx(() => Text('Wish list (${controller.wishlistCount})')),
+      title: Obx(() => Text('Wishlist (${controller.bookmarkedIds.length})')),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios),
         onPressed: () => Get.back(),
@@ -52,25 +49,10 @@ class WishlistView extends StatelessWidget {
       ),
       actions: [
         Obx(() {
-          if (controller.wishlistItems.isNotEmpty) {
-            return PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'clear') {
-                  _showClearConfirmationDialog(controller);
-                }
-              },
-              itemBuilder: (BuildContext context) => [
-                const PopupMenuItem<String>(
-                  value: 'clear',
-                  child: Row(
-                    children: [
-                      Icon(Icons.clear_all),
-                      SizedBox(width: 8),
-                      Text('Clear All'),
-                    ],
-                  ),
-                ),
-              ],
+          if (controller.bookmarkedIds.isNotEmpty) {
+            return IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => controller.getBookmarks(),
             );
           }
           return const SizedBox.shrink();
@@ -80,43 +62,131 @@ class WishlistView extends StatelessWidget {
   }
 
   /// Build the main wishlist grid
-  Widget _buildWishlistGrid(WishlistController controller) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: controller.wishlistItems.length,
-        itemBuilder: (context, index) {
-          final item = controller.wishlistItems[index];
-          return ProductCard(
-            productId: item.productId,
-            name: item.name,
-            brand: item.brand,
-            price: item.price,
-            imageUrl: item.imageUrl,
-            discount: item.discount,
-            rating: item.rating,
-            reviewCount: item.reviewCount,
-            showRating: true,
-            showDiscountBadge: item.discount != null,
-            isFavorite: true, // Always true since this is wishlist
-            showAddToCart: true,
-            onFavoriteTap: () {
-              _showRemoveConfirmationDialog(controller, item);
+  // ... (keep the imports and class definition the same)
+
+Widget _buildWishlistGrid(BookmarkController controller) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: controller.isBookmarksLoading
+        ? const Center(child: CircularProgressIndicator())
+        : GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: controller.bookmarks.length,
+            itemBuilder: (context, index) {
+              final item = controller.bookmarks[index];
+              final product = item['referenceId'] as Map<String, dynamic>? ?? {};
+              final productId = product['_id']?.toString() ?? '';
+              final productName = product['name']?.toString() ?? 'Product';
+              final brand = product['brand']?.toString() ?? 'Brand';
+              final images = (product['images'] as List<dynamic>?)?.cast<String>() ?? [];
+              final sizes = (product['sizeType'] as List<dynamic>?) ?? [];
+              final price = sizes.isNotEmpty ? (sizes[0]['price'] ?? 0).toString() : '0';
+              final discount = sizes.isNotEmpty ? (sizes[0]['discount'] ?? 0).toString() : '0';
+
+              return Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Product image
+                        Container(
+                          height: constraints.maxWidth * 0.8,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                            image: images.isNotEmpty 
+                              ? DecorationImage(
+                                  image: NetworkImage(
+                                    '${AppUrls.baseImageUrl}${images[0].startsWith('/') ? images[0].substring(1) : images[0]}',
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                          ),
+                          child: images.isEmpty 
+                            ? const Center(
+                                child: Icon(Icons.image, size: 50, color: Colors.grey),
+                              )
+                            : null,
+                        ),
+                        // Product details
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  productName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  brand,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const Spacer(),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '\$$price',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      icon: const Icon(
+                                        Icons.favorite,
+                                        color: Colors.red,
+                                        size: 24,
+                                      ),
+                                      onPressed: () => _showRemoveConfirmationDialog(
+                                          controller, item),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
             },
-            onAddToCart: () {
-              controller.addToCart(item);
-            },
-          );
-        },
-      ),
-    );
-  }
+          ),
+  ));
+}
 
   /// Build empty wishlist state
   Widget _buildEmptyWishlist(BuildContext context) {
@@ -164,49 +234,27 @@ class WishlistView extends StatelessWidget {
   }
 
   /// Show confirmation dialog before removing item from wishlist
-  void _showRemoveConfirmationDialog(WishlistController controller, WishlistItem item) {
+  void _showRemoveConfirmationDialog(BookmarkController controller, Map<String, dynamic> item) {
+    final productId = item['productId']?.toString() ?? '';
+    final productName = item['name']?.toString() ?? 'this item';
+    
     Get.dialog(
       AlertDialog(
         title: const Text('Remove from Wishlist'),
-        content: Text('Are you sure you want to remove "${item.name}" from your wishlist?'),
+        content: Text('Are you sure you want to remove "$productName" from your wishlist?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Get.back();
-              controller.removeFavorite(item.productId);
+              await controller.toggleBookmark(productId);
+              // Refresh the bookmarks list
+              await controller.getBookmarks();
             },
             child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Show confirmation dialog before clearing all wishlist items
-  void _showClearConfirmationDialog(WishlistController controller) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Clear Wishlist'),
-        content: const Text('Are you sure you want to remove all items from your wishlist? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Get.back();
-              controller.clearWishlist();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Get.theme.colorScheme.error,
-              foregroundColor: Get.theme.colorScheme.onError,
-            ),
-            child: const Text('Clear All'),
           ),
         ],
       ),

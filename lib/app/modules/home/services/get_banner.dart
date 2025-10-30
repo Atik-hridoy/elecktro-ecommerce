@@ -41,28 +41,56 @@ class BannerService extends GetxService {
       // Ensure we have the latest token
       await LocalStorage.getAllPrefData();
       
+      print('Fetching banners from: ${AppUrls.baseUrl}${AppUrls.getBanner}');
       final response = await _dio.get(AppUrls.getBanner);
 
       if (response.statusCode == 200) {
         final data = response.data;
+        print('Banner API Response: $data');
+        
         if (data['success'] == true && data['data'] != null) {
           // Process banners to ensure image URLs are complete
           final banners = List<Map<String, dynamic>>.from(data['data']);
-          return banners.map((banner) {
-            if (banner['banner'] != null) {
+          print('Processing ${banners.length} banners');
+          
+          return banners.map<Map<String, dynamic>>((banner) {
+            final Map<String, dynamic> bannerData = Map<String, dynamic>.from(banner);
+            
+            if (bannerData['banner'] != null) {
+              String imageUrl = bannerData['banner'].toString().trim();
+              
+              // Log the original URL
+              print('Original banner URL: $imageUrl');
+              
+              // Handle empty or invalid URLs
+              if (imageUrl.isEmpty) {
+                print('Warning: Empty banner URL found');
+                bannerData['image_url'] = '';
+                return bannerData;
+              }
+              
               // Convert relative URL to absolute URL if needed
-              String imageUrl = banner['banner'].toString();
               if (!imageUrl.startsWith('http')) {
                 // Remove leading slash if present to avoid double slashes
                 if (imageUrl.startsWith('/')) {
                   imageUrl = imageUrl.substring(1);
                 }
-                banner['image_url'] = '${AppUrls.baseImageUrl}$imageUrl';
+                // Ensure base URL ends with a slash
+                String baseUrl = AppUrls.baseImageUrl.endsWith('/') 
+                    ? AppUrls.baseImageUrl 
+                    : '${AppUrls.baseImageUrl}/';
+                bannerData['image_url'] = '$baseUrl$imageUrl';
               } else {
-                banner['image_url'] = imageUrl;
+                bannerData['image_url'] = imageUrl;
               }
+              
+              print('Processed banner URL: ${bannerData['image_url']}');
+            } else {
+              print('Warning: Banner object missing banner field: $banner');
+              bannerData['image_url'] = '';
             }
-            return banner;
+            
+            return bannerData;
           }).toList();
         } else {
           print('BannerService Error: ${data['message']}');

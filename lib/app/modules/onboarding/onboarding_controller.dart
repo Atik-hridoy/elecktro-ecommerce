@@ -56,12 +56,18 @@ class OnboardingController extends GetxController {
   
   void navigateToHome() async {
     _cancelTimers();
-    // Check if profile is already completed
     await LocalStorage.getAllPrefData();
-    if (LocalStorage.isProfileComplete()) {
-      Get.offAllNamed(Routes.auth);
+    
+    if (LocalStorage.token.isNotEmpty && LocalStorage.isLogIn) {
+      // If already logged in (returning user)
+      if (await LocalStorage.isProfileComplete()) {
+        Get.offAllNamed(Routes.home);
+      } else {
+        Get.offAllNamed(Routes.updateProfile);
+      }
     } else {
-      Get.offAllNamed(Routes.updateProfile);
+      // New user, go to auth
+      Get.offAllNamed(Routes.auth);
     }
   }
   

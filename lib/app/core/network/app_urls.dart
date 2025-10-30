@@ -28,7 +28,11 @@ class AppUrls {
   static const String getProducts = 'products/';
   static const String getProductDetails = 'products/single/';
   static const String postBookmark = 'bookmarks/';
+  static const String getBookmarks = 'bookmarks/';
 
+  // cart
+  static const String addToCart = 'cart/add';
+  static const String getCart = 'cart/me';
   // paymentSession
 
   static const String createPaymentSession = 'orders/create-checkout-session';

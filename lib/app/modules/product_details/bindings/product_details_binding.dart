@@ -1,5 +1,6 @@
 import 'package:elecktro_ecommerce/app/modules/auth/bindings/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
 import 'package:get/get.dart';
 
 class ProductDetailsBinding extends Bindings {
@@ -11,6 +12,9 @@ class ProductDetailsBinding extends Bindings {
     // Then initialize product details controller
     Get.lazyPut<ProductDetailsController>(
       () => ProductDetailsController(),
+    );
+    Get.lazyPut<CartService>(
+      () => CartService(),
     );
   }
 }

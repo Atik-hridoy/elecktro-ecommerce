@@ -1,105 +1,186 @@
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/cart/models/cart_model.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/model/add_to_cart.dart';
 
 class CartController extends GetxController {
   static CartController get to => Get.find();
   
-  // Add your cart logic here
-  final RxList<Map<String, dynamic>> cartItems = <Map<String, dynamic>>[].obs;
+  final CartService _cartService = CartService();
   
-  // Observable for checkbox state
-  var isChecked = false.obs;
+  // Cart data
+  final Rxn<CartModel> cart = Rxn<CartModel>();
+  final RxBool isLoading = false.obs;
+  final RxString errorMessage = ''.obs;
+  
+  // Getter for cart items count
+  int get itemCount => cart.value?.products.length ?? 0;
+  
+  // Getter for total amount
+  double get totalAmount => cart.value?.totalAmount ?? 0.0;
+  
+  // Observable for select all checkbox
+  final RxBool isAllSelected = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Add sample data for testing
-    if (cartItems.isEmpty) {
-      addToCart({
-        'id': '1',
-        'name': 'Wireless Headphones',
-        'brand': 'Sony',
-        'price': 99.99,
-        'originalPrice': 129.99,
-        'size': 'One Size',
-        'color': 'Black',
-        'image': 'assets/icons/home/ex1.png',
-      });
+    fetchCart();
+  }
+  
+  // Prepare cart data for checkout
+  Map<String, dynamic> prepareCheckoutData() {
+    if (cart.value == null || cart.value!.products.isEmpty) {
+      return {'cartItems': []};
+    }
+
+    return {
+      'cartItems': cart.value!.products.map((item) => {
+            'productId': item.productId,
+            'size': item.size,
+            'quantity': item.quantity,
+            'profit': item.profit,
+            'color': item.color,
+          }).toList(),
+    };
+  }
+
+  // Navigate to checkout
+  void navigateToCheckout() {
+    final checkoutData = prepareCheckoutData();
+    // Navigate to checkout screen with the prepared data
+    Get.toNamed('/checkout', arguments: checkoutData);
+  }
+
+  // Fetch cart data from API
+  Future<void> fetchCart() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
       
-      addToCart({
-        'id': '2',
-        'name': 'Smart Watch',
-        'brand': 'Samsung',
-        'price': 199.99,
-        'size': 'M',
-        'color': 'Silver',
-        'image': 'assets/icons/home/ex1.png',
- 
-      });
+      print('Fetching cart data...');
+      final response = await _cartService.getCart();
+      print('Cart API Response: $response');
+      
+      if (response['success'] == true) {
+        print('Cart data received, parsing...');
+        // The actual cart data is in response['data']['data']
+        final cartData = response['data'] is Map && response['data']['data'] != null 
+            ? response['data']['data'] 
+            : response['data'];
+            
+        cart.value = CartModel.fromJson(cartData);
+        print('Cart items count: ${cart.value?.products.length ?? 0}');
+        if (cart.value?.products.isEmpty ?? true) {
+          print('Cart is empty or no products found in the response');
+        }
+      } else {
+        errorMessage.value = response['message'] ?? 'Failed to load cart';
+        print('Error fetching cart: $errorMessage');
+        Get.snackbar('Error', errorMessage.value);
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred while loading cart';
+      Get.snackbar('Error', errorMessage.value);
+      // ignore: avoid_print
+      print('Error fetching cart: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
   
-  // Add methods for cart operations
-  void addToCart(Map<String, dynamic> product) {
-    // Check if product already exists in cart
-    final existingIndex = cartItems.indexWhere((item) => 
-      item['id'] == product['id'] && 
-      item['size'] == product['size'] && 
-      item['color'] == product['color']
-    );
-
-    if (existingIndex >= 0) {
-      // Update quantity if product exists
-      updateQuantity(existingIndex, (cartItems[existingIndex]['quantity'] ?? 1) + 1);
-    } else {
-      // Add new product with quantity 1
-      cartItems.add({
-        ...product,
-        'quantity': 1,
-        'isFavorite': false,
-      });
-      update();
+  // Add item to cart
+  Future<void> addToCart(String productId, {
+    required String size,
+    required String color,
+    int quantity = 1,
+    double price = 0.0,
+    List<String> images = const [],
+  }) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      final response = await _cartService.addToCart(
+        AddToCartModel(
+          productId: productId,
+          size: size,
+          price: price,
+          quantity: quantity,
+          color: color,
+          images: images,
+        ),
+      );
+      
+      if (response['success'] == true) {
+        await fetchCart(); // Refresh cart data
+        Get.snackbar('Success', 'Item added to cart');
+      } else {
+        errorMessage.value = response['message'] ?? 'Failed to add item to cart';
+        Get.snackbar('Error', errorMessage.value);
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred while adding to cart';
+      Get.snackbar('Error', errorMessage.value);
+      // ignore: avoid_print
+      print('Error adding to cart: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
   
-  void removeFromCart(int index) {
-    if (index >= 0 && index < cartItems.length) {
-      cartItems.removeAt(index);
-      update();
-    }
-  }
-
-  void toggleFavorite(int index) {
-    if (index >= 0 && index < cartItems.length) {
-      final item = cartItems[index];
-      item['isFavorite'] = !(item['isFavorite'] ?? false);
-      cartItems[index] = Map<String, dynamic>.from(item);
-      update();
-    }
-  }
-
-  void updateQuantity(int index, int newQuantity) {
-    if (index >= 0 && index < cartItems.length && newQuantity > 0) {
-      final item = cartItems[index];
-      item['quantity'] = newQuantity;
-      cartItems[index] = Map<String, dynamic>.from(item);
-      update();
-    }
-  }
-
-  // Toggle the checkbox state
-  void toggleCheckbox(bool? value) {
-    if (value != null) {
-      isChecked.value = value;  // Update the checkbox state
+  // Remove item from cart
+  Future<void> removeFromCart(String itemId) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      // TODO: Implement remove from cart API call
+      // For now, just update the local state
+      if (cart.value != null) {
+        cart.value = cart.value!.copyWith(
+          products: cart.value!.products.where((item) => item.id != itemId).toList(),
+        );
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred while removing item';
+      Get.snackbar('Error', errorMessage.value);
+    } finally {
+      isLoading.value = false;
     }
   }
   
-  double get totalAmount {
-    return cartItems.fold(0, (sum, item) => 
-      sum + ((item['price'] as num).toDouble() * (item['quantity'] ?? 1))
-    );
+  // Update item quantity
+  Future<void> updateQuantity(String itemId, int newQuantity) async {
+    try {
+      if (newQuantity < 1) return;
+      
+      // TODO: Implement update quantity API call
+      // For now, just update the local state
+      if (cart.value != null) {
+        final updatedProducts = cart.value!.products.map((item) {
+          if (item.id == itemId) {
+            return item.copyWith(quantity: newQuantity);
+          }
+          return item;
+        }).toList();
+        
+        cart.value = cart.value!.copyWith(products: updatedProducts);
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred while updating quantity';
+      Get.snackbar('Error', errorMessage.value);
+    }
   }
-
-  int get totalItems {
-    return cartItems.fold(0, (int sum, item) => sum + ((item['quantity'] as int?) ?? 1));
+  
+  // Toggle select all items
+  void toggleSelectAll(bool? value) {
+    isAllSelected.value = value ?? false;
+    // TODO: Update individual item selection state if needed
+  }
+  
+  // Toggle item selection
+  void toggleItemSelection(String itemId) {
+    // TODO: Implement individual item selection logic
   }
 }

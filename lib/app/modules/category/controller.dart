@@ -11,14 +11,15 @@ class CategoryController extends GetxController {
 
   // Products data for CategoryView grid
   final products = <ProductDetailModel>[].obs;
+  final filteredProducts = <ProductDetailModel>[].obs;
   final isLoadingProducts = false.obs;
   bool _hasLoadedProducts = false;
+  String? _currentCategoryId;
 
   @override
   void onInit() {
     super.onInit();
     // Initialize with sample data
-    
     filteredCategories.assignAll(categories);
 
     // Fetch products for grid
@@ -89,6 +90,7 @@ class CategoryController extends GetxController {
         for (final p in mapped) p.id: p,
       };
       products.assignAll(byId.values.toList());
+      filteredProducts.assignAll(products); // Initialize filtered products with all products
       _hasLoadedProducts = true;
     } catch (_) {
       products.clear();
@@ -96,6 +98,24 @@ class CategoryController extends GetxController {
       isLoadingProducts.value = false;
     }
   }
+
+  void filterProductsByCategory(String? categoryId) {
+    _currentCategoryId = categoryId;
+    if (categoryId == null || categoryId.isEmpty) {
+      filteredProducts.assignAll(products);
+    } else {
+      filteredProducts.assignAll(
+        products.where((product) => product.categoryId == categoryId).toList(),
+      );
+    }
+  }
+
+  void clearCategoryFilter() {
+    _currentCategoryId = null;
+    filteredProducts.assignAll(products);
+  }
+
+  bool isCategorySelected(String categoryId) => _currentCategoryId == categoryId;
 
   String _fullUrl(String url) {
     if (url.isEmpty) return url;

@@ -3,7 +3,6 @@ import 'package:elecktro_ecommerce/app/modules/product_details/widgets/product_b
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/controllers/product_controller.dart';
 
 // This view is restored to the original user-provided style, with dynamic data connected.
@@ -612,27 +611,37 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  controller.onAddToCart();
-                  Get.toNamed(Routes.cart);
-                },
+              child: Obx(() => ElevatedButton(
+                onPressed: controller.isAddingToCart.value
+                    ? null
+                    : () async {
+                        await controller.onAddToCart();
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFC107),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.shopping_cart_outlined),
-                    SizedBox(width: 8),
-                    Text('Add to Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                  ],
-                ),
+                child: controller.isAddingToCart.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.black,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.shopping_cart_outlined),
+                          SizedBox(width: 8),
+                          Text('Add to Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
               ),
-            ),
+            )),
           ],
         ),
       ),

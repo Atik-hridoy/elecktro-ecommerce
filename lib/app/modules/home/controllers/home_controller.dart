@@ -8,7 +8,7 @@ import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 class HomeController extends GetxController {
   var selectedIndex = 0.obs; // Observable variable for the selected index
   var currentBannerIndex = 0.obs; // Track current banner index
-  var banners = <String>[].obs; // Store banner image URLs
+  var banners = <Map<String, dynamic>>[].obs; // Store banner data with image URLs
   var isLoading = true.obs;
   var error = ''.obs;
   
@@ -49,9 +49,19 @@ class HomeController extends GetxController {
   
   // Update banner index
   void updateBannerIndex(int index) {
-    currentBannerIndex.value = index;
+    if (index >= 0 && index < banners.length) {
+      currentBannerIndex.value = index;
+    }
     _restartBannerTimer();
     update(); // Notify listeners about the change
+  }
+  
+  // Get current banner image URL
+  String get currentBannerImageUrl {
+    if (banners.isEmpty || currentBannerIndex.value >= banners.length) {
+      return '';
+    }
+    return banners[currentBannerIndex.value]['image_url'] ?? '';
   }
   
   // Fetch banners from API
@@ -61,17 +71,10 @@ class HomeController extends GetxController {
       error('');
       
       final bannerData = await _bannerService.getBanners();
-      if (bannerData != null) {
-        // Assuming bannerData is a List<Map> with 'image_url' field
-        banners.value = bannerData
-            .where((banner) => banner['image_url'] != null)
-            .map((banner) => banner['image_url'].toString())
-            .toList();
-        
-        if (banners.isEmpty) {
-          error('No banners available');
-        }
+      if (bannerData != null && bannerData.isNotEmpty) {
+        banners.assignAll(bannerData);
       } else {
+        banners.clear();
         error('Failed to load banners');
       }
     } catch (e) {
