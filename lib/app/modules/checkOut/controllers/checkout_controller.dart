@@ -1,24 +1,31 @@
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../services/payment_session_service.dart';
 
 class CheckoutController extends GetxController {
   // Cart items list (in a real app, this would come from a service)
   final RxList<Map<String, dynamic>> cartItems = <Map<String, dynamic>>[].obs;
-  
+
   // Order summary values
   final RxDouble subtotal = 0.0.obs;
   final RxDouble deliveryFee = 5.99.obs; // Example fixed delivery fee
-  
+
   // Payment method
   final RxString selectedPaymentMethod = 'Online Payment'.obs;
-  
+
   // Voucher / Discount
   final RxString voucherCode = ''.obs;
   final RxDouble discount = 0.0.obs;
   final TextEditingController voucherTextController = TextEditingController();
-  
+
   // Computed total amount
-  double get totalAmount => (subtotal.value + deliveryFee.value - discount.value).clamp(0.0, double.infinity);
+  double get totalAmount =>
+      (subtotal.value + deliveryFee.value - discount.value).clamp(0.0, double.infinity);
+
+  // Payment service
+  final PaymentSessionService _paymentService = PaymentSessionService();
 
   void setPaymentMethod(String value) {
     selectedPaymentMethod.value = value;
@@ -29,11 +36,11 @@ class CheckoutController extends GetxController {
     voucherTextController.dispose();
     super.onClose();
   }
-  
+
   @override
   void onInit() {
     super.onInit();
-    
+
     // Check if we have direct checkout data
     final args = Get.arguments;
     if (args != null && args is Map<String, dynamic>) {
@@ -46,9 +53,9 @@ class CheckoutController extends GetxController {
       // Normal cart loading
       _loadCartItems();
     }
-    
+
     _calculateSubtotal();
-    
+
     // Keep text field and reactive code in sync
     voucherTextController.text = voucherCode.value;
     voucherTextController.addListener(() {
@@ -58,7 +65,6 @@ class CheckoutController extends GetxController {
 
   // Load cart items (mock data for example)
   void _loadCartItems() {
-    // This is example data - in a real app, you would get this from your cart service
     final exampleItems = [
       {
         'id': '1',
@@ -82,11 +88,11 @@ class CheckoutController extends GetxController {
         'image': 'assets/images/smartwatch.jpg',
       },
     ];
-    
+
     cartItems.assignAll(exampleItems);
     _calculateSubtotal();
   }
-  
+
   // Calculate subtotal based on cart items
   void _calculateSubtotal() {
     double total = 0.0;
@@ -94,12 +100,13 @@ class CheckoutController extends GetxController {
       total += (item['price'] as num).toDouble() * (item['quantity'] as int);
     }
     subtotal.value = total;
+
     // Re-apply voucher if any
     if (voucherCode.value.isNotEmpty) {
       _applyVoucherInternal(voucherCode.value);
     }
   }
-  
+
   // Update item quantity
   void updateQuantity(int index, int newQuantity) {
     if (newQuantity > 0) {
@@ -107,10 +114,9 @@ class CheckoutController extends GetxController {
       item['quantity'] = newQuantity;
       cartItems[index] = Map<String, dynamic>.from(item);
       _calculateSubtotal();
-    } else {
     }
   }
-  
+
   // Remove item from cart
   void removeItem(int index) {
     if (index >= 0 && index < cartItems.length) {
@@ -118,7 +124,7 @@ class CheckoutController extends GetxController {
       _calculateSubtotal();
     }
   }
-  
+
   // Apply voucher logic
   void applyVoucher(String code) {
     voucherCode.value = code.trim();
@@ -143,13 +149,12 @@ class CheckoutController extends GetxController {
       discount.value = 0.0;
       return;
     }
-    // Simple demo rules: FREESHIP removes delivery fee; SAVE10 gives 10% off subtotal
+
     if (code.toUpperCase() == 'FREESHIP') {
       newDiscount = deliveryFee.value; // waive delivery
     } else if (code.toUpperCase() == 'SAVE10') {
       newDiscount = (subtotal.value * 0.10);
     } else {
-      // invalid code
       if (showFeedback) {
         Get.snackbar(
           'Invalid Voucher',
@@ -174,45 +179,63 @@ class CheckoutController extends GetxController {
       );
     }
   }
-  
-  // Process checkout
-  Future<void> processCheckout() async {
-    // In a real app, you would process the payment and create an order
-    // This is a placeholder for the checkout logic
+
+  // ==========================================
+  // NEW: Process checkout via PaymentSessionService
+  // ==========================================
+  Future<void> proceedToPayment() async {
+    if (cartItems.isEmpty) {
+      Get.snackbar(
+        'Cart Empty',
+        'Please add items to your cart',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final body = {
+      "cartItems": cartItems.map((item) {
+        return {
+          "productId": item['id'],
+          "size": item['size'],
+          "quantity": item['quantity'],
+          "profit": item['profit'] ?? 0,
+          "color": item['color'],
+        };
+      }).toList(),
+    };
+
     try {
-      // Show loading
+      // Show loader
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
-      
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Close loading dialog
-      Get.back();
-      
-      // Show success message
-      Get.snackbar(
-        'Order Placed!',
-        'Your order has been placed successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-      
-      // Clear cart and go to home or order confirmation
-      cartItems.clear();
-      Get.offAllNamed('/home');
-      
-    } catch (e) {
-      // Close loading dialog if still open
+
+      final checkoutUrl = await _paymentService.createPaymentSession(body);
+
+      // Close loader
       if (Get.isDialogOpen ?? false) Get.back();
-      
-      // Show error message
+
+      if (checkoutUrl != null) {
+        // Navigate to PaymentWebView with checkout URL
+        Get.toNamed(Routes.paymentWebView, arguments: {'url': checkoutUrl});
+      } else {
+        Get.snackbar(
+          'Payment Failed',
+          'Unable to create payment session',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
       Get.snackbar(
         'Error',
-        'Failed to process your order. Please try again.',
+        'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

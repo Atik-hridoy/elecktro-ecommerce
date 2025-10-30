@@ -26,5 +26,6 @@ abstract class Routes {
   static const faq = '/faq';
   static const support = '/support';
   static const updateProfile = '/update-profile';
+  static const paymentWebView = '/payment-web-view';
  
 }

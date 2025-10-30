@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class BannerCard extends StatefulWidget {
@@ -126,16 +127,18 @@ class _BannerCardState extends State<BannerCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        widget.items[index],
+                      child: CachedNetworkImage(
+                        imageUrl: widget.items[index],
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.error_outline, size: 40, color: Colors.grey),
-                          );
-                        },
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(child: CircularProgressIndicator()),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.error_outline, size: 40, color: Colors.grey),
+                        ),
                       ),
                     ),
                   );

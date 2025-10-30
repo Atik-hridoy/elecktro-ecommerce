@@ -47,6 +47,9 @@ dependencies:
   dio: ^5.9.0
   cached_network_image: ^3.4.1
   get: ^4.7.2
+  flutter_inappwebview: ^6.1.5
+  app_links: ^6.4.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

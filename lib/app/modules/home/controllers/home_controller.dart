@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/get_category_on_home_view_service.dart';
+import 'package:elecktro_ecommerce/app/modules/home/services/get_banner.dart';
 import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 class HomeController extends GetxController {
   var selectedIndex = 0.obs; // Observable variable for the selected index
   var currentBannerIndex = 0.obs; // Track current banner index
+  var banners = <String>[].obs; // Store banner image URLs
+  var isLoading = true.obs;
+  var error = ''.obs;
+  
   Timer? _bannerTimer;
   final categories = <CategoryModel>[].obs;
   late final ProductCategoryService _categoryService;
+  late final BannerService _bannerService;
 
   // Method to update selected index
   void updateIndex(int index) {
@@ -25,7 +31,12 @@ class HomeController extends GetxController {
     _categoryService = Get.isRegistered<ProductCategoryService>()
         ? Get.find<ProductCategoryService>()
         : Get.put(ProductCategoryService());
+    _bannerService = Get.isRegistered<BannerService>()
+        ? Get.find<BannerService>()
+        : Get.put(BannerService());
+    
     fetchCategories();
+    fetchBanners();
     _startBannerTimer();
   }
   
@@ -43,11 +54,38 @@ class HomeController extends GetxController {
     update(); // Notify listeners about the change
   }
   
+  // Fetch banners from API
+  Future<void> fetchBanners() async {
+    try {
+      isLoading(true);
+      error('');
+      
+      final bannerData = await _bannerService.getBanners();
+      if (bannerData != null) {
+        // Assuming bannerData is a List<Map> with 'image_url' field
+        banners.value = bannerData
+            .where((banner) => banner['image_url'] != null)
+            .map((banner) => banner['image_url'].toString())
+            .toList();
+        
+        if (banners.isEmpty) {
+          error('No banners available');
+        }
+      } else {
+        error('Failed to load banners');
+      }
+    } catch (e) {
+      error('Error loading banners: $e');
+    } finally {
+      isLoading(false);
+    }
+  }
+
   // Start auto-slide timer
   void _startBannerTimer() {
     _bannerTimer?.cancel();
     _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (!_isDisposed) {
+      if (!_isDisposed && banners.isNotEmpty) {
         currentBannerIndex.value = _getNextBannerIndex();
         update();
       }

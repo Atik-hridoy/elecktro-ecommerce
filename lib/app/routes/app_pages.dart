@@ -1,3 +1,4 @@
+import 'package:elecktro_ecommerce/app/modules/checkOut/views/payment_webview.dart';
 import 'package:flutter/material.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/bindings/bindings.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/views/authSignInView.dart';
@@ -98,6 +99,11 @@ class AppPages {
     GetPage(
       name: Routes.checkout,
       page: () => const CheckoutView(),
+      binding: CheckoutBinding(),
+    ),
+    GetPage(
+      name: Routes.paymentWebView,
+      page: () => const PaymentWebView(),
       binding: CheckoutBinding(),
     ),
     GetPage(

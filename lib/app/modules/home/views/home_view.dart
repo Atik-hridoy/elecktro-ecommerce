@@ -98,15 +98,34 @@ class HomeView extends StatelessWidget {
             // Banner Section with auto-sliding
             GetBuilder<HomeController>(
               builder: (controller) {
+                if (controller.isLoading.value) {
+                  return const SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                
+                if (controller.error.isNotEmpty) {
+                  return Container(
+                    height: 200,
+                    padding: const EdgeInsets.all(16),
+                    child: Center(
+                      child: Text(
+                        controller.error.value,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                
+                if (controller.banners.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                
                 return BannerCard(
                   key: const ValueKey('banner_slider'),
-                  items: const [
-                    'assets/banner/pic1.png',
-                    'assets/banner/pic2.png',
-                    'assets/banner/pic3.png',
-                    'assets/banner/pic4.png',
-                    'assets/banner/pic5.png',
-                  ],
+                  items: controller.banners,
                   currentIndex: controller.currentBannerIndex.value,
                   onPageChanged: (index) {
                     controller.updateBannerIndex(index);
