@@ -37,4 +37,8 @@ class AppUrls {
 
   static const String createPaymentSession = 'orders/create-checkout-session';
 
+  // order
+
+  static const String getOrders = 'orders/my-orders';
+
 }

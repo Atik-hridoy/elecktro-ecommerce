@@ -1,7 +1,13 @@
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/order_history/services/order_service.dart';
+import 'package:elecktro_ecommerce/app/modules/profile/account%20options/order_history/models/order_model.dart';
+import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
 
 class HistoryController extends GetxController {
   final RxList<Map<String, dynamic>> orders = <Map<String, dynamic>>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxString errorMessage = ''.obs;
+  final OrderService _orderService = Get.put(OrderService());
 
   @override
   void onInit() {
@@ -10,193 +16,73 @@ class HistoryController extends GetxController {
     loadOrders();
   }
 
-  void loadOrders() {
-    // Sample orders with the correct data structure that matches the view
-    orders.value = [
-      // Pending Orders
-      {
-        'id': '#1458118',
-        'status': 'Pending',
-        'address': '20 Cooper Square, New York',
-        'date': '25 Aug, 2025',
-        'product_name': 'Luggage Tag',
-        'quantity': '3',
-        'total': 9,
-      },
-      {
-        'id': '#1458119',
-        'status': 'Pending',
-        'address': '15 Madison Avenue, NYC',
-        'date': '24 Aug, 2025',
-        'product_name': 'Travel Backpack',
-        'quantity': '1',
-        'total': 45,
-      },
-      {
-        'id': '#1458120',
-        'status': 'Pending',
-        'address': '350 Fifth Avenue, NYC',
-        'date': '23 Aug, 2025',
-        'product_name': 'Wireless Headphones',
-        'quantity': '2',
-        'total': 178,
-      },
+  Future<void> loadOrders() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
       
-      // To Ship Orders
-      {
-        'id': '#1468229',
-        'status': 'To Ship',
-        'address': '20 Cooper Square, New York',
-        'date': '25 Aug, 2025',
-        'product_name': 'Luggage Tag',
-        'quantity': '3',
-        'total': 9,
-      },
-      {
-        'id': '#1468230',
-        'status': 'To Ship',
-        'address': '42 Broadway Street, NY',
-        'date': '23 Aug, 2025',
-        'product_name': 'Phone Case',
-        'quantity': '2',
-        'total': 25,
-      },
-      {
-        'id': '#1468231',
-        'status': 'To Ship',
-        'address': '88 Central Park West, NY',
-        'date': '22 Aug, 2025',
-        'product_name': 'Wireless Headphones',
-        'quantity': '1',
-        'total': 89,
-      },
-      {
-        'id': '#1468232',
-        'status': 'To Ship',
-        'address': '125 Park Avenue, NYC',
-        'date': '21 Aug, 2025',
-        'product_name': 'Laptop Stand',
-        'quantity': '1',
-        'total': 35,
-      },
-      {
-        'id': '#1468233',
-        'status': 'To Ship',
-        'address': '555 Madison Avenue, NY',
-        'date': '20 Aug, 2025',
-        'product_name': 'Travel Backpack',
-        'quantity': '1',
-        'total': 65,
-      },
+      // Fetch orders from the service
+      final response = await _orderService.getOrders();
       
-      // Completed Orders
-      {
-        'id': '#2365897',
-        'status': 'Completed',
-        'address': '20 Cooper Square, New York',
-        'date': '18 Aug, 2025',
-        'product_name': 'Luggage Tag',
-        'quantity': '3',
-        'total': 9,
-      },
-      {
-        'id': '#2365898',
-        'status': 'Completed',
-        'address': '120 Wall Street, NYC',
-        'date': '17 Aug, 2025',
-        'product_name': 'Laptop Stand',
-        'quantity': '1',
-        'total': 35,
-      },
-      {
-        'id': '#2365899',
-        'status': 'Completed',
-        'address': '75 Park Avenue, NY',
-        'date': '16 Aug, 2025',
-        'product_name': 'Coffee Mug Set',
-        'quantity': '4',
-        'total': 28,
-      },
-      {
-        'id': '#2365900',
-        'status': 'Completed',
-        'address': '200 5th Avenue, NYC',
-        'date': '15 Aug, 2025',
-        'product_name': 'Desk Organizer',
-        'quantity': '1',
-        'total': 22,
-      },
-      {
-        'id': '#2365901',
-        'status': 'Completed',
-        'address': '1 World Trade Center, NY',
-        'date': '14 Aug, 2025',
-        'product_name': 'Phone Case',
-        'quantity': '3',
-        'total': 45,
-      },
-      {
-        'id': '#2365902',
-        'status': 'Completed',
-        'address': '30 Rockefeller Plaza, NYC',
-        'date': '12 Aug, 2025',
-        'product_name': 'Wireless Headphones',
-        'quantity': '1',
-        'total': 129,
-      },
-      {
-        'id': '#2365903',
-        'status': 'Completed',
-        'address': '432 Park Avenue, NY',
-        'date': '10 Aug, 2025',
-        'product_name': 'Travel Backpack',
-        'quantity': '2',
-        'total': 130,
-      },
-      
-      // Cancelled Orders
-      {
-        'id': '#3478121',
-        'status': 'Cancelled',
-        'address': '100 Times Square, NYC',
-        'date': '26 Aug, 2025',
-        'product_name': 'Wireless Mouse',
-        'quantity': '1',
-        'total': 25,
-      },
-      {
-        'id': '#3478122',
-        'status': 'Cancelled',
-        'address': '200 Broadway, NY',
-        'date': '25 Aug, 2025',
-        'product_name': 'USB Cable',
-        'quantity': '3',
-        'total': 15,
-      },
-      {
-        'id': '#3478123',
-        'status': 'Cancelled',
-        'address': '300 Wall Street, NYC',
-        'date': '24 Aug, 2025',
-        'product_name': 'Phone Charger',
-        'quantity': '2',
-        'total': 30,
-      },
-      {
-        'id': '#3478124',
-        'status': 'Cancelled',
-        'address': '400 Fifth Avenue, NY',
-        'date': '23 Aug, 2025',
-        'product_name': 'Laptop Sleeve',
-        'quantity': '1',
-        'total': 20,
-      },
+      if (response != null && response.orders.isNotEmpty) {
+        // Map the API response to the format expected by the UI
+        orders.value = response.orders.map((order) => {
+          'id': order.orderNumber,
+          'status': _mapStatus(order.deliveryStatus),
+          'address': order.address ?? 'No address provided',
+          'date': _formatDate(order.createdAt),
+          'product_name': _getProductNames(order.products),
+          'quantity': order.products.length.toString(),
+          'total': order.totalPrice,
+        }).toList();
+        
+        // Log the actual response for debugging
+        AppLogger.info('Successfully loaded ${orders.length} orders');
+        AppLogger.info('Orders data: $orders');
+      } else {
+        orders.value = [];
+        AppLogger.info('No orders found');
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to load orders. Please try again.';
+      AppLogger.error('Error loading orders: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  
+  String _mapStatus(String deliveryStatus) {
+    // Map the API status to the UI status if needed
+    return deliveryStatus;
+  }
+  
+  String _formatDate(DateTime date) {
+    return '${date.day} ${_getMonthName(date.month)}, ${date.year}';
+  }
+  
+  String _getMonthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
+    return months[month - 1];
+  }
+  
+  String _getProductNames(List<dynamic> products) {
+    if (products.isEmpty) return 'No products';
+    if (products.length == 1) {
+      final product = products[0];
+      return product is OrderProduct ? product.productName : product['productName'] ?? 'Product';
+    }
+    final firstProduct = products[0];
+    final productName = firstProduct is OrderProduct 
+        ? firstProduct.productName 
+        : firstProduct['productName'] ?? 'Product';
+    return '$productName +${products.length - 1} more';
   }
 
-  void refreshOrders() {
-    // Simulate refreshing orders (you can add loading state here)
-    loadOrders();
+  Future<void> refreshOrders() async {
+    await loadOrders();
   }
   
   // Method to add a new order (for testing purposes)

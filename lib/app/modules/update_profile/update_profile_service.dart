@@ -60,7 +60,7 @@ class UpdateProfileService extends GetxService {
         method: 'POST',
         endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfile}',
         statusCode: response.statusCode!,
-        responseData: response.data,
+        responseData: response.data, response: response,
       );
 
       if (response.statusCode == 200) {

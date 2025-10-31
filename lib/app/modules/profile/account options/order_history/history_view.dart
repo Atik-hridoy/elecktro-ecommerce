@@ -65,39 +65,98 @@ class HistoryView extends GetView<HistoryController> {
     final allOrders = controller.orders.isEmpty ? _getDemoOrders() : controller.orders;
     
     final filteredOrders = allOrders.where((order) {
-      switch (status) {
-        case 'pending':
-          return order['status'].toString().toLowerCase() == 'pending';
-        case 'to_ship':
-          return order['status'].toString().toLowerCase() == 'to ship';
-        case 'completed':
-          return order['status'].toString().toLowerCase() == 'completed';
-        case 'cancelled':
-          return order['status'].toString().toLowerCase() == 'cancelled';
-        default:
-          return false;
+      final orderStatus = order['status']?.toString().toLowerCase().trim() ?? '';
+      final tabStatus = status.toLowerCase().replaceAll('_', ' ').trim();
+      
+      // Special handling for different status variations
+      if (tabStatus == 'pending') {
+        return orderStatus == 'pending' || orderStatus == 'processing';
+      } else if (tabStatus == 'to ship') {
+        return orderStatus.contains('ship') || orderStatus.contains('delivery');
+      } else if (tabStatus == 'completed') {
+        return orderStatus == 'completed' || orderStatus == 'delivered';
+      } else if (tabStatus == 'cancelled') {
+        return orderStatus.contains('cancel') || orderStatus.contains('refund');
       }
+      return orderStatus == tabStatus;
     }).toList();
 
     if (filteredOrders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 64,
-              color: Colors.grey[400],
+      return RefreshIndicator(
+        onRefresh: () async {
+          if (controller.orders.isNotEmpty) {
+            await controller.refreshOrders();
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(Get.context!).size.height * 0.7,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    status == 'completed' 
+                      ? Icons.check_circle_outline
+                      : status == 'cancelled'
+                        ? Icons.cancel_outlined
+                        : status == 'pending' || status == 'to_ship'
+                          ? Icons.pending_actions_outlined
+                          : Icons.receipt_long_outlined,
+                    size: 64,
+                    color: Colors.grey[500],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  _getEmptyStateTitle(status),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _getEmptyStateSubtitle(status),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (status == 'pending' || status == 'to_ship') ...[
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Navigate to products page
+                      Get.until((route) => Get.currentRoute == '/home');
+                      Get.toNamed('/category');
+                    },
+                    icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                    label: const Text('Continue Shopping'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No ${status.replaceAll('_', ' ')} orders found',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -176,17 +235,22 @@ class HistoryView extends GetView<HistoryController> {
                   ),
                   const SizedBox(height: 2),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: _getStatusColor(order['status']).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _getStatusColor(order['status']).withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
-                      order['status'] ?? 'Pending',
+                      _getStatusText(order['status']),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: _getStatusColor(order['status']),
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -380,17 +444,67 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
+  /// Returns the color and formatted status text for an order status
+  static ({Color color, String displayText}) getStatusInfo(String? status) {
+    final statusLower = status?.toLowerCase() ?? 'pending';
+    
+    switch (statusLower) {
       case 'pending':
-        return Colors.blue;
+        return (
+          color: const Color(0xFF3498db), // Blue
+          displayText: 'Pending',
+        );
+      case 'processing':
+        return (
+          color: const Color(0xFF9b59b6), // Purple
+          displayText: 'Processing',
+        );
+      case 'to_ship':
       case 'to ship':
-        return Colors.orange;
+      case 'shipped':
+        return (
+          color: const Color(0xFFf39c12), // Orange
+          displayText: 'Shipped',
+        );
+      case 'out_for_delivery':
+      case 'out for delivery':
+        return (
+          color: const Color(0xFF2ecc71), // Green
+          displayText: 'Out for Delivery',
+        );
+      case 'delivered':
       case 'completed':
-        return Colors.green;
+        return (
+          color: const Color(0xFF27ae60), // Dark Green
+          displayText: 'Delivered',
+        );
+      case 'cancelled':
+      case 'canceled':
+        return (
+          color: const Color(0xFFe74c3c), // Red
+          displayText: 'Cancelled',
+        );
+      case 'refunded':
+        return (
+          color: const Color(0xFF7f8c8d), // Gray
+          displayText: 'Refunded',
+        );
       default:
-        return Colors.grey;
+        return (
+          color: Colors.grey,
+          displayText: status?.split('_').map((s) => '${s[0].toUpperCase()}${s.substring(1)}').join(' ') ?? 'Pending',
+        );
     }
+  }
+  
+  /// Returns the color for a given order status
+  Color _getStatusColor(String? status) {
+    return getStatusInfo(status).color;
+  }
+  
+  /// Returns the display text for a given order status
+  String _getStatusText(String? status) {
+    return getStatusInfo(status).displayText;
   }
 
   // Get product-specific colors for better visual distinction
@@ -434,6 +548,40 @@ class HistoryView extends GetView<HistoryController> {
         return Icons.storage;
       default:
         return Icons.shopping_bag_outlined;
+    }
+  }
+
+  // Get title for empty state based on order status
+  String _getEmptyStateTitle(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'No Pending Orders';
+      case 'to_ship':
+      case 'to ship':
+        return 'No Orders to Ship';
+      case 'completed':
+        return 'No Completed Orders';
+      case 'cancelled':
+        return 'No Cancelled Orders';
+      default:
+        return 'No Orders Found';
+    }
+  }
+
+  // Get subtitle for empty state based on order status
+  String _getEmptyStateSubtitle(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'You don\'t have any pending orders. Your new orders will appear here.';
+      case 'to_ship':
+      case 'to ship':
+        return 'All your orders are on their way! Check back later for shipping updates.';
+      case 'completed':
+        return 'Your completed order history will appear here.';
+      case 'cancelled':
+        return 'No cancelled orders to display.';
+      default:
+        return 'Your orders will appear here once you make a purchase.';
     }
   }
 

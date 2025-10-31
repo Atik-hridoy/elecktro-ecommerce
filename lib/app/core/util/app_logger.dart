@@ -117,7 +117,7 @@ class AppLogger {
     required String endpoint,
     required int statusCode,
     dynamic responseData,
-    Duration? duration,
+    Duration? duration, required response,
   }) {
     if (!_enableLogs) return;
 

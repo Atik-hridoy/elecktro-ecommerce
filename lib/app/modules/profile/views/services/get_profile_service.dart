@@ -42,6 +42,7 @@ class GetProfileService {
         endpoint: url,
         statusCode: response.statusCode ?? 0,
         responseData: response.data,
+        response: response,
       );
 
       if (response.statusCode == 200) {

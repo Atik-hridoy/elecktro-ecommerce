@@ -103,6 +103,7 @@ class UpdateProfileService {
         endpoint: '${AppUrls.baseUrl}${AppUrls.updateProfileInsideApp}',
         statusCode: response.statusCode,
         responseData: responseData,
+        response: response,
         duration: duration,
       );
       

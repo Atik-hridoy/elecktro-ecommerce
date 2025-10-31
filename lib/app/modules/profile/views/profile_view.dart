@@ -301,12 +301,17 @@ class ProfileView extends GetView<ProfileController> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                // Handle logout logic here
-                // You can call your controller method here
-                // controller.logout();
-                print('User logged out');
+                try {
+                  await controller.logout();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error logging out: $e')),
+                    );
+                  }
+                }
               },
               child: const Text('Log Out', style: TextStyle(color: Colors.red)),
             ),

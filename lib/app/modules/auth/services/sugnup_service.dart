@@ -36,6 +36,7 @@ class AuthCreateUserService extends GetxService {
           endpoint: response.requestOptions.path,
           statusCode: response.statusCode ?? 200,
           responseData: response.data,
+          response: response,
         );
         return handler.next(response);
       },

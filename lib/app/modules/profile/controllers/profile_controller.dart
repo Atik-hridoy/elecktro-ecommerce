@@ -1,5 +1,8 @@
 import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 import '../views/services/get_profile_service.dart';
 import '../views/model/get_profile_model.dart';
@@ -80,5 +83,32 @@ class ProfileController extends GetxController {
   // Refresh profile data
   Future<void> refreshProfile() async {
     await fetchProfileData();
+  }
+  
+  // Logout user
+  Future<void> logout() async {
+    try {
+      isLoading.value = true;
+      // Clear user data
+      name.value = '';
+      email.value = '';
+      address.value = '';
+      
+      // Clear local storage
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // Navigate to auth screen
+      Get.offAllNamed(Routes.authSignIn);
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to logout: $e',
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

@@ -49,6 +49,7 @@ class ProductService extends GetxService {
         statusCode: res.statusCode ?? 0,
         responseData: res.data,
         duration: sw.elapsed,
+        response: res,
       );
 
       return Response(
@@ -131,6 +132,7 @@ class ProductService extends GetxService {
         statusCode: res.statusCode ?? 0,
         responseData: res.data,
         duration: sw.elapsed,
+        response: res,
       );
 
       return Response(
