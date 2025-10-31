@@ -98,9 +98,55 @@ class OrderService extends GetxService {
         final responseData = response.data;
         
         if (responseData is Map<String, dynamic> && responseData['data'] != null) {
-          return OrderResponse.fromJson(responseData);
+          // Handle the actual API response format
+          final data = responseData['data'] as Map<String, dynamic>;
+          final results = data['result'] as List<dynamic>;
+          
+          // Convert each order to OrderModel
+          final orders = results.map((orderData) {
+            return OrderModel(
+              id: orderData['_id'] ?? '',
+              orderNumber: orderData['orderNumber'] ?? 'N/A',
+              customerId: orderData['customerId'] ?? '',
+              sellerId: orderData['sellerId'] ?? '',
+              products: (orderData['products'] as List<dynamic>? ?? []).map((p) {
+                return OrderProduct(
+                  productId: p['productId'] is String ? p['productId'] : p['productId']?['_id'] ?? '',
+                  sellerId: p['sellerId'] ?? '',
+                  productName: p['productName'] ?? 'Unknown Product',
+                  size: p['size'] ?? '',
+                  color: p['color'] ?? '',
+                  quantity: p['quantity'] ?? 1,
+                  price: (p['price'] ?? 0).toDouble(),
+                  discount: (p['discount'] ?? 0).toDouble(),
+                  totalPrice: (p['totalPrice'] ?? 0).toDouble(),
+                );
+              }).toList(),
+              totalPrice: (orderData['totalPrice'] ?? 0).toDouble(),
+              paymentStatus: orderData['paymentStatus'] ?? 'pending',
+              deliveryStatus: orderData['deliveryStatus'] ?? 'pending',
+              address: orderData['shippingAddress']?['address'] ?? 'No address provided',
+              phoneNumber: orderData['shippingAddress']?['phoneNumber'],
+              email: orderData['shippingAddress']?['email'],
+              createdAt: orderData['createdAt'] != null 
+                  ? DateTime.parse(orderData['createdAt']) 
+                  : DateTime.now(),
+              updatedAt: orderData['updatedAt'] != null 
+                  ? DateTime.parse(orderData['updatedAt']) 
+                  : DateTime.now(),
+            );
+          }).toList();
+          
+          // Create a proper OrderResponse
+          return OrderResponse(
+            orders: orders,
+            page: page,
+            limit: limit,
+            total: data['total'] ?? 0,
+            totalPage: (data['total'] / limit).ceil(),
+          );
         } else {
-          throw Exception('Invalid response format');
+          throw Exception('Invalid response format: Missing data');
         }
       } else {
         throw Exception('Failed to load orders: ${response.statusCode}');
