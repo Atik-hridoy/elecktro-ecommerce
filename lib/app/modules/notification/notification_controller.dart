@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
+import 'package:elecktro_ecommerce/app/modules/notification/services/get_notification.dart';
 
 
 // Notification Item Model
@@ -262,10 +263,11 @@ class NotificationController extends GetxController {
     );
   }
 
-  void markAsRead(String id) {
+  Future<void> markAsRead(String id) async {
     try {
       final index = notifications.indexWhere((n) => n.id == id);
       if (index != -1) {
+        // Update UI optimistically
         final updated = notifications[index];
         notifications[index] = NotificationItem(
           id: updated.id,
@@ -275,12 +277,39 @@ class NotificationController extends GetxController {
           isHighlighted: false,
         );
         notifications.refresh();
+
+        // Call the API to mark as read
+        final notificationService = Get.find<GetNotificationService>();
+        final result = await notificationService.markNotificationAsRead(id);
+
+        if (result['success'] != true) {
+          // Revert UI if API call fails
+          notifications[index] = updated;
+          notifications.refresh();
+          
+          Get.snackbar(
+            'Error',
+            result['error']?.toString() ?? 'Failed to mark notification as read',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red[50],
+            colorText: Colors.red[800],
+          );
+        }
       }
     } catch (e) {
       AppLogger.error(
         'Error marking notification as read',
         tag: 'NotificationService',
         error: e,
+        stackTrace: StackTrace.current,
+      );
+      
+      Get.snackbar(
+        'Error',
+        'An error occurred while marking the notification as read',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
       );
     }
   }
@@ -375,6 +404,49 @@ class NotificationController extends GetxController {
         ],
       ),
     );
+  }
+
+  // Mark all notifications as read
+  Future<void> markAllAsRead() async {
+    try {
+      isLoading.value = true;
+      // Update local state first for better UX
+      notifications.value = notifications.map((n) => NotificationItem(
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        time: n.time,
+        isHighlighted: false,
+      )).toList();
+
+      final notificationService = GetNotificationService();
+      final response = await notificationService.markAllNotificationsAsRead();
+      
+      if (response['success'] == true) {
+        Get.snackbar(
+          'Success', 
+          response['message'] ?? 'All notifications marked as read',
+          snackPosition: SnackPosition.BOTTOM, 
+          backgroundColor: Colors.green, 
+          colorText: Colors.white
+        );
+      } else {
+        // Revert local changes if API call fails
+        notifications.refresh();
+        throw Exception(response['error'] ?? 'Failed to mark notifications as read');
+      }
+    } catch (e) {
+      AppLogger.error('Error marking all notifications as read', tag: 'NotificationController', error: e);
+      Get.snackbar(
+        'Error', 
+        'Failed to mark notifications as read: ${e.toString().replaceAll('Exception: ', '')}',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Helper method to format date time

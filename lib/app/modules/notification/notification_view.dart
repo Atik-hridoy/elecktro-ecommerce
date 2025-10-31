@@ -5,6 +5,29 @@ import 'notification_controller.dart';
 class NotificationView extends GetView<NotificationController> {
   const NotificationView({Key? key}) : super(key: key);
 
+  Widget _buildMoreOptionsButton() {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Colors.black),
+      onSelected: (value) {
+        if (value == 'mark_all_read') {
+          controller.markAllAsRead();
+        } else if (value == 'clear_all') {
+          controller.clearAllNotifications();
+        }
+      },
+      itemBuilder: (BuildContext context) => [
+        const PopupMenuItem(
+          value: 'mark_all_read',
+          child: Text('Mark all as read'),
+        ),
+        const PopupMenuItem(
+          value: 'clear_all',
+          child: Text('Clear all notifications'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,36 +55,9 @@ class NotificationView extends GetView<NotificationController> {
         ),
         centerTitle: true,
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
-            onSelected: (value) {
-              if (value == 'refresh') {
-                controller.refreshNotifications();
-              } else if (value == 'clear_all') {
-                controller.clearAllNotifications();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'refresh',
-                child: Row(
-                  children: [
-                    Icon(Icons.refresh, size: 18),
-                    SizedBox(width: 8),
-                    Text('Refresh'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'clear_all',
-                child: Row(
-                  children: [
-                    Icon(Icons.clear_all, size: 18, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Clear All', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
+          Row(
+            children: [
+              _buildMoreOptionsButton(),
             ],
           ),
         ],
@@ -162,29 +158,32 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: notification.isHighlighted 
-              ? Colors.green.shade50 
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: notification.isHighlighted 
-              ? Border.all(color: Colors.green.shade200, width: 1)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: notification.isHighlighted 
+                ? Colors.green.shade50 
+                : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: notification.isHighlighted 
+                ? Border.all(color: Colors.green.shade200, width: 1)
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,20 +216,16 @@ class NotificationCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: onMorePressed,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Colors.transparent,
-                    ),
-                    child: Icon(
-                      Icons.more_vert,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
+                IconButton(
+                  onPressed: onMorePressed,
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: Colors.grey[600],
+                    size: 20,
                   ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
                 ),
               ],
             ),
@@ -264,7 +259,8 @@ class NotificationCard extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

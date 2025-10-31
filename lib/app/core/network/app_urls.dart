@@ -44,5 +44,7 @@ class AppUrls {
   // notification
 
   static const String getNotification = 'notifications/';
+  static const String markAllNotificationsRead = 'notifications/';
+  static const String readSingleNotification = 'notifications/single/';
 
 }
