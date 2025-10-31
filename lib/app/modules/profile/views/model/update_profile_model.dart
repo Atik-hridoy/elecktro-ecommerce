@@ -4,6 +4,8 @@ class UpdateProfileModelInsideApp {
   final String gender;
   final String address;
   final String phone;
+  final String? email;
+  final String? profileImage;
 
   UpdateProfileModelInsideApp({
     required this.firstName,
@@ -11,6 +13,8 @@ class UpdateProfileModelInsideApp {
     this.gender = '',
     this.address = '',
     required this.phone,
+    this.email,
+    this.profileImage,
   });
 
   // Convert model to JSON
@@ -21,6 +25,8 @@ class UpdateProfileModelInsideApp {
       'gender': gender,
       'address': address,
       'phone': phone,
+      'email': email,
+      'profileImage': profileImage,
     };
   }
 
@@ -32,6 +38,8 @@ class UpdateProfileModelInsideApp {
       gender: json['gender'] ?? '',
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
+      email: json['email'],
+      profileImage: json['profileImage'],
     );
   }
 
@@ -42,6 +50,8 @@ class UpdateProfileModelInsideApp {
     String? gender,
     String? address,
     String? phone,
+    String? email,
+    String? profileImage,
   }) {
     return UpdateProfileModelInsideApp(
       firstName: firstName ?? this.firstName,
@@ -49,6 +59,8 @@ class UpdateProfileModelInsideApp {
       gender: gender ?? this.gender,
       address: address ?? this.address,
       phone: phone ?? this.phone,
+      email: email ?? this.email,
+      profileImage: profileImage ?? this.profileImage,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'history_controller.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 class HistoryView extends GetView<HistoryController> {
   const HistoryView({Key? key}) : super(key: key);
@@ -269,14 +270,28 @@ class HistoryView extends GetView<HistoryController> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: _getProductColor(order['product_name']),
+                  color: _getProductColor(order['product_name']).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.grey[200]!,
+                    width: 1,
+                  ),
+                  image: order['product_image'] != null
+                      ? DecorationImage(
+                          image: NetworkImage(
+                            '${AppUrls.baseImageUrl}${order['product_image']}'.replaceAll('//', '/'),
+                          ),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Icon(
-                  _getProductIcon(order['product_name']),
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: order['product_image'] == null
+                    ? Icon(
+                        _getProductIcon(order['product_name']),
+                        color: _getProductColor(order['product_name']),
+                        size: 24,
+                      )
+                    : null,
               ),
               
               const SizedBox(width: 12),

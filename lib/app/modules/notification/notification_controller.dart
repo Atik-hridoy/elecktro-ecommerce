@@ -1,5 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
+import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
+
 
 // Notification Item Model
 class NotificationItem {
@@ -20,6 +25,7 @@ class NotificationItem {
 
 // Notification Controller
 class NotificationController extends GetxController {
+  final Dio _dio = Dio();
   final RxList<NotificationItem> notifications = <NotificationItem>[].obs;
   final RxBool isLoading = false.obs;
 
@@ -29,58 +35,219 @@ class NotificationController extends GetxController {
     loadNotifications();
   }
 
-  void loadNotifications() {
-    isLoading.value = true;
-    
-    // Simulate API call delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      notifications.value = [
-        NotificationItem(
-          id: '1',
-          title: 'Your order is submitted',
-          message: "Your device 'Trkli Tracker' is in Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: true,
-        ),
-        NotificationItem(
-          id: '2164165',
-          title: 'Your order 2164165 in processing',
-          message: "Your device 'Trkli Tracker' isin Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: false,
-        ),
-        NotificationItem(
-          id: '2164165-2',
-          title: 'Your order 2164165 in processing',
-          message: "Your device 'Trkli Tracker' isin Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: false,
-        ),
-        NotificationItem(
-          id: '2164165-3',
-          title: 'Your order 2164165 in processing',
-          message: "Your device 'Trkli Tracker' isin Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: false,
-        ),
-        NotificationItem(
-          id: '2164165-4',
-          title: 'Your order 2164165 in processing',
-          message: "Your device 'Trkli Tracker' isin Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: false,
-        ),
-        NotificationItem(
-          id: '2164165-5',
-          title: 'Your order 2164165 in processing',
-          message: "Your device 'Trkli Tracker' isin Panidns stage now",
-          time: '2:30 am',
-          isHighlighted: false,
-        ),
-      ];
+  Future<Map<String, dynamic>> _getNotifications() async {
+    try {
+      final token = LocalStorage.token;
+      if (token.isEmpty) {
+        AppLogger.error(
+          'No authentication token found',
+          tag: 'NotificationService',
+          error: 'Token is empty',
+        );
+        return {
+          'success': false,
+          'message': 'Authentication required',
+          'data': null,
+        };
+      }
+
+      AppLogger.debug(
+        'Fetching notifications...',
+        tag: 'NotificationService',
+        details: {'action': 'fetch_notifications'},
+      );
       
+      AppLogger.debug(
+        'Token: ${token.substring(0, 10)}...',
+        tag: 'NotificationService',
+        details: {'token': '${token.substring(0, 10)}...'},
+      );
+      
+      final apiUrl = '${AppUrls.baseUrl}${AppUrls.getNotification}';
+      AppLogger.debug(
+        'URL: $apiUrl',
+        tag: 'NotificationService',
+        details: {'url': apiUrl},
+      );
+
+      final response = await _dio.get(
+        apiUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      ).timeout(const Duration(seconds: 30));
+
+      AppLogger.debug(
+        'Response: ${response.statusCode}',
+        tag: 'NotificationService',
+        details: <String, Object>{
+          'statusCode': response.statusCode ?? 0,
+          'statusMessage': response.statusMessage ?? 'No status message',
+        },
+      );
+      
+      if (response.data != null) {
+        if (response.data is Map) {
+          AppLogger.debug(
+            'Response data',
+            tag: 'NotificationService',
+            details: Map<String, Object>.from(response.data as Map),
+          );
+        } else {
+          AppLogger.debug(
+            'Response data',
+            tag: 'NotificationService',
+            details: <String, Object>{'data': response.data.toString()},
+          );
+        }
+      }
+
+      return {
+        'success': true,
+        'message': 'Notifications fetched successfully',
+        'data': response.data,
+      };
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.response != null) {
+        errorMessage = 'Server responded with ${e.response?.statusCode}: ${e.response?.statusMessage}';
+        AppLogger.error(
+          'API Error Response',
+          tag: 'NotificationService',
+          error: e,
+        );
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Connection timeout';
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Receive timeout';
+      } else if (e.type == DioExceptionType.sendTimeout) {
+        errorMessage = 'Send timeout';
+      }
+      AppLogger.error(
+        errorMessage,
+        tag: 'NotificationService',
+        error: e,
+      );
+      return {
+        'success': false,
+        'message': errorMessage,
+        'data': null,
+      };
+    } catch (e) {
+      AppLogger.error(
+        'Unexpected error occurred',
+        tag: 'NotificationService',
+        error: e,
+      );
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: $e',
+        'data': null,
+      };
+    }
+  }
+
+  void loadNotifications() async {
+    isLoading.value = true;
+
+    try {
+      final response = await _getNotifications();
+      
+      if (response['success'] == true && response['data'] != null) {
+        // Navigate through the nested response structure
+        final responseData = response['data'] as Map<String, dynamic>;
+        final resultData = responseData['data'] as Map<String, dynamic>?;
+        final results = resultData?['result'] as List<dynamic>? ?? [];
+        
+        AppLogger.debug(
+          'Processing ${results.length} notifications',
+          tag: 'NotificationService',
+          details: {'results': results},
+        );
+
+        notifications.value = results.map<NotificationItem>((item) {
+          try {
+            // Extract message or use default
+            String message = item['message']?.toString() ?? 
+                           item['content']?.toString() ?? 
+                           item['description']?.toString() ?? 
+                           'No message available';
+            
+            // Format order status messages
+            String title = item['title']?.toString() ?? 'Order Update';
+            
+            // Special handling for order status messages
+            if (message.contains('ORD#')) {
+              message = message.replaceAll('\n', ' ').trim();
+              
+              // If title is not provided, use a default based on message content
+              if (title == 'Order Update') {
+                if (message.toLowerCase().contains('processed')) {
+                  title = 'Order Processed';
+                } else if (message.toLowerCase().contains('shipped')) {
+                  title = 'Order Shipped';
+                } else if (message.toLowerCase().contains('delivered')) {
+                  title = 'Order Delivered';
+                }
+              }
+              
+              // Format the order number for better readability
+              final orderNumber = RegExp(r'ORD#[A-Z0-9]+').firstMatch(message)?.group(0) ?? '';
+              if (orderNumber.isNotEmpty) {
+                message = message.replaceAll(orderNumber, '\n$orderNumber\n');
+              }
+            }
+
+            return NotificationItem(
+              id: item['_id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              title: title,
+              message: message.trim(),
+              time: item['createdAt'] != null
+                  ? _formatDateTime(item['createdAt'].toString())
+                  : _formatDateTime(DateTime.now().toIso8601String()),
+              isHighlighted: !(item['isRead'] ?? item['read'] ?? false),
+            );
+          } catch (e) {
+            AppLogger.error(
+              'Error parsing notification item',
+              tag: 'NotificationService',
+              error: e,
+              stackTrace: StackTrace.current,
+            );
+            // Return a default notification item in case of parsing error
+            return NotificationItem(
+              id: 'error-${DateTime.now().millisecondsSinceEpoch}',
+              title: 'Order Update',
+              message: 'Your order status has been updated',
+              time: _formatDateTime(DateTime.now().toIso8601String()),
+              isHighlighted: true,
+            );
+          }
+        }).toList();
+      } else {
+        AppLogger.warning(
+          'No notifications found or invalid response format',
+          tag: 'NotificationService',
+          
+        );
+        notifications.clear();
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to fetch notifications',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
+      );
+      notifications.clear();
+    } finally {
       isLoading.value = false;
-    });
+    }
   }
 
   void deleteNotification(String id) {
@@ -96,24 +263,24 @@ class NotificationController extends GetxController {
   }
 
   void markAsRead(String id) {
-    final index = notifications.indexWhere((notification) => notification.id == id);
-    if (index != -1) {
-      final notification = notifications[index];
-      notifications[index] = NotificationItem(
-        id: notification.id,
-        title: notification.title,
-        message: notification.message,
-        time: notification.time,
-        isHighlighted: false, // Mark as read by removing highlight
-      );
-      
-      Get.snackbar(
-        'Marked as read',
-        'Notification marked as read',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green.shade100,
-        colorText: Colors.green.shade800,
+    try {
+      final index = notifications.indexWhere((n) => n.id == id);
+      if (index != -1) {
+        final updated = notifications[index];
+        notifications[index] = NotificationItem(
+          id: updated.id,
+          title: updated.title,
+          message: updated.message,
+          time: updated.time,
+          isHighlighted: false,
+        );
+        notifications.refresh();
+      }
+    } catch (e) {
+      AppLogger.error(
+        'Error marking notification as read',
+        tag: 'NotificationService',
+        error: e,
       );
     }
   }
@@ -208,5 +375,31 @@ class NotificationController extends GetxController {
         ],
       ),
     );
+  }
+
+  // Helper method to format date time
+  String _formatDateTime(String dateTimeString) {
+    try {
+      final dateTime = DateTime.tryParse(dateTimeString)?.toLocal() ?? DateTime.now();
+      // Format: Oct 31, 2023 14:30
+      return '${_getMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year} ${_formatTime(dateTime)}';
+    } catch (e) {
+      return DateTime.now().toLocal().toString().substring(0, 16);
+    }
+  }
+
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return monthNames[month - 1];
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour % 12 == 0 ? 12 : dateTime.hour % 12;
+    final period = dateTime.hour < 12 ? 'AM' : 'PM';
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute $period';
   }
 }

@@ -51,41 +51,25 @@ class UpdateProfileService {
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Accept'] = 'application/json';
 
-      // Add profile data to request
-      final profileJson = profileData.toJson();
-      final fields = Map<String, String>.from(
-        profileJson.map((key, value) => MapEntry(key, value.toString())),
-      );
-      request.fields.addAll(fields);
-      
-      // Log request fields
-      AppLogger.debug(
-        'Request fields',
-        tag: tag,
-        details: fields,
-      );
-      
-      if (profileImage != null) {
-        AppLogger.debug(
-          'Including profile image',
-          tag: tag,
-          details: {'path': profileImage.path},
-        );
-      }
+      // Add form fields
+      final profileDataMap = profileData.toJson()..removeWhere((key, value) => value == null);
+      profileDataMap.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
 
       // Add profile image if provided
       if (profileImage != null) {
-        var stream = http.ByteStream(profileImage.openRead());
-        var length = await profileImage.length();
-        
-        var multipartFile = http.MultipartFile(
-          'profile_image', // This should match your API's expected field name
-          stream,
-          length,
-          filename: basename(profileImage.path),
-          contentType: MediaType('image', 'jpeg'), // Adjust based on your image type
+        final fileStream = http.ByteStream(profileImage.openRead());
+        final fileLength = await profileImage.length();
+        final multipartFile = http.MultipartFile(
+          'profileImage',
+          fileStream,
+          fileLength,
+          filename: profileImage.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
         );
-        
         request.files.add(multipartFile);
       }
 

@@ -41,4 +41,8 @@ class AppUrls {
 
   static const String getOrders = 'orders/my-orders';
 
+  // notification
+
+  static const String getNotification = 'notifications/';
+
 }
