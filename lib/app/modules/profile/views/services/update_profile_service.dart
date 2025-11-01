@@ -64,13 +64,15 @@ class UpdateProfileService {
         final fileStream = http.ByteStream(profileImage.openRead());
         final fileLength = await profileImage.length();
         final multipartFile = http.MultipartFile(
-          'profileImage',
+          'image',  
           fileStream,
           fileLength,
           filename: profileImage.path.split('/').last,
           contentType: MediaType('image', 'jpeg'),
         );
         request.files.add(multipartFile);
+        
+        AppLogger.info('Uploading image: ${profileImage.path}', tag: tag);
       }
 
       // Send the request

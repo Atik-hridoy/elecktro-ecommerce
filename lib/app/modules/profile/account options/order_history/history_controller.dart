@@ -23,6 +23,7 @@ class HistoryController extends GetxController {
       
       // Fetch orders from the service
       final response = await _orderService.getOrders();
+      print("response==========================>>>>>>>>>>>>>>>>> $response");
       
       if (response != null && response.orders.isNotEmpty) {
         // Map the API response to the format expected by the UI

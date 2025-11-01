@@ -96,11 +96,12 @@ class OrderService extends GetxService {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
+        print("responseData==========================>>>>>>>>>>>>>>>>> $responseData");
         
         if (responseData is Map<String, dynamic> && responseData['data'] != null) {
           // Handle the actual API response format
           final data = responseData['data'] as Map<String, dynamic>;
-          final results = data['result'] as List<dynamic>;
+          final results = data['orders'] as List<dynamic>;
           
           // Convert each order to OrderModel
           final orders = results.map((orderData) {
@@ -138,12 +139,13 @@ class OrderService extends GetxService {
           }).toList();
           
           // Create a proper OrderResponse
+          final total = data['total'] ?? orders.length;
           return OrderResponse(
             orders: orders,
             page: page,
             limit: limit,
-            total: data['total'] ?? 0,
-            totalPage: (data['total'] / limit).ceil(),
+            total: total,
+            totalPage: (total / limit).ceil(),
           );
         } else {
           throw Exception('Invalid response format: Missing data');

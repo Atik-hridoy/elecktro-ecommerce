@@ -15,6 +15,7 @@ class ProfileController extends GetxController {
   var name = ''.obs;
   var email = ''.obs;
   var address = ''.obs;
+  var profileImageUrl = ''.obs;
   var isLoading = false.obs;
   var error = ''.obs;
 
@@ -39,6 +40,11 @@ class ProfileController extends GetxController {
         name.value = fullName;
         email.value = profileData.data.email ?? ''; // Add this line to save email
         address.value = profileData.data.address;
+        
+        // Update profile image URL if available
+        if (profileData.data.image.isNotEmpty) {
+          profileImageUrl.value = profileData.data.image;
+        }
         
         AppLogger.success('Profile data loaded successfully');
         AppLogger.debug('Name: $fullName', details: {'Name': fullName});
@@ -93,6 +99,7 @@ class ProfileController extends GetxController {
       name.value = '';
       email.value = '';
       address.value = '';
+      profileImageUrl.value = '';
       
       // Clear local storage
       final prefs = await SharedPreferences.getInstance();

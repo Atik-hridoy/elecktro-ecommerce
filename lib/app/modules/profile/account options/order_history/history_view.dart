@@ -62,8 +62,9 @@ class HistoryView extends GetView<HistoryController> {
   }
 
   Widget _buildOrderList(String status) {
-    // Use demo data if controller orders are empty, otherwise use controller data
-    final allOrders = controller.orders.isEmpty ? _getDemoOrders() : controller.orders;
+    return Obx(() {
+      // Use demo data if controller orders are empty, otherwise use controller data
+      final allOrders = controller.orders.isEmpty ? _getDemoOrders() : controller.orders;
     
     final filteredOrders = allOrders.where((order) {
       final orderStatus = order['status']?.toString().toLowerCase().trim() ?? '';
@@ -165,7 +166,7 @@ class HistoryView extends GetView<HistoryController> {
     return RefreshIndicator(
       onRefresh: () async {
         if (controller.orders.isNotEmpty) {
-          controller.refreshOrders();
+          await controller.refreshOrders();
         }
       },
       child: ListView.builder(
@@ -177,6 +178,7 @@ class HistoryView extends GetView<HistoryController> {
         },
       ),
     );
+    });
   }
 
   Widget _buildOrderCard(Map<String, dynamic> order) {
