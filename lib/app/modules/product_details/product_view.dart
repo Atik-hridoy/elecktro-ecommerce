@@ -1,5 +1,6 @@
 import 'package:elecktro_ecommerce/app/modules/product_details/custom%20widget/sellercard.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/widgets/product_build_row_review_item.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/widgets/add_review_dialog.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -277,12 +278,100 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                // Write Review Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AddReviewDialog(
+                          onSubmit: (review, rating, images) async {
+                            // Submit review to backend
+                            final success = await controller.submitReview(
+                              reviewText: review,
+                              rating: rating,
+                              images: images,
+                            );
+                            
+                            if (success) {
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.rate_review),
+                    label: const Text('Write a Review'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: Color(0xFFFFC107)),
+                      foregroundColor: Colors.black,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 16),
-                ProductBuildRowReviewItem(name: 'Hadi H', title: 'Just the thing', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: 'Aug 14, 2021'),
-                const SizedBox(height: 16),
-                ProductBuildRowReviewItem(name: 'Kim Shine', title: '', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: ''),
-                const SizedBox(height: 16),
-                ProductBuildRowReviewItem(name: 'Matilda Brown', title: 'Just the thing', review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', rating: 4.9, date: 'Aug 14, 2021'),
+                // Dynamic Reviews from Controller
+                Obx(() {
+                  if (controller.reviews.isEmpty) {
+                    // Show demo reviews if no user reviews
+                    return Column(
+                      children: [
+                        ProductBuildRowReviewItem(
+                          name: 'Hadi H', 
+                          title: 'Just the thing', 
+                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
+                          rating: 4.9, 
+                          date: 'Aug 14, 2021',
+                          images: const [
+                            'https://images.unsplash.com/photo-1523275335684-37898b6baf30',
+                            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+                            'https://images.unsplash.com/photo-1572635196237-14b3f281503f',
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        ProductBuildRowReviewItem(
+                          name: 'Kim Shine', 
+                          title: '', 
+                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
+                          rating: 4.9, 
+                          date: '',
+                        ),
+                        const SizedBox(height: 16),
+                        ProductBuildRowReviewItem(
+                          name: 'Matilda Brown', 
+                          title: 'Just the thing', 
+                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
+                          rating: 4.9, 
+                          date: 'Aug 14, 2021',
+                          images: const [
+                            'https://images.unsplash.com/photo-1560343090-f0409e92791a',
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                  
+                  // Show user reviews
+                  return Column(
+                    children: controller.reviews.map((review) {
+                      return Column(
+                        children: [
+                          ProductBuildRowReviewItem(
+                            name: review['name'] ?? 'Anonymous',
+                            title: review['title'] ?? '',
+                            review: review['review'] ?? '',
+                            rating: (review['rating'] ?? 5.0).toDouble(),
+                            date: review['date'] ?? '',
+                            images: List<String>.from(review['images'] ?? []),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                }),
                 const SizedBox(height: 100),
               ],
             ),

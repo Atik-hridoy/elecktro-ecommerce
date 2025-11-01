@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/services/create_review_feedback_service.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/model/add_to_cart.dart';
 import 'package:flutter/material.dart';
 
@@ -40,6 +42,13 @@ Rxn<ProductDetailModel> product = Rxn();
   // Cart service
   final CartService _cartService = CartService();
   final RxBool isAddingToCart = false.obs;
+  
+  // Review service
+  final CreateReviewFeedbackService _reviewService = CreateReviewFeedbackService();
+  final RxBool isSubmittingReview = false.obs;
+  
+  // Reviews
+  final RxList<Map<String, dynamic>> reviews = <Map<String, dynamic>>[].obs;
 
   // Get available sizes from the product
   List<String>? get _availableSizes {
@@ -331,5 +340,92 @@ Rxn<ProductDetailModel> product = Rxn();
         lastName: data['sellerLastName']?.toString() ?? '',
       );
     }
+  }
+  
+  // Submit review to backend
+  Future<bool> submitReview({
+    required String reviewText,
+    required double rating,
+    required List<File> images,
+    String? title,
+  }) async {
+    if (product.value == null) {
+      Get.snackbar('Error', 'Product not found');
+      return false;
+    }
+
+    try {
+      isSubmittingReview.value = true;
+
+      final response = await _reviewService.createReview(
+        productId: product.value!.id!,
+        comment: reviewText,
+        rating: rating.toInt(),
+        images: images.isNotEmpty ? images : null,
+      );
+
+      if (response != null && response.success) {
+        // Add review to local list for immediate display
+        // Construct full image URLs using baseImageUrl
+        final imageUrls = (response.data?.images ?? []).map((imagePath) {
+          if (imagePath.startsWith('http')) {
+            return imagePath;
+          }
+          return '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
+        }).toList();
+        
+        addReview(
+          reviewText: reviewText,
+          rating: rating,
+          imageUrls: imageUrls,
+          title: title,
+        );
+        
+        Get.snackbar(
+          'Success',
+          'Review submitted successfully!',
+          backgroundColor: Colors.green[50],
+          colorText: Colors.green[800],
+        );
+        return true;
+      } else {
+        Get.snackbar('Error', 'Failed to submit review');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to submit review: ${e.toString()}');
+      return false;
+    } finally {
+      isSubmittingReview.value = false;
+    }
+  }
+  
+  // Add a new review to local list
+  void addReview({
+    required String reviewText,
+    required double rating,
+    required List<String> imageUrls,
+    String? title,
+  }) {
+    final newReview = {
+      'name': 'You', // You can get actual user name from auth
+      'title': title ?? '',
+      'review': reviewText,
+      'rating': rating,
+      'date': _formatDate(DateTime.now()),
+      'images': imageUrls,
+    };
+    
+    // Add to the beginning of the list so it appears first
+    reviews.insert(0, newReview);
+  }
+  
+  // Format date helper
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
