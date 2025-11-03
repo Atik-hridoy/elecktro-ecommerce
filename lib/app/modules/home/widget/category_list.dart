@@ -7,8 +7,15 @@ import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_
 /// On larger screens, it displays a wrapping grid of all categories.
 class CategoryList extends StatelessWidget {
   final List<CategoryModel> categories;
+  final Function(String categoryId)? onCategoryTap;
+  final String? selectedCategoryId;
 
-  const CategoryList({super.key, required this.categories});
+  const CategoryList({
+    super.key, 
+    required this.categories,
+    this.onCategoryTap,
+    this.selectedCategoryId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +38,8 @@ class CategoryList extends StatelessWidget {
                   context: context,
                   title: category.name,
                   thumbnail: category.thumbnail,
+                  categoryId: category.id,
+                  isSelected: selectedCategoryId == category.id,
                 );
               }).toList(),
             ),
@@ -50,6 +59,8 @@ class CategoryList extends StatelessWidget {
                   context: context,
                   title: category.name,
                   thumbnail: category.thumbnail,
+                  categoryId: category.id,
+                  isSelected: selectedCategoryId == category.id,
                 );
               },
             ),
@@ -64,6 +75,8 @@ class CategoryList extends StatelessWidget {
     required BuildContext context,
     required String title,
     required String thumbnail,
+    required String categoryId,
+    bool isSelected = false,
   }) {
     final textTheme = Theme.of(context).textTheme;
 
@@ -75,7 +88,9 @@ class CategoryList extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // TODO: Implement category tap navigation
+            if (onCategoryTap != null) {
+              onCategoryTap!(categoryId);
+            }
           },
           child: Padding(
             padding: const EdgeInsets.all(4.0),
@@ -87,8 +102,9 @@ class CategoryList extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: isSelected ? const Color(0xFF044D37).withOpacity(0.2) : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(16),
+                    border: isSelected ? Border.all(color: const Color(0xFF044D37), width: 2) : null,
                     image: thumbnail.isNotEmpty
                         ? DecorationImage(
                             image: NetworkImage(thumbnail),

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'create_help_service.dart';
 
 class SupportController extends GetxController {
+  // Text Controllers
+  final TextEditingController contactController = TextEditingController();
+  final TextEditingController messageController = TextEditingController();
+  
+  // Service
+  final CreateHelpService _helpService = CreateHelpService();
+  
   // Observable variables
   final RxBool isLoading = false.obs;
   final RxString selectedIssueType = ''.obs;
@@ -23,6 +31,8 @@ class SupportController extends GetxController {
   
   @override
   void onClose() {
+    contactController.dispose();
+    messageController.dispose();
     super.onClose();
   }
   
@@ -200,5 +210,98 @@ class SupportController extends GetxController {
       'Connecting to live chat agent...',
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+  
+  Future<void> submitSupport() async {
+    // Validate fields
+    if (contactController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter your email address',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+      );
+      return;
+    }
+    
+    // Validate email format
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(contactController.text.trim())) {
+      Get.snackbar(
+        'Error',
+        'Please enter a valid email address',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+      );
+      return;
+    }
+    
+    if (messageController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter your message',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+      );
+      return;
+    }
+    
+    try {
+      // Call API
+      isLoading.value = true;
+      
+      final response = await _helpService.createHelpRequest(
+        email: contactController.text.trim(),
+        message: messageController.text.trim(),
+      );
+      
+      print('Help request created: $response');
+      
+      // Clear form
+      contactController.clear();
+      messageController.clear();
+      
+      // Show success message
+      Get.snackbar(
+        'Success',
+        'Your support request has been submitted successfully. We will contact you soon.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF00BFA5),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: const Duration(seconds: 3),
+      );
+      
+      // Optionally go back
+      Future.delayed(const Duration(seconds: 1), () {
+        Get.back();
+      });
+    } catch (e) {
+      print('Error submitting support request: $e');
+      
+      // Show error message
+      Get.snackbar(
+        'Error',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

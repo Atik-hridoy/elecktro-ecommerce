@@ -14,7 +14,8 @@ class CategoryController extends GetxController {
   final filteredProducts = <ProductDetailModel>[].obs;
   final isLoadingProducts = false.obs;
   bool _hasLoadedProducts = false;
-  String? _currentCategoryId;
+  final currentCategoryId = Rxn<String>();
+  final searchQuery = ''.obs;
 
   @override
   void onInit() {
@@ -100,22 +101,47 @@ class CategoryController extends GetxController {
   }
 
   void filterProductsByCategory(String? categoryId) {
-    _currentCategoryId = categoryId;
-    if (categoryId == null || categoryId.isEmpty) {
-      filteredProducts.assignAll(products);
-    } else {
-      filteredProducts.assignAll(
-        products.where((product) => product.categoryId == categoryId).toList(),
-      );
+    currentCategoryId.value = categoryId;
+    _applyFilters();
+  }
+  
+  void searchProducts(String query) {
+    searchQuery.value = query.toLowerCase();
+    _applyFilters();
+  }
+  
+  void _applyFilters() {
+    var result = products.toList();
+    
+    // Filter by category
+    if (currentCategoryId.value != null && currentCategoryId.value!.isNotEmpty) {
+      result = result.where((product) => product.categoryId == currentCategoryId.value).toList();
     }
+    
+    // Filter by search query
+    if (searchQuery.value.isNotEmpty) {
+      result = result.where((product) {
+        return product.name.toLowerCase().contains(searchQuery.value) ||
+               product.brand.toLowerCase().contains(searchQuery.value) ||
+               product.category.toLowerCase().contains(searchQuery.value);
+      }).toList();
+    }
+    
+    filteredProducts.assignAll(result);
   }
 
   void clearCategoryFilter() {
-    _currentCategoryId = null;
+    currentCategoryId.value = null;
+    _applyFilters();
+  }
+  
+  void clearAllFilters() {
+    currentCategoryId.value = null;
+    searchQuery.value = '';
     filteredProducts.assignAll(products);
   }
 
-  bool isCategorySelected(String categoryId) => _currentCategoryId == categoryId;
+  bool isCategorySelected(String categoryId) => currentCategoryId.value == categoryId;
 
   String _fullUrl(String url) {
     if (url.isEmpty) return url;

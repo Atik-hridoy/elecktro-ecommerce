@@ -15,6 +15,8 @@ class AppUrls {
 
   static const String getProfile = 'users/profile';
   static const String updateProfileInsideApp = 'users/profile';
+  static const String faqs = 'faqs/';
+  static const String createHelp = 'help/create';
 
   // home 
   static const String getBanner = 'banners/';

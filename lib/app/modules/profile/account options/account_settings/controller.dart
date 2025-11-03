@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 class AccountSettingsController extends GetxController {
   // Observable variables
   final RxBool isLoading = false.obs;
+  final RxString currentLanguage = 'en'.obs;
   
   @override
   void onInit() {
@@ -45,37 +46,23 @@ class AccountSettingsController extends GetxController {
     );
   }
   
-  void changePassword() {
-    // Logic to change password
+  void changeLanguage(String language) {
+    currentLanguage.value = language;
+    // Add logic to save language preference to storage
+    // LocalStorage.saveLanguage(language);
+    print('Language changed to: $language');
+  }
+  
+  void navigateToChangePassword() {
+    // Logic to navigate to change password screen
     Get.toNamed('/change-password');
+    // Or you can show a dialog/bottom sheet here
   }
   
   void deleteAccount() {
-    // Logic to delete account
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              // Add delete account logic here
-              Get.snackbar(
-                'Account Deleted',
-                'Your account has been deleted successfully',
-                snackPosition: SnackPosition.BOTTOM,
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+    // Logic to delete account - API call would go here
+    print('Account deletion requested');
+    // Add API call here to delete account
+    // await accountService.deleteAccount();
   }
 }

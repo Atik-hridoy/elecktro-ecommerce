@@ -47,7 +47,7 @@ class CategoryView extends GetView<CategoryController> {
                   padding: const EdgeInsets.fromLTRB(16, 60, 16, 10),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Search categories...',
+                      hintText: 'Search products...',
                       prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -56,23 +56,31 @@ class CategoryView extends GetView<CategoryController> {
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.filter_list,
-                              color: Colors.grey,
-                              size: 20,
+                      suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
+                              onPressed: () {
+                                controller.searchProducts('');
+                              },
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.only(right: 12.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.filter_list,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Filters',
+                                    style: TextStyle(color: Color(0xFF044D37)),
+                                  ),
+                                ],
+                              ),
                             ),
-                            SizedBox(width: 5),
-                            Text(
-                              'Filters',
-                              style: TextStyle(color: Color(0xFF044D37)),
-                            ),
-                          ],
-                        ),
                       ),
                       suffixIconConstraints: const BoxConstraints(
                         minWidth: 40,
@@ -80,7 +88,7 @@ class CategoryView extends GetView<CategoryController> {
                       ),
                     ),
                     onChanged: (value) {
-                      controller.searchCategories(value);
+                      controller.searchProducts(value);
                     },
                   ),
                 ),
@@ -96,6 +104,10 @@ class CategoryView extends GetView<CategoryController> {
                   child: Obx(
                     () => CategoryList(
                       categories: Get.find<HomeController>().categories.toList(),
+                      onCategoryTap: (categoryId) {
+                        controller.filterProductsByCategory(categoryId);
+                      },
+                      selectedCategoryId: controller.currentCategoryId.value,
                     ),
                   ),
                 ),
@@ -110,36 +122,41 @@ class CategoryView extends GetView<CategoryController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Products Header
-              Padding(
+              Obx(() => Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'All Products',
-                      style: TextStyle(
+                    Text(
+                      controller.currentCategoryId.value != null
+                          ? 'Filtered Products (${controller.filteredProducts.length})'
+                          : 'All Products (${controller.filteredProducts.length})',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'See All',
-                        style: TextStyle(
-                          color: Color(0xFF044D37),
-                          fontSize: 14,
+                    if (controller.currentCategoryId.value != null || controller.searchQuery.value.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          controller.clearAllFilters();
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Clear Filters',
+                          style: TextStyle(
+                            color: Color(0xFF044D37),
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
-              ),
+              )),
 
               // Products Grid
               Obx(() {
@@ -150,7 +167,7 @@ class CategoryView extends GetView<CategoryController> {
                   );
                 }
 
-                final items = controller.products;
+                final items = controller.filteredProducts;
                 if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),

@@ -332,7 +332,7 @@ Rxn<ProductDetailModel> product = Rxn();
     brand.value = data['brand']?.toString() ?? 'N/A';
     price.value = data['price']?.toString() ?? '\$0.00';
     imageUrl.value = data['imageUrl']?.toString() ?? '';
-    discount.value = data['discount']?.toString() ?? '';
+    discount.value = data['discount']?.toString() ?? '';    
     
     // Update seller info if available
     if (data['sellerName'] != null) {
