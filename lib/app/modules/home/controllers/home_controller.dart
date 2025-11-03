@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/get_category_on_home_view_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/get_banner.dart';
+import 'package:elecktro_ecommerce/app/modules/home/services/get_populer_product.dart';
 import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
+import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 
 class HomeController extends GetxController {
@@ -11,11 +13,16 @@ class HomeController extends GetxController {
   var banners = <Map<String, dynamic>>[].obs; // Store banner data with image URLs
   var isLoading = true.obs;
   var error = ''.obs;
+  var isLoadingPopularProducts = false.obs;
+  var searchQuery = ''.obs;
   
   Timer? _bannerTimer;
   final categories = <CategoryModel>[].obs;
+  final popularProducts = <ProductDetailModel>[].obs;
+  final filteredPopularProducts = <ProductDetailModel>[].obs;
   late final ProductCategoryService _categoryService;
   late final BannerService _bannerService;
+  late final GetPopularProductService _popularProductService;
 
   // Method to update selected index
   void updateIndex(int index) {
@@ -34,9 +41,13 @@ class HomeController extends GetxController {
     _bannerService = Get.isRegistered<BannerService>()
         ? Get.find<BannerService>()
         : Get.put(BannerService());
+    _popularProductService = Get.isRegistered<GetPopularProductService>()
+        ? Get.find<GetPopularProductService>()
+        : Get.put(GetPopularProductService());
     
     fetchCategories();
     fetchBanners();
+    fetchPopularProducts();
     _startBannerTimer();
   }
   
@@ -164,5 +175,86 @@ class HomeController extends GetxController {
       return '$base/$url';
     }
     return base + url;
+  }
+
+  // Fetch popular products from API
+  Future<void> fetchPopularProducts() async {
+    try {
+      isLoadingPopularProducts(true);
+      
+      final products = await _popularProductService.getPopularProducts();
+      
+      // Update images to full URLs
+      final updatedProducts = products.map((product) {
+        final updatedImages = product.images.map((img) => _fullUrl(img)).toList();
+        return ProductDetailModel(
+          id: product.id,
+          sellerId: product.sellerId,
+          category: product.category,
+          categoryId: product.categoryId,
+          subCategory: product.subCategory,
+          subCategoryId: product.subCategoryId,
+          images: updatedImages,
+          name: product.name,
+          model: product.model,
+          brand: product.brand,
+          color: product.color,
+          sizeType: product.sizeType,
+          specialCategory: product.specialCategory,
+          overview: product.overview,
+          highlights: product.highlights,
+          techSpecs: product.techSpecs,
+          isDeleted: product.isDeleted,
+          status: product.status,
+          totalStock: product.totalStock,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+          isBookmarked: product.isBookmarked,
+        );
+      }).toList();
+      
+      popularProducts.assignAll(updatedProducts);
+      filteredPopularProducts.assignAll(updatedProducts);
+      print('Popular products loaded: ${popularProducts.length}');
+    } catch (e) {
+      print('Error loading popular products: $e');
+      popularProducts.clear();
+      filteredPopularProducts.clear();
+    } finally {
+      isLoadingPopularProducts(false);
+    }
+  }
+
+  // Search products
+  void searchProducts(String query) {
+    searchQuery.value = query;
+    
+    if (query.isEmpty) {
+      // If search is empty, show all products
+      filteredPopularProducts.assignAll(popularProducts);
+    } else {
+      // Filter products based on search query
+      final lowerQuery = query.toLowerCase();
+      final filtered = popularProducts.where((product) {
+        final nameMatch = product.name.toLowerCase().contains(lowerQuery);
+        final brandMatch = product.brand.toLowerCase().contains(lowerQuery);
+        final categoryMatch = product.category.toLowerCase().contains(lowerQuery);
+        final modelMatch = product.model.toLowerCase().contains(lowerQuery);
+        
+        return nameMatch || brandMatch || categoryMatch || modelMatch;
+      }).toList();
+      
+      filteredPopularProducts.assignAll(filtered);
+    }
+    
+    print('Search: "$query" - Found ${filteredPopularProducts.length} products');
+  }
+
+  // Clear search
+  void clearSearch() {
+    searchQuery.value = '';
+    filteredPopularProducts.assignAll(popularProducts);
   }
 }

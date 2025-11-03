@@ -52,10 +52,26 @@ class _PaymentWebViewState extends State<PaymentWebView> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment'),
-        backgroundColor: Colors.green,
+    return WillPopScope(
+      onWillPop: () async {
+        // Show confirmation dialog when user tries to go back
+        final shouldPop = await _showExitConfirmation();
+        return shouldPop;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Payment'),
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              // Show confirmation before navigating to home
+              final shouldExit = await _showExitConfirmation();
+              if (shouldExit) {
+                Get.offAllNamed('/home');
+              }
+            },
+          ),
         actions: [
           if (isLoading)
             const Padding(
@@ -142,7 +158,32 @@ class _PaymentWebViewState extends State<PaymentWebView> {
             ),
         ],
       ),
+    ),
+  );
+}
+
+  // Show confirmation dialog before exiting payment page
+  Future<bool> _showExitConfirmation() async {
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Cancel Payment?'),
+        content: const Text('Are you sure you want to leave the payment page? Your payment will be cancelled.'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Stay'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
     );
+    return result ?? false;
   }
 
   Future<void> _handleUrlChange(String url) async {

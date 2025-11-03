@@ -17,12 +17,22 @@ class SellerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if seller info is available
+    final hasSellerInfo = seller.firstName.isNotEmpty || seller.lastName.isNotEmpty || seller.id.isNotEmpty;
+    final sellerName = '${seller.firstName} ${seller.lastName}'.trim();
+    final displayName = sellerName.isNotEmpty ? sellerName : 'Unknown Seller';
+    
+    // Don't show card if no seller info at all
+    if (!hasSellerInfo) {
+      return const SizedBox.shrink();
+    }
+    
     return Card(
       elevation: 0,
       color: Colors.grey[50],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: onTap,
+        onTap: seller.id.isNotEmpty ? onTap : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -44,7 +54,7 @@ class SellerCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${seller.firstName} ${seller.lastName}',
+                      displayName,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -64,7 +74,7 @@ class SellerCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-'$reviewCount Reviews',
+                          '$reviewCount Reviews',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.green[700],
@@ -76,7 +86,8 @@ class SellerCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              if (seller.id.isNotEmpty)
+                const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
         ),

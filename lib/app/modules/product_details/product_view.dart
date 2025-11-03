@@ -25,8 +25,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
 
   // Get available sizes from the product
   List<String>? get _availableSizes {
-    if (controller.product.value?.sizeType == null) return null;
-    return controller.product.value!.sizeType.map((sizeType) => sizeType.size).toList();
+    if (controller.product.value?.sizeType == null || controller.product.value!.sizeType.isEmpty) return null;
+    return controller.product.value!.sizeType
+        .map((sizeType) => sizeType.size ?? 'One Size')
+        .where((size) => size.isNotEmpty)
+        .toList();
   }
   
   // Get available colors from the product
@@ -156,126 +159,208 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
       children: [
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(bottom: 120), 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildMainProductImage(),
                 const SizedBox(height: 16),
                 _buildImageThumbnails(),
-                const SizedBox(height: 24),
-                Text(
-                  controller.product.value?.name ?? '', 
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-                ),
-                const SizedBox(height: 4),
                 
-                Text(
-                  controller.product.value?.brand ?? '', 
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                
-                // --- Seller Information Card ---
-                Obx(() => SellerCard(
-                  seller: controller.seller.value,
-                  rating: controller.rating.value,
-                  reviewCount: controller.reviewCount.value,
-                  onTap: () {
-                    // Handle seller card tap
-                    // You can navigate to seller profile page here
-                    // Get.toNamed(Routes.sellerProfile, arguments: controller.seller.value.id);
-                  },
-                )),
-                const SizedBox(height: 16),
-                
-                // --- Grouped into a Card ---
-                Card(
-                  elevation: 0,
-                  color: Colors.grey[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        _buildPriceAndQuantity(),
-                        const SizedBox(height: 24),
-                        _buildSizeSelector(),
-                        const SizedBox(height: 16),
-                        _buildColorSelector(),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // --- Overview Card ---
-                Card(
-                  elevation: 0,
-                  color: Colors.grey[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Overview:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 8),
-                        Text(
-                          controller.product.value?.overview ?? '',
-                          style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
+                // Product Info Section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Product Name
+                      Text(
+                        controller.product.value?.name ?? '', 
+                        style: const TextStyle(
+                          fontSize: 20, 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.black,
+                          height: 1.3,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // --- Highlights & Specs Card ---
-                Card(
-                  elevation: 0,
-                  color: Colors.grey[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Highlights:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 12),
-                        if (controller.product.value?.highlights != null)
-                          if (controller.product.value!.highlights is Map)
-                            ...(controller.product.value!.highlights as Map<String, dynamic>).entries
-                                .map((entry) => _buildHighlightItem('${entry.key}: ${entry.value}'))
-                                .toList()
-                          else if (controller.product.value!.highlights is String)
-                            _buildHighlightItem(controller.product.value!.highlights.toString())
-                        else
-                          _buildHighlightItem('No highlights available'),
-                        const Divider(height: 32),
-                        const Text('Tech Specs:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 12),
-                        _buildSpecRow('Form Factor', 'Hard Case'),
-                        _buildSpecRow('Supported Devices', 'AirTag'),
-                        _buildSpecRow('Material', 'Silicone'),
-                        _buildSpecRow('Length', '1.6 in | 41 cm'),
-                        _buildSpecRow('Width', '1.6 in | 41 cm'),
-                        _buildSpecRow('Height', '0.4 in | 10 cm'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // --- Feedback Section (No Card, as reviews are already in cards) ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Feedback', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                    Row(
-                      children: [
-                        Obx(() => IconButton(
-                          icon: controller.isLoadingReviews.value
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
+                      ),
+                      const SizedBox(height: 6),
+                      
+                      // Brand with icon
+                      Row(
+                        children: [
+                          Icon(Icons.verified, size: 14, color: Colors.blue[700]),
+                          const SizedBox(width: 4),
+                          Text(
+                            controller.product.value?.brand ?? '', 
+                            style: TextStyle(
+                              fontSize: 13, 
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // --- Seller Information Card ---
+                      Obx(() => SellerCard(
+                        seller: controller.seller.value,
+                        rating: controller.rating.value,
+                        reviewCount: controller.reviewCount.value,
+                        onTap: () {
+                          // Navigate to seller profile page
+                          Get.toNamed(
+                            Routes.sellerProfile,
+                            arguments: {
+                              'seller': controller.seller.value,
+                              'rating': controller.rating.value,
+                              'reviewCount': controller.reviewCount.value,
+                            },
+                          );
+                        },
+                      )),
+                      const SizedBox(height: 20),
+                      
+                      // --- Price, Size & Color Card ---
+                      Card(
+                        elevation: 2,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              _buildPriceAndQuantity(),
+                              const Divider(height: 32),
+                              _buildSizeSelector(),
+                              const SizedBox(height: 20),
+                              _buildColorSelector(),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // --- Overview Card ---
+                      Card(
+                        elevation: 2,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.description_outlined, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Overview', 
+                                    style: TextStyle(
+                                      fontSize: 16, 
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    )
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                controller.product.value?.overview ?? '',
+                                style: TextStyle(
+                                  fontSize: 14, 
+                                  color: Colors.grey[700], 
+                                  height: 1.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // --- Highlights & Specs Card ---
+                      Card(
+                        elevation: 2,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.star_outline, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Highlights', 
+                                    style: TextStyle(
+                                      fontSize: 16, 
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    )
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              if (controller.product.value?.highlights != null)
+                                if (controller.product.value!.highlights is Map)
+                                  ...(controller.product.value!.highlights as Map<String, dynamic>).entries
+                                      .map((entry) => _buildHighlightItem('${entry.key}: ${entry.value}'))
+                                      .toList()
+                                else if (controller.product.value!.highlights is String)
+                                  _buildHighlightItem(controller.product.value!.highlights.toString())
+                              else
+                                _buildHighlightItem('No highlights available'),
+                              const Divider(height: 32),
+                              Row(
+                                children: [
+                                  Icon(Icons.settings_outlined, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Tech Specs', 
+                                    style: TextStyle(
+                                      fontSize: 16, 
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    )
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSpecRow('Form Factor', 'Hard Case'),
+                              _buildSpecRow('Supported Devices', 'AirTag'),
+                              _buildSpecRow('Material', 'Silicone'),
+                              _buildSpecRow('Length', '1.6 in | 41 cm'),
+                              _buildSpecRow('Width', '1.6 in | 41 cm'),
+                              _buildSpecRow('Height', '0.4 in | 10 cm'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // --- Feedback Section ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Feedback', 
+                            style: TextStyle(
+                              fontSize: 16, 
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            )
+                          ),
+                          Row(
+                            children: [
+                              Obx(() => IconButton(
+                                icon: controller.isLoadingReviews.value
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.refresh, size: 20),
@@ -284,104 +369,108 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                               : () => controller.fetchReviewFeedback(),
                           tooltip: 'Refresh reviews',
                         )),
-                        const Icon(Icons.star, color: Colors.amber, size: 16),
-                        const SizedBox(width: 4),
-                        const Text('4.9/5', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Write Review Button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AddReviewDialog(
-                          onSubmit: (review, rating, images) async {
-                            // Submit review to backend
-                            final success = await controller.submitReview(
-                              reviewText: review,
-                              rating: rating,
-                              images: images,
+                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const SizedBox(width: 4),
+                              const Text('4.9/5', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Write Review Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AddReviewDialog(
+                                onSubmit: (review, rating, images) async {
+                                  // Submit review to backend
+                                  final success = await controller.submitReview(
+                                    reviewText: review,
+                                    rating: rating,
+                                    images: images,
+                                  );
+                                  
+                                  if (success) {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                              ),
                             );
-                            
-                            if (success) {
-                              Navigator.pop(context);
-                            }
                           },
+                          icon: const Icon(Icons.rate_review),
+                          label: const Text('Write a Review'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: const BorderSide(color: Color(0xFF00BFA5)),
+                            foregroundColor: const Color(0xFF00BFA5),
+                          ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.rate_review),
-                    label: const Text('Write a Review'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(color: Color(0xFFFFC107)),
-                      foregroundColor: Colors.black,
-                    ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Dynamic Reviews from Controller
+                      Obx(() {
+                        // Show loading indicator while fetching reviews
+                        if (controller.isLoadingReviews.value) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        
+                        if (controller.reviews.isEmpty) {
+                          // Show message if no reviews
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.rate_review_outlined, size: 48, color: Colors.grey[400]),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No reviews yet',
+                                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Be the first to review this product!',
+                                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        // Show user reviews
+                        return Column(
+                          children: controller.reviews.map((review) {
+                            return Column(
+                              children: [
+                                ProductBuildRowReviewItem(
+                                  name: review['name'] ?? 'Anonymous',
+                                  title: review['title'] ?? '',
+                                  review: review['review'] ?? '',
+                                  rating: (review['rating'] ?? 5.0).toDouble(),
+                                  date: review['date'] ?? '',
+                                  images: List<String>.from(review['images'] ?? []),
+                                  userImage: review['userImage'],
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            );
+                          }).toList(),
+                        );
+                      }),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Dynamic Reviews from Controller
-                Obx(() {
-                  // Show loading indicator while fetching reviews
-                  if (controller.isLoadingReviews.value) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-                  
-                  if (controller.reviews.isEmpty) {
-                    // Show message if no reviews
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          children: [
-                            Icon(Icons.rate_review_outlined, size: 48, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No reviews yet',
-                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Be the first to review this product!',
-                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  
-                  // Show user reviews
-                  return Column(
-                    children: controller.reviews.map((review) {
-                      return Column(
-                        children: [
-                          ProductBuildRowReviewItem(
-                            name: review['name'] ?? 'Anonymous',
-                            title: review['title'] ?? '',
-                            review: review['review'] ?? '',
-                            rating: (review['rating'] ?? 5.0).toDouble(),
-                            date: review['date'] ?? '',
-                            images: List<String>.from(review['images'] ?? []),
-                            userImage: review['userImage'],
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      );
-                    }).toList(),
-                  );
-                }),
-                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -525,23 +614,29 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     final images = controller.product.value?.images ?? [];
     if (images.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 80,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          final imageUrl = images[index];
-          final isNetwork = imageUrl.startsWith('http');
-          final isSelected = selectedImageIndex == index;
-          
-          return GestureDetector(
-            onTap: () => setState(() => selectedImageIndex = index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: isSelected ? 80 : 70,
-              height: isSelected ? 80 : 70,
-              margin: EdgeInsets.only(right: 8, top: isSelected ? 0 : 5),
+    return Center(
+      child: SizedBox(
+        height: 70,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          itemCount: images.length,
+          itemBuilder: (context, index) {
+            final imageUrl = images[index];
+            final isNetwork = imageUrl.startsWith('http');
+            final isSelected = selectedImageIndex == index;
+            
+            return GestureDetector(
+              onTap: () => setState(() => selectedImageIndex = index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 60,
+                height: 60,
+                margin: EdgeInsets.only(
+                  right: index < images.length - 1 ? 8 : 0,
+                  left: index == 0 ? 8 : 0,
+                  top: isSelected ? 0 : 5,
+                ),
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -578,6 +673,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
           );
         },
       ),
+    ),
     );
   }
 
@@ -585,20 +681,20 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
+        Obx(() => Row(
           children: [
             Text(
-              controller.price.value, // DYNAMIC DATA
+              '\$${controller.currentDiscountedPrice.toStringAsFixed(2)}', // ✅ Dynamic discounted price
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(width: 8),
-            if (controller.discount.value.isNotEmpty)
+            if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
               Text(
-                '\$20.30', // Placeholder original price
+                '\$${controller.currentOriginalPrice.toStringAsFixed(2)}', // ✅ Dynamic original price
                 style: TextStyle(fontSize: 16, color: Colors.grey[400], decoration: TextDecoration.lineThrough),
               ),
           ],
-        ),
+        )),
         Row(
           children: [
             IconButton(
@@ -624,90 +720,202 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   Widget _buildSizeSelector() {
     final sizes = _availableSizes ?? ['S', 'M', 'L', 'XL'];
     
-    return Row(
+    return Obx(() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Size:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-        const SizedBox(width: 16),
-        ...List.generate(sizes.length, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => selectedSizeIndex = index),
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Select Size', 
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              )
+            ),
+            Text(
+              controller.currentSize,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF00BFA5),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: List.generate(sizes.length, (index) {
+            final isSelected = controller.selectedSizeIndex.value == index;
+            return GestureDetector(
+              onTap: () => controller.selectSize(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: selectedSizeIndex == index ? Colors.black : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+                  color: isSelected ? const Color(0xFF00BFA5) : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF00BFA5) : Colors.grey[300]!,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: const Color(0xFF00BFA5).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ] : [],
                 ),
                 child: Text(
                   sizes[index],
                   style: TextStyle(
-                    color: selectedSizeIndex == index ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 14,
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ],
-    );
+    ));
   }
 
   Widget _buildColorSelector() {
     final colors = _availableColors;
     
-    return Row(
+    return Obx(() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-        const SizedBox(width: 16),
-        ...List.generate(colors.length, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => selectedColorIndex = index),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: colors[index],
-                  shape: BoxShape.circle,
-                  border: selectedColorIndex == index 
-                      ? Border.all(color: Colors.black, width: 3) 
-                      : Border.all(color: Colors.grey[300]!, width: 1),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Select Color', 
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              )
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '${colors.length} ${colors.length > 1 ? 'Colors' : 'Color'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
                 ),
               ),
             ),
-          );
-        }),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(colors.length, (index) {
+            final isSelected = controller.selectedColorIndex.value == index;
+            return GestureDetector(
+              onTap: () => controller.selectColor(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: colors[index],
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? Colors.black : Colors.grey[300]!,
+                    width: isSelected ? 3 : 2,
+                  ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: colors[index].withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ] : [],
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 24,
+                      )
+                    : null,
+              ),
+            );
+          }),
+        ),
       ],
-    );
+    ));
   }
 
   Widget _buildBottomBar() {
-    return Material(
-      elevation: 10,
-      color: Colors.grey[100],
-      shadowColor: Colors.black.withValues(alpha: 0.8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      child: SafeArea(
+        top: false,
         child: Row(
           children: [
+            // Buy Now Button
             Expanded(
               child: ElevatedButton(
                 onPressed: () => controller.onBuyNow(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF3D00),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('Buy Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.shopping_bag_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Buy Now', 
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      )
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
+            
+            // Add to Cart Button
             Expanded(
               child: Obx(() => ElevatedButton(
                 onPressed: controller.isAddingToCart.value
@@ -718,8 +926,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFC107),
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 child: controller.isAddingToCart.value
                     ? const SizedBox(
@@ -733,13 +944,20 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.shopping_cart_outlined),
+                          Icon(Icons.add_shopping_cart_outlined, size: 20),
                           SizedBox(width: 8),
-                          Text('Add to Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          Text(
+                            'Add to Cart', 
+                            style: TextStyle(
+                              fontSize: 16, 
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            )
+                          ),
                         ],
                       ),
-              ),
-            )),
+              )),
+            ),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
@@ -42,7 +43,7 @@ class HomeView extends StatelessWidget {
                   homeController.updateIndex(3); // Navigate to profile
                 },
                 onSearchChanged: (query) {
-                  print('Search query: $query');
+                  homeController.searchProducts(query);
                 },
               )
             : null,
@@ -150,26 +151,52 @@ class HomeView extends StatelessWidget {
             // Popular Products Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+              child: Obx(() => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Popular Products',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Popular Products',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      if (homeController.searchQuery.value.isNotEmpty)
+                        Text(
+                          '${homeController.filteredPopularProducts.length} results found',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
+                  if (homeController.searchQuery.value.isEmpty)
+                    GestureDetector(
+                      onTap: () {},
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: () => homeController.clearSearch(),
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
                 ],
-              ),
+              )),
             ),
 
             const SizedBox(height: 16),
@@ -177,81 +204,72 @@ class HomeView extends StatelessWidget {
             // Popular Products Grid
             SizedBox(
               height: 240,
-              child: Builder(
-                builder: (context) {
-                  // List of product data
-                  const products = [
-                    {
-                      'id': 'prod_001',
-                      'name': 'Wireless Earbuds',
-                      'brand': 'SoundBeats',
-                      'price': '\$99',
-                      'imageUrl': 'assets/images/1.jpeg',
-                    },
-                    {
-                      'id': 'prod_002',
-                      'name': 'Smart Watch',
-                      'brand': 'TechWear',
-                      'price': '\$199',
-                      'imageUrl': 'assets/images/2.jpeg',
-                    },
-                    {
-                      'id': 'prod_003',
-                      'name': 'Bluetooth Speaker',
-                      'brand': 'BoomAudio',
-                      'price': '\$79',
-                      'imageUrl': 'assets/images/3.jpeg',
-                    },
-                    {
-                      'id': 'prod_004',
-                      'name': 'Wireless Mouse',
-                      'brand': 'ErgoTech',
-                      'price': '\$39',
-                      'imageUrl': 'assets/images/4.jpeg',
-                    },
-                    {
-                      'id': 'prod_005',
-                      'name': 'Power Bank',
-                      'brand': 'ChargeIt',
-                      'price': '\$49',
-                      'imageUrl': 'assets/images/5.jpeg',
-                    },
-                  ];
+              child: Obx(() {
+                final isLoading = homeController.isLoadingPopularProducts.value;
+                final products = homeController.filteredPopularProducts;
 
-                  // Define colors for product cards
-                  final colors = [
-                    Colors.blue[200]!,
-                    Colors.purple[200]!,
-                    Colors.red[200]!,
-                    Colors.teal[200]!,
-                    Colors.orange[200]!,
-                  ];
+                // Show skeleton loader or actual products
+                return Skeletonizer(
+                  enabled: isLoading,
+                  child: products.isEmpty && !isLoading
+                      ? Center(
+                          child: Text(
+                            homeController.searchQuery.value.isEmpty
+                                ? 'No popular products available'
+                                : 'No products found for "${homeController.searchQuery.value}"',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: isLoading ? 5 : products.length,
+                          itemBuilder: (context, index) {
+                            if (isLoading) {
+                              // Show skeleton cards
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: ProductCard(
+                                  name: 'Loading Product Name',
+                                  productId: 'skeleton-$index',
+                                  brand: 'Loading Brand',
+                                  price: '\$999',
+                                  imageUrl: '',
+                                  rating: 4.5,
+                                  reviewCount: 100,
+                                ),
+                              );
+                            }
 
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      // Ensure we have at least one color
-                      final color = colors.isNotEmpty
-                          ? colors[index % colors.length]
-                          : Colors.grey[200]!;
+                            final product = products[index];
+                            final price = product.sizeType.isNotEmpty
+                                ? product.sizeType.first.price.toString()
+                                : '0';
+                            final imageUrl = product.images.isNotEmpty
+                                ? product.images.first
+                                : '';
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: ProductCard(
-                          name: products[index]['name'] as String,
-                          productId: products[index]['id'] as String,
-                          brand: products[index]['brand'] as String,
-                          price: products[index]['price'] as String,
-                          imageUrl: products[index]['imageUrl'],
-                          
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: ProductCard(
+                                product: product,
+                                name: product.name,
+                                productId: product.id,
+                                brand: product.brand,
+                                price: '\$$price',
+                                imageUrl: imageUrl,
+                                rating: product.rating,
+                                reviewCount: product.reviewCount,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                );
+              }),
             ),
 
             const SizedBox(height: 24),

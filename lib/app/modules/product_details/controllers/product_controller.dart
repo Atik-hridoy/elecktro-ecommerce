@@ -53,8 +53,11 @@ Rxn<ProductDetailModel> product = Rxn();
 
   // Get available sizes from the product
   List<String>? get _availableSizes {
-    if (product.value?.sizeType == null) return null;
-    return product.value!.sizeType.map((sizeType) => sizeType.size).toList();
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) return null;
+    return product.value!.sizeType
+        .map((sizeType) => sizeType.size ?? 'One Size')
+        .where((size) => size.isNotEmpty)
+        .toList();
   }
   
   // Get available colors from the product
@@ -101,6 +104,48 @@ Rxn<ProductDetailModel> product = Rxn();
       }
     }).toList();
   }
+  
+  // Get current selected variant's stock
+  int get currentStock {
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
+      return 0;
+    }
+    final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
+    return selectedVariant.quantity;
+  }
+  
+  // Get current selected variant's size name
+  String get currentSize {
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
+      return 'One Size';
+    }
+    final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
+    return selectedVariant.size ?? 'One Size';
+  }
+  
+  // Get current selected variant's original price (before discount)
+  double get currentOriginalPrice {
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
+      return 0.0;
+    }
+    final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
+    return selectedVariant.price;
+  }
+  
+  // Get current selected variant's discounted price
+  double get currentDiscountedPrice {
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
+      return 0.0;
+    }
+    final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
+    final basePrice = selectedVariant.price;
+    final discountPercent = selectedVariant.discount ?? 0;
+    
+    if (discountPercent > 0) {
+      return basePrice - (basePrice * discountPercent / 100);
+    }
+    return basePrice;
+  }
 
 
 
@@ -130,7 +175,11 @@ Rxn<ProductDetailModel> product = Rxn();
  
 
   // --- UI Actions ---
-  void selectSize(int index) => selectedSizeIndex.value = index;
+  void selectSize(int index) {
+    selectedSizeIndex.value = index;
+    _updatePriceAndStock();
+  }
+  
   void selectColor(int index) => selectedColorIndex.value = index;
   void selectImage(int index) => selectedImageIndex.value = index;
   void incrementQuantity() => quantity.value++;
@@ -138,6 +187,31 @@ Rxn<ProductDetailModel> product = Rxn();
     if (quantity.value > 1) {
       quantity.value--;
     }
+  }
+  
+  // Update price and stock based on selected size
+  void _updatePriceAndStock() {
+    if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
+      return;
+    }
+    
+    // Get selected size variant
+    final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
+    
+    // Update price with discount if available
+    final basePrice = selectedVariant.price;
+    final discountPercent = selectedVariant.discount ?? 0;
+    
+    if (discountPercent > 0) {
+      final discountedPrice = basePrice - (basePrice * discountPercent / 100);
+      price.value = discountedPrice.toStringAsFixed(2);
+      discount.value = discountPercent.toString();
+    } else {
+      price.value = basePrice.toString();
+      discount.value = '0';
+    }
+    
+    print('Updated price for size ${selectedVariant.size}: \$${price.value} (Discount: ${discount.value}%)');
   }
 
   // --- Business Logic Actions ---
@@ -312,18 +386,32 @@ Rxn<ProductDetailModel> product = Rxn();
     }
     
     // Handle seller info
+    print('=== SELLER INFO DEBUG ===');
+    print('Product ID: ${productData.id}');
+    print('Seller ID Object: ${productData.sellerId}');
+    print('Seller ID: ${productData.sellerId?.id}');
+    print('Seller First Name: ${productData.sellerId?.firstName}');
+    print('Seller Last Name: ${productData.sellerId?.lastName}');
+    
     if (productData.sellerId != null) {
       seller.value = productData.sellerId!;
+      print('Seller info assigned to controller');
+    } else {
+      print('WARNING: No seller info in product data!');
+    }
+    print('=== END SELLER INFO DEBUG ===');
+    
+    // Handle price and discount - set initial price from first size variant
+    if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
+      // Set initial selected size index to 0
+      selectedSizeIndex.value = 0;
+      // Update price and stock based on first variant
+      _updatePriceAndStock();
     }
     
-    // Handle price and discount
-    if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
-      final sizeType = productData.sizeType.first;
-      price.value = '\$${sizeType.price?.toStringAsFixed(2) ?? '0.00'}';
-      if (sizeType.discount != null && sizeType.discount > 0) {
-        discount.value = '${sizeType.discount.toStringAsFixed(0)}% OFF';
-      }
-    }
+    // Handle rating and reviews
+    rating.value = productData.rating;
+    reviewCount.value = productData.reviewCount;
   }
 
   void _updateFromMap(Map<dynamic, dynamic> data) {

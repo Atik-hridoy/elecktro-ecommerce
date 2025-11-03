@@ -18,6 +18,10 @@ class AppUrls {
   static const String faqs = 'faqs/';
   static const String createHelp = 'help/create';
 
+  static const String getSellerProfile = 'products/seller-info/';
+  static const String getSellerProducts = 'products/seller-products/';
+  static const String getSellerProductsCategories = 'products/seller-product-categories/';
+
   // home 
   static const String getBanner = 'banners/';
 
@@ -28,6 +32,7 @@ class AppUrls {
   // product
   
   static const String getProducts = 'products/';
+  static const String getPopularProducts = 'products/popular';
   static const String getProductDetails = 'products/single/';
   static const String postBookmark = 'bookmarks/';
   static const String getBookmarks = 'bookmarks/';

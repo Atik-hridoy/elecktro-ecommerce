@@ -44,6 +44,7 @@ import 'package:elecktro_ecommerce/app/modules/support/view.dart';
 import 'package:elecktro_ecommerce/app/modules/support/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/update_profile/binding.dart';
 import 'package:elecktro_ecommerce/app/modules/update_profile/update_profileview.dart';
+import 'package:elecktro_ecommerce/app/modules/seller_profile/views/seller_profile_view.dart';
 // ignore: depend_on_referenced_packages
 import 'package:get/get.dart';
 
@@ -196,6 +197,10 @@ class AppPages {
       name: Routes.support,
       page: () => const SupportView(),
       binding: SupportBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerProfile,
+      page: () => const SellerProfileView(),
     ),
 
   ];
