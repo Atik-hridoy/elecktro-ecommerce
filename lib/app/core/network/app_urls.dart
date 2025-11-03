@@ -30,6 +30,7 @@ class AppUrls {
   static const String postBookmark = 'bookmarks/';
   static const String getBookmarks = 'bookmarks/';
   static const String postReviewFeedback = 'feedbacks/create';
+  static const String getReviewFeedback = 'feedbacks/';
 
   // cart
   static const String addToCart = 'cart/add';

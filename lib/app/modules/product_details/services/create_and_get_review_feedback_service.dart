@@ -134,4 +134,62 @@ class CreateReviewFeedbackService {
       rethrow;
     }
   }
+
+  Future<dynamic> getReviewFeedback({required String productId}) async {
+    try {
+      // Get token
+      await LocalStorage.getAllPrefData();
+      final token = LocalStorage.token;
+
+      if (token.isEmpty) {
+        AppLogger.error('No authentication token found', tag: _tag);
+        throw Exception('Authentication required');
+      }
+
+      final url = Uri.parse('${AppUrls.baseUrl}${AppUrls.getReviewFeedback}$productId');
+
+      AppLogger.apiRequest(
+        method: 'GET',
+        endpoint: url.toString(),
+      );
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      AppLogger.apiResponse(
+        method: 'GET',
+        endpoint: url.toString(),
+        statusCode: response.statusCode,
+        responseData: responseData,
+        response: response,
+      );
+
+      if (response.statusCode == 200) {
+        AppLogger.success('Review feedback fetched successfully', tag: _tag);
+        print('Review Feedback Response: $responseData');
+        return responseData;
+      } else {
+        final errorMsg = responseData['message'] ?? 'Failed to fetch review feedback';
+        AppLogger.error(errorMsg, tag: _tag);
+        print('Error fetching review feedback: $errorMsg');
+        throw Exception(errorMsg);
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to fetch review feedback: $e',
+        tag: _tag,
+        error: e,
+        stackTrace: stackTrace,
+      );
+      print('Exception in getReviewFeedback: $e');
+      rethrow;
+    }
+  }
 }

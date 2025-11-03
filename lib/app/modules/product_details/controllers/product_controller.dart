@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
-import 'package:elecktro_ecommerce/app/modules/product_details/services/create_review_feedback_service.dart';
+import 'package:elecktro_ecommerce/app/modules/product_details/services/create_and_get_review_feedback_service.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/model/add_to_cart.dart';
 import 'package:flutter/material.dart';
 
@@ -46,6 +46,7 @@ Rxn<ProductDetailModel> product = Rxn();
   // Review service
   final CreateReviewFeedbackService _reviewService = CreateReviewFeedbackService();
   final RxBool isSubmittingReview = false.obs;
+  final RxBool isLoadingReviews = false.obs;
   
   // Reviews
   final RxList<Map<String, dynamic>> reviews = <Map<String, dynamic>>[].obs;
@@ -259,6 +260,7 @@ Rxn<ProductDetailModel> product = Rxn();
   void onInit() {
     super.onInit();
     _loadProductDetails();
+    fetchReviewFeedback();
   }
 
   void _loadProductDetails() {
@@ -316,10 +318,10 @@ Rxn<ProductDetailModel> product = Rxn();
     
     // Handle price and discount
     if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
-      final sizeType = productData.sizeType!.first;
+      final sizeType = productData.sizeType.first;
       price.value = '\$${sizeType.price?.toStringAsFixed(2) ?? '0.00'}';
       if (sizeType.discount != null && sizeType.discount > 0) {
-        discount.value = '${sizeType.discount!.toStringAsFixed(0)}% OFF';
+        discount.value = '${sizeType.discount.toStringAsFixed(0)}% OFF';
       }
     }
   }
@@ -406,6 +408,7 @@ Rxn<ProductDetailModel> product = Rxn();
     required double rating,
     required List<String> imageUrls,
     String? title,
+    String? userImage,
   }) {
     final newReview = {
       'name': 'You', // You can get actual user name from auth
@@ -414,6 +417,7 @@ Rxn<ProductDetailModel> product = Rxn();
       'rating': rating,
       'date': _formatDate(DateTime.now()),
       'images': imageUrls,
+      'userImage': userImage,
     };
     
     // Add to the beginning of the list so it appears first
@@ -427,5 +431,100 @@ Rxn<ProductDetailModel> product = Rxn();
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+  
+  // Fetch review feedback from API
+  Future<void> fetchReviewFeedback() async {
+    if (product.value?.id == null) {
+      print('Product ID is null, cannot fetch reviews');
+      return;
+    }
+
+    try {
+      isLoadingReviews.value = true;
+      print('Fetching reviews for product ID: ${product.value!.id}');
+      
+      final response = await _reviewService.getReviewFeedback(
+        productId: product.value!.id!,
+      );
+      
+      print('Review feedback response: $response');
+      
+      if (response != null) {
+        // Parse the response and update reviews list
+        if (response is Map && response['data'] != null) {
+          final List<dynamic> feedbackList = response['data'] is List 
+              ? response['data'] 
+              : [response['data']];
+          
+          reviews.clear();
+          
+          for (var feedback in feedbackList) {
+            if (feedback is Map) {
+              // Extract user info
+              final user = feedback['userId'] ?? {};
+              final userName = user is Map 
+                  ? '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}'.trim()
+                  : 'Anonymous';
+              
+              // Extract user profile image
+              String? userImageUrl;
+              if (user is Map && user['image'] != null) {
+                final profileImage = user['image'].toString();
+                if (profileImage.isNotEmpty) {
+                  userImageUrl = profileImage.startsWith('http')
+                      ? profileImage
+                      : '${AppUrls.baseImageUrl}${profileImage.startsWith('/') ? profileImage.substring(1) : profileImage}';
+                  print('User image URL: $userImageUrl');
+                }
+              }
+              
+              // Extract images and format URLs
+              final List<String> imageUrls = [];
+              if (feedback['images'] != null && feedback['images'] is List) {
+                for (var imagePath in feedback['images']) {
+                  if (imagePath is String) {
+                    final fullUrl = imagePath.startsWith('http')
+                        ? imagePath
+                        : '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
+                    imageUrls.add(fullUrl);
+                  }
+                }
+              }
+              
+              // Parse date
+              String formattedDate = '';
+              if (feedback['createdAt'] != null) {
+                try {
+                  final date = DateTime.parse(feedback['createdAt']);
+                  formattedDate = _formatDate(date);
+                } catch (e) {
+                  print('Error parsing date: $e');
+                }
+              }
+              
+              final review = {
+                'name': userName.isNotEmpty ? userName : 'Anonymous',
+                'title': '', // API doesn't seem to have title field
+                'review': feedback['comment'] ?? '',
+                'rating': (feedback['rating'] ?? 5).toDouble(),
+                'date': formattedDate,
+                'images': imageUrls,
+                'userImage': userImageUrl,
+              };
+              
+              reviews.add(review);
+              print('Added review: $review');
+            }
+          }
+          
+          print('Total reviews loaded: ${reviews.length}');
+        }
+      }
+    } catch (e, stackTrace) {
+
+    } finally {
+      isLoadingReviews.value = false;
+    }
   }
 }

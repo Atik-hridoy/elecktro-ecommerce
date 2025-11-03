@@ -9,6 +9,7 @@ class ProductBuildRowReviewItem extends StatelessWidget {
     required this.rating, 
     required this.date,
     this.images = const [],
+    this.userImage,
   });
 
   final String name;
@@ -17,6 +18,7 @@ class ProductBuildRowReviewItem extends StatelessWidget {
   final double rating;
   final String date;
   final List<String> images;
+  final String? userImage;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,34 @@ class ProductBuildRowReviewItem extends StatelessWidget {
               CircleAvatar(
                 radius: 20,
                 backgroundColor: Colors.grey[300],
-                child: Text(name.split(' ').map((e) => e[0]).join(''), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: userImage != null && userImage!.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          userImage!,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            // Fallback to initials if image fails to load
+                            return Text(
+                              name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').join(''),
+                              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                        ),
+                      )
+                    : Text(
+                        name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').join(''),
+                        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

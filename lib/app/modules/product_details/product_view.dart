@@ -271,6 +271,19 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     const Text('Feedback', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                     Row(
                       children: [
+                        Obx(() => IconButton(
+                          icon: controller.isLoadingReviews.value
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.refresh, size: 20),
+                          onPressed: controller.isLoadingReviews.value
+                              ? null
+                              : () => controller.fetchReviewFeedback(),
+                          tooltip: 'Refresh reviews',
+                        )),
                         const Icon(Icons.star, color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         const Text('4.9/5', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
@@ -314,42 +327,37 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 const SizedBox(height: 16),
                 // Dynamic Reviews from Controller
                 Obx(() {
+                  // Show loading indicator while fetching reviews
+                  if (controller.isLoadingReviews.value) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  
                   if (controller.reviews.isEmpty) {
-                    // Show demo reviews if no user reviews
-                    return Column(
-                      children: [
-                        ProductBuildRowReviewItem(
-                          name: 'Hadi H', 
-                          title: 'Just the thing', 
-                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
-                          rating: 4.9, 
-                          date: 'Aug 14, 2021',
-                          images: const [
-                            'https://images.unsplash.com/photo-1523275335684-37898b6baf30',
-                            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
-                            'https://images.unsplash.com/photo-1572635196237-14b3f281503f',
+                    // Show message if no reviews
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.rate_review_outlined, size: 48, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No reviews yet',
+                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Be the first to review this product!',
+                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        ProductBuildRowReviewItem(
-                          name: 'Kim Shine', 
-                          title: '', 
-                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
-                          rating: 4.9, 
-                          date: '',
-                        ),
-                        const SizedBox(height: 16),
-                        ProductBuildRowReviewItem(
-                          name: 'Matilda Brown', 
-                          title: 'Just the thing', 
-                          review: 'I loved this dress so much as soon I got it I knew I had to buy it in another color. I am 5\'3 about 155lbs and I carry all my weight to my upper body. When I put it on I felt like it slimmed me put and I got so many compliments.', 
-                          rating: 4.9, 
-                          date: 'Aug 14, 2021',
-                          images: const [
-                            'https://images.unsplash.com/photo-1560343090-f0409e92791a',
-                          ],
-                        ),
-                      ],
+                      ),
                     );
                   }
                   
@@ -365,6 +373,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             rating: (review['rating'] ?? 5.0).toDouble(),
                             date: review['date'] ?? '',
                             images: List<String>.from(review['images'] ?? []),
+                            userImage: review['userImage'],
                           ),
                           const SizedBox(height: 16),
                         ],
