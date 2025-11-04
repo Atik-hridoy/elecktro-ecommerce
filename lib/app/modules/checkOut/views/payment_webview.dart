@@ -127,6 +127,69 @@ class _PaymentWebViewState extends State<PaymentWebView> {
               setState(() => isLoading = false);
               _handleUrlChange(url?.toString() ?? '');
             },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              final url = navigationAction.request.url?.toString() ?? '';
+              
+              if (kDebugMode) {
+                print('shouldOverrideUrlLoading called with URL: $url');
+              }
+              
+              // Handle success URLs
+              if (url.contains('success') || 
+                  url.contains('checkout.stripe.com/success') ||
+                  url.contains('/api/v1/orders/success')) {
+                if (kDebugMode) {
+                  print('Payment success detected in shouldOverrideUrlLoading, redirecting to home...');
+                }
+                
+                // Close WebView and navigate to home
+                if (mounted) {
+                  Get.back();
+                  
+                  // Add a small delay to ensure smooth navigation
+                  await Future.delayed(const Duration(milliseconds: 300));
+                  
+                  // Navigate to home
+                  Get.offAllNamed('/home');
+                  
+                  Get.snackbar(
+                    'Payment Successful',
+                    'Your payment was processed successfully!',
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 5),
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+                
+                // Prevent the WebView from loading the success URL
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Handle cancel URLs
+              if (url.contains('cancel') || url.contains('checkout.stripe.com/cancel')) {
+                if (kDebugMode) {
+                  print('Payment cancelled in shouldOverrideUrlLoading');
+                }
+                
+                if (mounted) {
+                  Get.back();
+                  
+                  Get.snackbar(
+                    'Payment Cancelled',
+                    'Your payment was cancelled.',
+                    backgroundColor: Colors.orange,
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+                
+                return NavigationActionPolicy.CANCEL;
+              }
+              
+              // Allow all other URLs to load
+              return NavigationActionPolicy.ALLOW;
+            },
             onLoadError: (controller, url, code, message) {
               if (kDebugMode) {
                 print('WebView load error: $code, $message, URL: $url');

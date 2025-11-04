@@ -161,10 +161,22 @@ class OtpController extends GetxController {
       if (response['success'] == true) {
         final accessToken = response['accessToken'];
         final refreshToken = response['refreshToken'];
+        final data = response['data'] as Map<String, dynamic>?;
         
         if (accessToken == null || refreshToken == null) {
           throw Exception('Access token or refresh token is missing in the response');
         }
+        
+        // Check if profile is complete from API response
+        final isProfileCompleteFromApi = data?['isProfileCompleted'] ?? false;
+        
+        AppLogger.debug(
+          'Profile completion status from API',
+          tag: 'OtpController',
+          details: {
+            'isProfileCompleted': isProfileCompleteFromApi,
+          },
+        );
         
         // Store tokens and user data
         await Future.wait([
@@ -172,6 +184,7 @@ class OtpController extends GetxController {
           LocalStorage.setString(LocalStorageKeys.refreshToken, refreshToken),
           LocalStorage.setString(LocalStorageKeys.myEmail, email),
           LocalStorage.setBool(LocalStorageKeys.isLogIn, true),
+          LocalStorage.setBool(LocalStorageKeys.isProfileCompleted, isProfileCompleteFromApi),
         ]);
 
         AppLogger.success(
@@ -189,10 +202,16 @@ class OtpController extends GetxController {
           colorText: Colors.white,
         );
         
-        // Navigate based on the flow
+        // Refresh local storage data to get the latest profile status
         await LocalStorage.getAllPrefData();
+        
+        // Navigate based on the flow
         if (isRegistration) {
-          // For registration flow, go to update profile
+          // For registration flow, go to update profile (new user needs to complete profile)
+          AppLogger.info(
+            'New registration - navigating to update profile',
+            tag: 'OtpController',
+          );
           Get.offAllNamed(
             Routes.updateProfile,
             arguments: {
@@ -200,12 +219,13 @@ class OtpController extends GetxController {
               'isFirstTime': true,
             },
           );
-        } else if (LocalStorage.isProfileComplete()) {
-          // For login flow with complete profile, go to home
-          Get.offAllNamed(Routes.home);
         } else {
-          // For login flow with incomplete profile, go to update profile
-          Get.offAllNamed(Routes.updateProfile);
+          // For login flow, existing user should go directly to home
+          AppLogger.info(
+            'Login successful - navigating to home',
+            tag: 'OtpController',
+          );
+          Get.offAllNamed(Routes.home);
         }
       } else {
         // Handle verification failure
