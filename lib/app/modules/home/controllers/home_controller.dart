@@ -13,6 +13,8 @@ class HomeController extends GetxController {
   var banners = <Map<String, dynamic>>[].obs; // Store banner data with image URLs
   var isLoading = true.obs;
   var error = ''.obs;
+  var hasNetworkError = false.obs;
+  var hasServerError = false.obs;
   var isLoadingPopularProducts = false.obs;
   var searchQuery = ''.obs;
   
@@ -80,6 +82,8 @@ class HomeController extends GetxController {
     try {
       isLoading(true);
       error('');
+      hasNetworkError(false);
+      hasServerError(false);
       
       final bannerData = await _bannerService.getBanners();
       if (bannerData != null && bannerData.isNotEmpty) {
@@ -89,7 +93,14 @@ class HomeController extends GetxController {
         error('failed_load_banners'.tr);
       }
     } catch (e) {
-      error('${'error_loading_banners'.tr}: $e');
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('socket') || errorMessage.contains('network') || errorMessage.contains('connection')) {
+        hasNetworkError(true);
+      } else if (errorMessage.contains('500') || errorMessage.contains('502') || errorMessage.contains('503')) {
+        hasServerError(true);
+      } else {
+        error('${'error_loading_banners'.tr}: $e');
+      }
     } finally {
       isLoading(false);
     }
@@ -158,7 +169,13 @@ class HomeController extends GetxController {
       } else {
         categories.clear();
       }
-    } catch (_) {
+    } catch (e) {
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('socket') || errorMessage.contains('network') || errorMessage.contains('connection')) {
+        hasNetworkError(true);
+      } else if (errorMessage.contains('500') || errorMessage.contains('502') || errorMessage.contains('503')) {
+        hasServerError(true);
+      }
       categories.clear();
     }
   }
@@ -219,7 +236,12 @@ class HomeController extends GetxController {
       filteredPopularProducts.assignAll(updatedProducts);
       print('Popular products loaded: ${popularProducts.length}');
     } catch (e) {
-      print('Error loading popular products: $e');
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('socket') || errorMessage.contains('network') || errorMessage.contains('connection')) {
+        hasNetworkError(true);
+      } else if (errorMessage.contains('500') || errorMessage.contains('502') || errorMessage.contains('503')) {
+        hasServerError(true);
+      }
       popularProducts.clear();
       filteredPopularProducts.clear();
     } finally {

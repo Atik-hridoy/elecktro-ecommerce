@@ -51,7 +51,7 @@ class BookmarkController extends GetxController {
       _bookmarkedIds.addAll(result.map((b) => b['productId'].toString()));
     } catch (e) {
       print('Error fetching bookmarks: $e');
-      rethrow;
+    
     } finally {
       _isLoading.value = false;
       update();

@@ -5,6 +5,8 @@ import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/views/cart_widget.dart';
 import 'package:elecktro_ecommerce/app/modules/home/widget/navbar.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/empty_state_screen.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/something_went_wrong_screen.dart';
 import '../controllers/cart_controller.dart';
 
 import 'appbar.dart';
@@ -38,17 +40,19 @@ class CartView extends GetView<CartController> {
           }
           
           if (controller.errorMessage.value.isNotEmpty) {
-            return Center(
-              child: Text(
-                controller.errorMessage.value,
-                style: const TextStyle(color: Colors.red),
-              ),
+            return SomethingWentWrongScreen(
+              message: controller.errorMessage.value,
+              onRetry: () => controller.fetchCart(),
             );
           }
 
           if (controller.itemCount == 0) {
-            return Center(
-              child: Text('your_cart_empty'.tr),
+            return EmptyStateScreen(
+              title: 'your_cart_empty'.tr,
+              message: 'add_products_to_cart'.tr,
+              icon: Icons.shopping_cart_outlined,
+              onAction: () => Get.find<HomeController>().updateIndex(0),
+              actionButtonText: 'start_shopping'.tr,
             );
           }
 
@@ -83,26 +87,21 @@ class CartView extends GetView<CartController> {
                   }
                   
                   if (controller.errorMessage.value.isNotEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(controller.errorMessage.value),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () => controller.fetchCart(),
-                            child: Text('retry'.tr),
-                          ),
-                        ],
-                      ),
+                    return SomethingWentWrongScreen(
+                      message: controller.errorMessage.value,
+                      onRetry: () => controller.fetchCart(),
                     );
                   }
                   
                   final products = controller.cart.value?.products ?? [];
                   
                   if (products.isEmpty) {
-                    return Center(
-                      child: Text('your_cart_empty'.tr),
+                    return EmptyStateScreen(
+                      title: 'your_cart_empty'.tr,
+                      message: 'add_products_to_cart'.tr,
+                      icon: Icons.shopping_cart_outlined,
+                      onAction: () => Get.find<HomeController>().updateIndex(0),
+                      actionButtonText: 'start_shopping'.tr,
                     );
                   }
                   

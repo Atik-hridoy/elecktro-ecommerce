@@ -204,7 +204,6 @@ Rxn<ProductDetailModel> product = Rxn();
 
   void onBuyNow() {
     if (product.value == null) {
-      Get.snackbar('error'.tr, 'product_not_loaded'.tr);
       return;
     }
 
@@ -247,7 +246,6 @@ Rxn<ProductDetailModel> product = Rxn();
   Future<void> onAddToCart() async {
     final currentProduct = product.value;
     if (currentProduct == null) {
-      Get.snackbar('error'.tr, 'product_info_not_available'.tr);
       return;
     }
 
@@ -257,7 +255,6 @@ Rxn<ProductDetailModel> product = Rxn();
       // Get available sizes and colors with proper bounds checking
       final sizes = _availableSizes ?? [];
       if (sizes.isEmpty) {
-        Get.snackbar('error'.tr, 'no_size_available'.tr);
         return;
       }
       final selectedSize = sizes[selectedSizeIndex.value.clamp(0, sizes.length - 1)];
@@ -283,11 +280,9 @@ Rxn<ProductDetailModel> product = Rxn();
       
       if (result['success'] == true) {
         Get.snackbar('success'.tr, '${currentProduct.name} ${'added_to_cart'.tr}');
-      } else {
-        Get.snackbar('error'.tr, result['message'] ?? 'failed_to_add_to_cart'.tr);
       }
     } catch (e) {
-      Get.snackbar('error'.tr, '${'an_error_occurred'.tr}: ${e.toString()}');
+      // Error handled silently
     } finally {
       isAddingToCart.value = false;
     }
@@ -317,7 +312,6 @@ Rxn<ProductDetailModel> product = Rxn();
         throw Exception('Invalid product data format');
       }
     } catch (e) {
-      Get.snackbar('error'.tr, 'failed_to_load_product_details'.tr);
       Get.back();
     } finally {
       isLoading.value = false;
@@ -392,7 +386,6 @@ Rxn<ProductDetailModel> product = Rxn();
     String? title,
   }) async {
     if (product.value == null) {
-      Get.snackbar('error'.tr, 'product_not_found'.tr);
       return false;
     }
 
@@ -431,11 +424,9 @@ Rxn<ProductDetailModel> product = Rxn();
         );
         return true;
       } else {
-        Get.snackbar('error'.tr, 'failed_to_submit_review'.tr);
         return false;
       }
     } catch (e) {
-      Get.snackbar('error'.tr, '${'failed_to_submit_review'.tr}: ${e.toString()}');
       return false;
     } finally {
       isSubmittingReview.value = false;

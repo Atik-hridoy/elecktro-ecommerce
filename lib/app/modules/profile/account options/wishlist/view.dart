@@ -3,6 +3,7 @@ import 'package:elecktro_ecommerce/app/modules/home/widget/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/empty_state_screen.dart';
 
 class WishlistView extends StatelessWidget {
   const WishlistView({Key? key}) : super(key: key);
@@ -190,46 +191,12 @@ Widget _buildWishlistGrid(BookmarkController controller) {
 
   /// Build empty wishlist state
   Widget _buildEmptyWishlist(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 80,
-              color: theme.colorScheme.outline,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Your wishlist is empty',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Save items you like to your wishlist.\nReview them anytime and easily move them to your bag.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () {
-                // Navigate to home or products page
-                Get.back(); // Or navigate to your home page
-              },
-              icon: const Icon(Icons.shopping_bag_outlined),
-              label: const Text('Continue Shopping'),
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateScreen(
+      title: 'wishlist_empty'.tr,
+      message: 'save_items_wishlist'.tr,
+      icon: Icons.favorite_border,
+      onAction: () => Get.back(),
+      actionButtonText: 'continue_shopping'.tr,
     );
   }
 

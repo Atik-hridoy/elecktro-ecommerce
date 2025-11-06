@@ -71,7 +71,7 @@ class AccountController extends GetxController {
         phoneController.text = profileData.data.phone;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load profile: $e');
+      // Error handled by UI
     } finally {
       isLoading.value = false;
     }

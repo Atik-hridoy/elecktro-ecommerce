@@ -109,7 +109,10 @@ class CategoryController extends GetxController {
 
   void filterProductsByCategory(String? categoryId) {
     currentCategoryId.value = categoryId;
+    print('Filtering by category: $categoryId');
+    print('Total products before filter: ${products.length}');
     _applyFilters();
+    print('Filtered products count: ${filteredProducts.length}');
   }
   
   void searchProducts(String query) {
@@ -122,7 +125,7 @@ class CategoryController extends GetxController {
     
     // Filter by category
     if (currentCategoryId.value != null && currentCategoryId.value!.isNotEmpty) {
-      result = result.where((product) => product.categoryId == currentCategoryId.value).toList();
+      result = result.where((product) => product.categoryId.id == currentCategoryId.value).toList();
     }
     
     // Filter by search query

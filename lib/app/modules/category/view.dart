@@ -4,6 +4,7 @@ import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/no_data_found_screen.dart';
 import 'controller.dart';
 import '../home/widget/category_list.dart';
 import '../home/widget/product_card.dart';
@@ -172,9 +173,16 @@ class CategoryView extends GetView<CategoryController> {
 
                 final items = controller.filteredProducts;
                 if (items.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: Text('no_products_found'.tr)),
+                  return NoDataFoundScreen(
+                    title: 'no_products_found'.tr,
+                    message: controller.searchQuery.value.isNotEmpty
+                        ? 'try_different_search'.tr
+                        : 'no_products_in_category'.tr,
+                    icon: Icons.shopping_bag_outlined,
+                    onAction: controller.currentCategoryId.value != null || controller.searchQuery.value.isNotEmpty
+                        ? () => controller.clearAllFilters()
+                        : null,
+                    actionButtonText: 'clear_filters'.tr,
                   );
                 }
 

@@ -76,15 +76,10 @@ class CartController extends GetxController {
         }
       } else {
         errorMessage.value = response['message'] ?? 'failed_load_cart'.tr;
-        print('Error fetching cart: $errorMessage');
-        Get.snackbar('error'.tr, errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'error_loading_cart'.tr;
-      Get.snackbar('error'.tr, errorMessage.value);
-      // ignore: avoid_print
-      print('Error fetching cart: $e');
-    } finally {
+    } finally{
       isLoading.value = false;
     }
   }
@@ -117,13 +112,9 @@ class CartController extends GetxController {
         Get.snackbar('success'.tr, 'item_added_to_cart'.tr);
       } else {
         errorMessage.value = response['message'] ?? 'failed_add_to_cart'.tr;
-        Get.snackbar('error'.tr, errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'error_adding_to_cart'.tr;
-      Get.snackbar('error'.tr, errorMessage.value);
-      // ignore: avoid_print
-      print('Error adding to cart: $e');
     } finally {
       isLoading.value = false;
     }
@@ -144,7 +135,6 @@ class CartController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'error_removing_item'.tr;
-      Get.snackbar('error'.tr, errorMessage.value);
     } finally {
       isLoading.value = false;
     }
@@ -169,7 +159,6 @@ class CartController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'error_updating_quantity'.tr;
-      Get.snackbar('error'.tr, errorMessage.value);
     }
   }
   

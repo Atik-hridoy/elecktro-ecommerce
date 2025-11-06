@@ -6,6 +6,9 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/notification/notification_controller.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/network_error_screen.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/server_error_screen.dart';
+import 'package:elecktro_ecommerce/app/core/widgets/error_screens/something_went_wrong_screen.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
 import '../widget/banner_card.dart';
@@ -96,34 +99,52 @@ class HomeView extends StatelessWidget {
 
   // Home page body structure
   Widget _buildHomePage(HomeController homeController) {
-    return Builder(
-      builder: (context) => SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Obx(() {
+      // Show Network Error Screen
+      if (homeController.hasNetworkError.value) {
+        return NetworkErrorScreen(
+          onRetry: () {
+            homeController.fetchBanners();
+            homeController.fetchCategories();
+            homeController.fetchPopularProducts();
+          },
+        );
+      }
+      
+      // Show Server Error Screen
+      if (homeController.hasServerError.value) {
+        return ServerErrorScreen(
+          onRetry: () {
+            homeController.fetchBanners();
+            homeController.fetchCategories();
+            homeController.fetchPopularProducts();
+          },
+        );
+      }
+      
+      return Builder(
+        builder: (context) => Stack(
           children: [
-            // Banner Section with auto-sliding
-            GetBuilder<HomeController>(
-              builder: (controller) {
-                if (controller.isLoading.value) {
-                  return const SizedBox(
-                    height: 200,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                
-                if (controller.error.isNotEmpty) {
-                  return Container(
-                    height: 200,
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: Text(
-                        controller.error.value,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                }
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+              // Banner Section with auto-sliding
+              GetBuilder<HomeController>(
+                builder: (controller) {
+                  if (controller.isLoading.value) {
+                    return const SizedBox(
+                      height: 200,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  
+                  if (controller.error.isNotEmpty) {
+                    return SomethingWentWrongScreen(
+                      message: controller.error.value,
+                      onRetry: () => controller.fetchBanners(),
+                    );
+                  }
                 
                 if (controller.banners.isEmpty) {
                   return const SizedBox.shrink();
@@ -207,29 +228,63 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Popular Products Grid
-            SizedBox(
-              height: 240,
-              child: Obx(() {
-                final isLoading = homeController.isLoadingPopularProducts.value;
-                final products = homeController.filteredPopularProducts;
+            Obx(() {
+              final isLoading = homeController.isLoadingPopularProducts.value;
+              final products = homeController.filteredPopularProducts;
 
-                // Show skeleton loader or actual products
-                return Skeletonizer(
+              // Show error state only when no search query (empty popular products)
+              if (products.isEmpty && !isLoading && homeController.searchQuery.value.isEmpty) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.inbox_rounded,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'no_popular_products'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'check_back_later'.tr,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              // If searching and no results, show empty space (floating card will appear)
+              if (products.isEmpty && !isLoading && homeController.searchQuery.value.isNotEmpty) {
+                return const SizedBox(height: 240);
+              }
+
+              // Show products list
+              return SizedBox(
+                height: 240,
+                child: Skeletonizer(
                   enabled: isLoading,
-                  child: products.isEmpty && !isLoading
-                      ? Center(
-                          child: Text(
-                            homeController.searchQuery.value.isEmpty
-                                ? 'no_popular_products'.tr
-                                : '${'no_products_for_search'.tr} "${homeController.searchQuery.value}"',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      : ListView.builder(
+                  child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: isLoading ? 5 : products.length,
@@ -239,13 +294,11 @@ class HomeView extends StatelessWidget {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: ProductCard(
-                                  name: 'Loading Product Name',
+                                  name: '',
                                   productId: 'skeleton-$index',
-                                  brand: 'Loading Brand',
-                                  price: '\$999',
+                                  brand: '',
+                                  price: '',
                                   imageUrl: '',
-                                  rating: 4.5,
-                                  reviewCount: 100,
                                 ),
                               );
                             }
@@ -273,94 +326,9 @@ class HomeView extends StatelessWidget {
                             );
                           },
                         ),
+                  ),
                 );
               }),
-            ),
-
-            const SizedBox(height: 24),
-
-            // You may like Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'you_may_like'.tr,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // You may like products
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: 6, // Total number of products
-                itemBuilder: (context, index) {
-                  // List of recommended products
-                  const recommendedProducts = [
-                    {
-                      'id': 'prod_006',
-                      'name': 'Wireless Keyboard',
-                      'brand': 'KeyMaster',
-                      'price': '\$59',
-                      'imageUrl': 'assets/images/6.jpeg',
-                    },
-                    {
-                      'id': 'prod_007',
-                      'name': 'Gaming Mouse',
-                      'brand': 'GameGear',
-                      'price': '\$79',
-                      'imageUrl': 'assets/images/7.jpeg',
-                    },
-                    {
-                      'id': 'prod_008',
-                      'name': 'USB Hub',
-                      'brand': 'PortPlus',
-                      'price': '\$25',
-                      'imageUrl': 'assets/images/8.jpeg',
-                    },
-                    {
-                      'id': 'prod_009',
-                      'name': 'Laptop Stand',
-                      'brand': 'ErgoTech',
-                      'price': '\$35',
-                      'imageUrl': 'assets/images/1.jpeg',
-                    },
-                    {
-                      'id': 'prod_010',
-                      'name': 'Screen Protector',
-                      'brand': 'ShieldMax',
-                      'price': '\$12',
-                      'imageUrl': 'assets/images/2.jpeg',
-                    },
-                    {
-                      'id': 'prod_011',
-                      'name': 'Laptop Sleeve',
-                      'brand': 'UrbanGear',
-                      'price': '\$25',
-                      'imageUrl': 'assets/images/3.jpeg',
-                    },
-                  ];
-
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: ProductCard(
-                      productId: recommendedProducts[index]['id'] as String,
-                      name: recommendedProducts[index]['name'] as String,
-                      brand: recommendedProducts[index]['brand'] as String,
-                      price: recommendedProducts[index]['price'] as String,
-                      imageUrl: recommendedProducts[index]['imageUrl'],
-                    ),
-                  );
-                },
-              ),
-            ),
 
             const SizedBox(
               height: 20,
@@ -368,6 +336,89 @@ class HomeView extends StatelessWidget {
           ],
         ),
       ),
-    );
+      
+      // Floating error card for search results
+      Obx(() {
+        final isLoading = homeController.isLoadingPopularProducts.value;
+        final products = homeController.filteredPopularProducts;
+        final hasSearchQuery = homeController.searchQuery.value.isNotEmpty;
+        
+        // Only show floating card when searching and no results found
+        if (hasSearchQuery && products.isEmpty && !isLoading) {
+          return Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.search_off_rounded,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'no_results_found'.tr,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${'no_products_for_search'.tr} "${homeController.searchQuery.value}"',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => homeController.clearSearch(),
+                    icon: const Icon(Icons.clear, size: 18),
+                    label: Text('clear_search'.tr),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF044D37),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }),
+    ],
+        ),
+      );
+    });
   }
 }
