@@ -26,7 +26,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
       child: Scaffold(
         appBar: RoundedAppBar(
-          title: 'My Account',
+          title: 'my_account'.tr,
           height: 60.0,
           borderRadius: 20.0,
           backgroundColor: Colors.white,
@@ -155,7 +155,7 @@ class ProfileView extends GetView<ProfileController> {
               // Menu Items
               _buildMenuItem(
                 icon: Icons.favorite_outline,
-                title: 'Wishlist',
+                title: 'wishlist'.tr,
                 onTap: () {
                   Get.toNamed(Routes.wishlist);
                   print('Navigate to wishlist');
@@ -164,7 +164,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.shopping_cart_outlined,
-                title: 'Dealing History',
+                title: 'dealing_history'.tr,
                 onTap: () {
                   Get.toNamed(Routes.history);
                   print('Navigate to dealing history');
@@ -173,7 +173,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.settings_outlined,
-                title: 'Account Setting',
+                title: 'account_setting'.tr,
                 onTap: () {
                   Get.toNamed(Routes.accountSettings);
                 },
@@ -181,7 +181,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.info_outline,
-                title: 'About',
+                title: 'about'.tr,
                 onTap: () {
                   Get.toNamed(Routes.about);
                 },
@@ -189,7 +189,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.work_outline,
-                title: 'Work Functionality',
+                title: 'work_functionality'.tr,
                 onTap: () {
                   Get.toNamed(Routes.work);
                 },
@@ -197,7 +197,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.description_outlined,
-                title: 'Terms & Conditions',
+                title: 'terms_and_conditions'.tr,
                 onTap: () {
                   Get.toNamed(Routes.termsAndConditions);
                 },
@@ -205,7 +205,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.help_outline,
-                title: 'FAQ',
+                title: 'faq'.tr,
                 onTap: () {
                   Get.toNamed(Routes.faq);
                 },
@@ -213,7 +213,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.support_outlined,
-                title: 'Support',
+                title: 'support'.tr,
                 onTap: () {
                   Get.toNamed(Routes.support);
                 },
@@ -221,7 +221,7 @@ class ProfileView extends GetView<ProfileController> {
 
               _buildMenuItem(
                 icon: Icons.logout,
-                title: 'Log Out',
+                title: 'log_out'.tr,
                 textColor: Colors.red,
                 showArrow: false,
                 onTap: () {
@@ -324,14 +324,14 @@ class ProfileView extends GetView<ProfileController> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Log Out'),
-          content: const Text('Are you sure you want to log out?'),
+          title: Text('log_out'.tr),
+          content: Text('are_you_sure_logout'.tr),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('cancel'.tr),
             ),
             TextButton(
               onPressed: () async {
@@ -341,12 +341,12 @@ class ProfileView extends GetView<ProfileController> {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error logging out: $e')),
+                      SnackBar(content: Text('${'error_logging_out'.tr}: $e')),
                     );
                   }
                 }
               },
-              child: const Text('Log Out', style: TextStyle(color: Colors.red)),
+              child: Text('log_out'.tr, style: const TextStyle(color: Colors.red)),
             ),
           ],
         );

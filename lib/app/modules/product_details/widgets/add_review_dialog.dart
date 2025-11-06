@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddReviewDialog extends StatefulWidget {
@@ -41,7 +42,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick images: $e')),
+          SnackBar(content: Text('${'failed_to_pick_images'.tr}: $e')),
         );
       }
     }
@@ -64,7 +65,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take photo: $e')),
+          SnackBar(content: Text('${'failed_to_take_photo'.tr}: $e')),
         );
       }
     }
@@ -79,7 +80,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
   void _submit() {
     if (_reviewController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please write a review')),
+        SnackBar(content: Text('please_write_a_review'.tr)),
       );
       return;
     }
@@ -111,9 +112,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Write a Review',
-                  style: TextStyle(
+                Text(
+                  'write_a_review'.tr,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -129,9 +130,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             const SizedBox(height: 20),
 
             // Rating
-            const Text(
-              'Rating',
-              style: TextStyle(
+            Text(
+              'rating_label'.tr,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -155,9 +156,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             const SizedBox(height: 20),
 
             // Title (Optional)
-            const Text(
-              'Title (Optional)',
-              style: TextStyle(
+            Text(
+              'title_optional'.tr,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -166,7 +167,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'Summarize your review',
+                hintText: 'summarize_your_review'.tr,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -179,9 +180,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             const SizedBox(height: 16),
 
             // Review Text
-            const Text(
-              'Review',
-              style: TextStyle(
+            Text(
+              'review'.tr,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -191,7 +192,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
               controller: _reviewController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Share your experience with this product...',
+                hintText: 'share_your_experience'.tr,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -201,9 +202,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
             const SizedBox(height: 16),
 
             // Photos Section
-            const Text(
-              'Photos (Optional)',
-              style: TextStyle(
+            Text(
+              'photos_optional'.tr,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -266,7 +267,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
                     child: OutlinedButton.icon(
                       onPressed: _pickImages,
                       icon: const Icon(Icons.photo_library),
-                      label: const Text('Gallery'),
+                      label: Text('gallery'.tr),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
@@ -277,7 +278,7 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
                     child: OutlinedButton.icon(
                       onPressed: _takePhoto,
                       icon: const Icon(Icons.camera_alt),
-                      label: const Text('Camera'),
+                      label: Text('camera'.tr),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
@@ -309,9 +310,9 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
                           color: Colors.black,
                         ),
                       )
-                    : const Text(
-                        'Submit Review',
-                        style: TextStyle(
+                    : Text(
+                        'submit_review'.tr,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

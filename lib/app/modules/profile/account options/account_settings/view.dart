@@ -16,9 +16,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Account Settings',
-          style: TextStyle(
+        title: Text(
+          'account_settings'.tr,
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -36,9 +36,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               color: Colors.white,
-              child: const Text(
-                'Manage your account settings including language preferences, password, and account deletion.',
-                style: TextStyle(
+              child: Text(
+                'manage_account_settings'.tr,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
@@ -64,10 +64,10 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                       color: Color(0xFF424242),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Language',
-                        style: TextStyle(
+                        'language'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -76,7 +76,7 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                       ),
                     ),
                     Obx(() => Text(
-                      controller.currentLanguage.value == 'en' ? 'English' : 'Spanish',
+                      controller.currentLanguage.value == 'en' ? 'english'.tr : 'spanish'.tr,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
@@ -108,18 +108,18 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
               child: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.lock_outline,
                       size: 24,
                       color: Color(0xFF424242),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        'Change Password',
-                        style: TextStyle(
+                        'change_password'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -151,18 +151,18 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
               child: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.delete_outline,
                       size: 24,
                       color: Colors.red,
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        'Delete Account',
-                        style: TextStyle(
+                        'delete_account'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -170,7 +170,7 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                         ),
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
                       color: Color(0xFF9E9E9E),
@@ -197,9 +197,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Select Language',
-                style: TextStyle(
+              Text(
+                'select_language'.tr,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -246,9 +246,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                         activeColor: const Color(0xFF044D37),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'English',
-                        style: TextStyle(
+                      Text(
+                        'english'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -300,9 +300,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                         activeColor: const Color(0xFF044D37),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Spanish',
-                        style: TextStyle(
+                      Text(
+                        'spanish'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
@@ -328,9 +328,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(
+                  child: Text(
+                    'close'.tr,
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -352,16 +352,16 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        title: const Text(
-          'Delete Account',
-          style: TextStyle(
+        title: Text(
+          'delete_account'.tr,
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w600,
           ),
         ),
-        content: const Text(
-          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
-          style: TextStyle(
+        content: Text(
+          'delete_account_confirmation'.tr,
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
           ),
@@ -369,9 +369,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
+            child: Text(
+              'cancel'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 color: Color(0xFF424242),
               ),
@@ -383,8 +383,8 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
               Get.back();
               // Show success message
               Get.snackbar(
-                'Account Deleted',
-                'Your account has been deleted successfully',
+                'account_deleted'.tr,
+                'account_deleted_success'.tr,
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.red.withOpacity(0.9),
                 colorText: Colors.white,
@@ -392,9 +392,9 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
                 borderRadius: 8,
               );
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(
+            child: Text(
+              'delete'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -408,8 +408,8 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
 
   void _showLanguageUpdatedSnackbar() {
     Get.snackbar(
-      'Language Updated',
-      'Your language preference has been updated successfully',
+      'language_updated'.tr,
+      'language_updated_success'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: const Color(0xFF044D37).withOpacity(0.9),
       colorText: Colors.white,

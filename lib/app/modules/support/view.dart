@@ -23,9 +23,9 @@ class SupportView extends GetView<SupportController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            const Text(
-              'Need Help? We\'re Here for You!',
-              style: TextStyle(
+            Text(
+              'need_help'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -35,9 +35,9 @@ class SupportView extends GetView<SupportController> {
             const SizedBox(height: 12),
             
             // Description
-            const Text(
-              'Welcome to our Help & Support center. Whether you have a question, ran into a problem, or just need some guidance',
-              style: TextStyle(
+            Text(
+              'support_description'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -48,9 +48,9 @@ class SupportView extends GetView<SupportController> {
             const SizedBox(height: 32),
             
             // Email Field
-            const Text(
-              'Email*',
-              style: TextStyle(
+            Text(
+              'email_required_field'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -83,9 +83,9 @@ class SupportView extends GetView<SupportController> {
             const SizedBox(height: 24),
             
             // Message Field
-            const Text(
-              'Message',
-              style: TextStyle(
+            Text(
+              'message_label'.tr,
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -97,7 +97,7 @@ class SupportView extends GetView<SupportController> {
               controller: controller.messageController,
               maxLines: 8,
               decoration: InputDecoration(
-                hintText: 'Type your message here...',
+                hintText: 'type_message_here'.tr,
                 hintStyle: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
@@ -139,9 +139,9 @@ class SupportView extends GetView<SupportController> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Confirm',
-                        style: TextStyle(
+                    : Text(
+                        'confirm'.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

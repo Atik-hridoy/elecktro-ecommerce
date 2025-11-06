@@ -34,9 +34,9 @@ class SuccessView extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Congratulations Text
-              const Text(
-                'Congratulations',
-                style: TextStyle(
+              Text(
+                'congratulations'.tr,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.red,
@@ -46,10 +46,10 @@ class SuccessView extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Success Message
-              const Text(
-                'Your order has been successfully completed.',
+              Text(
+                'order_success_message'.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                   height: 1.5,
@@ -59,15 +59,7 @@ class SuccessView extends StatelessWidget {
               const SizedBox(height: 30),
 
               // Order Details
-              const Text(
-                'you order 1 item with online payment, payment\namount \$20.30',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                  height: 1.5,
-                ),
-              ),
+              
 
               const Spacer(flex: 2),
 
@@ -91,9 +83,9 @@ class SuccessView extends StatelessWidget {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Back to Home',
-                          style: TextStyle(
+                        child: Text(
+                          'back_to_home'.tr,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -117,9 +109,9 @@ class SuccessView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'View Order History',
-                          style: TextStyle(
+                        child: Text(
+                          'view_order_history'.tr,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),

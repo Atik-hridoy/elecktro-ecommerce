@@ -16,6 +16,13 @@ class CategoryController extends GetxController {
   bool _hasLoadedProducts = false;
   final currentCategoryId = Rxn<String>();
   final searchQuery = ''.obs;
+  
+  // Filter properties
+  final minPrice = 0.0.obs;
+  final maxPrice = 10000.0.obs;
+  final selectedBrands = <String>[].obs;
+  final minRating = 0.0.obs;
+  final sortBy = 'default'.obs; // default, price_low, price_high, rating
 
   @override
   void onInit() {
@@ -127,6 +134,39 @@ class CategoryController extends GetxController {
       }).toList();
     }
     
+    // Filter by price range
+    result = result.where((product) {
+      final price = product.sizeType.isNotEmpty ? product.sizeType.first.price : 0.0;
+      return price >= minPrice.value && price <= maxPrice.value;
+    }).toList();
+    
+    // Filter by brand
+    if (selectedBrands.isNotEmpty) {
+      result = result.where((product) => selectedBrands.contains(product.brand)).toList();
+    }
+    
+    // Filter by rating
+    if (minRating.value > 0) {
+      result = result.where((product) => product.rating >= minRating.value).toList();
+    }
+    
+    // Sort
+    if (sortBy.value == 'price_low') {
+      result.sort((a, b) {
+        final priceA = a.sizeType.isNotEmpty ? a.sizeType.first.price : 0.0;
+        final priceB = b.sizeType.isNotEmpty ? b.sizeType.first.price : 0.0;
+        return priceA.compareTo(priceB);
+      });
+    } else if (sortBy.value == 'price_high') {
+      result.sort((a, b) {
+        final priceA = a.sizeType.isNotEmpty ? a.sizeType.first.price : 0.0;
+        final priceB = b.sizeType.isNotEmpty ? b.sizeType.first.price : 0.0;
+        return priceB.compareTo(priceA);
+      });
+    } else if (sortBy.value == 'rating') {
+      result.sort((a, b) => b.rating.compareTo(a.rating));
+    }
+    
     filteredProducts.assignAll(result);
   }
 
@@ -138,7 +178,46 @@ class CategoryController extends GetxController {
   void clearAllFilters() {
     currentCategoryId.value = null;
     searchQuery.value = '';
+    minPrice.value = 0.0;
+    maxPrice.value = 10000.0;
+    selectedBrands.clear();
+    minRating.value = 0.0;
+    sortBy.value = 'default';
     filteredProducts.assignAll(products);
+  }
+  
+  // Get all unique brands
+  List<String> get availableBrands {
+    return products.map((p) => p.brand).where((b) => b.isNotEmpty).toSet().toList()..sort();
+  }
+  
+  // Toggle brand selection
+  void toggleBrand(String brand) {
+    if (selectedBrands.contains(brand)) {
+      selectedBrands.remove(brand);
+    } else {
+      selectedBrands.add(brand);
+    }
+    _applyFilters();
+  }
+  
+  // Update price range
+  void updatePriceRange(double min, double max) {
+    minPrice.value = min;
+    maxPrice.value = max;
+    _applyFilters();
+  }
+  
+  // Update rating filter
+  void updateMinRating(double rating) {
+    minRating.value = rating;
+    _applyFilters();
+  }
+  
+  // Update sort
+  void updateSort(String sort) {
+    sortBy.value = sort;
+    _applyFilters();
   }
 
   bool isCategorySelected(String categoryId) => currentCategoryId.value == categoryId;

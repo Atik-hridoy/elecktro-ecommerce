@@ -23,7 +23,7 @@ class CartView extends GetView<CartController> {
       ),
       child: Scaffold(
         appBar: RoundedAppBar(
-          title: 'My Cart',
+          title: 'my_cart'.tr,
           height: 60.0,
           borderRadius: 20.0,
           backgroundColor: Colors.white,
@@ -47,8 +47,8 @@ class CartView extends GetView<CartController> {
           }
 
           if (controller.itemCount == 0) {
-            return const Center(
-              child: Text('Your cart is empty'),
+            return Center(
+              child: Text('your_cart_empty'.tr),
             );
           }
 
@@ -65,7 +65,7 @@ class CartView extends GetView<CartController> {
                           activeColor: Colors.black,
                         )),
                     Text(
-                      '${controller.itemCount} Items in Cart',
+                      '${controller.itemCount} ${'items_in_cart'.tr}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -91,7 +91,7 @@ class CartView extends GetView<CartController> {
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => controller.fetchCart(),
-                            child: const Text('Retry'),
+                            child: Text('retry'.tr),
                           ),
                         ],
                       ),
@@ -101,8 +101,8 @@ class CartView extends GetView<CartController> {
                   final products = controller.cart.value?.products ?? [];
                   
                   if (products.isEmpty) {
-                    return const Center(
-                      child: Text('Your cart is empty'),
+                    return Center(
+                      child: Text('your_cart_empty'.tr),
                     );
                   }
                   
@@ -113,10 +113,10 @@ class CartView extends GetView<CartController> {
                       final item = products[index];
                       return CartProductCard(
                         key: ValueKey(item.id),
-                        productName: item.name ?? 'Product',
-                        brand: item.brand ?? 'Generic',
-                        size: item.size.isNotEmpty ? item.size : 'One Size',
-                        color: item.color.isNotEmpty ? item.color : 'Black',
+                        productName: item.name ?? 'product'.tr,
+                        brand: item.brand ?? 'generic'.tr,
+                        size: item.size.isNotEmpty ? item.size : 'one_size'.tr,
+                        color: item.color.isNotEmpty ? item.color : 'black'.tr,
                         price: item.price,
                         quantity: item.quantity,
                         images: item.images,
@@ -148,9 +148,9 @@ class CartView extends GetView<CartController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Total:',
-                          style: TextStyle(
+                        Text(
+                          'total'.tr,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -172,7 +172,7 @@ class CartView extends GetView<CartController> {
                         onPressed: () {
                           // Handle checkout
                           // Get.toNamed(Routes.CHECKOUT);
-                          Get.snackbar('Checkout', 'Proceeding to checkout');
+                          Get.snackbar('checkout'.tr, 'proceeding_to_checkout'.tr);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
@@ -181,9 +181,9 @@ class CartView extends GetView<CartController> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          'Proceed to Checkout',
-                          style: TextStyle(
+                        child: Text(
+                          'proceed_to_checkout'.tr,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -212,26 +212,26 @@ class CartView extends GetView<CartController> {
         activeColor: const Color(0xFF044D37),
         inactiveColor: Colors.grey,
         backgroundColor: Colors.white,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined, size: 24),
-            activeIcon: Icon(Icons.home, size: 24),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined, size: 24),
+            activeIcon: const Icon(Icons.home, size: 24),
+            label: 'home'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.category_outlined, size: 24),
-            activeIcon: Icon(Icons.category, size: 24),
-            label: 'Categories',
+            icon: const Icon(Icons.category_outlined, size: 24),
+            activeIcon: const Icon(Icons.category, size: 24),
+            label: 'categories'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined, size: 24),
-            activeIcon: Icon(Icons.shopping_cart, size: 24),
-            label: 'Cart',
+            icon: const Icon(Icons.shopping_cart_outlined, size: 24),
+            activeIcon: const Icon(Icons.shopping_cart, size: 24),
+            label: 'cart'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline, size: 24),
-            activeIcon: Icon(Icons.person, size: 24),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline, size: 24),
+            activeIcon: const Icon(Icons.person, size: 24),
+            label: 'profile'.tr,
           ),
         ],
       );

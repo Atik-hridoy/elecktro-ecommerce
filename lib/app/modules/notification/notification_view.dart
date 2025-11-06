@@ -16,13 +16,13 @@ class NotificationView extends GetView<NotificationController> {
         }
       },
       itemBuilder: (BuildContext context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'mark_all_read',
-          child: Text('Mark all as read'),
+          child: Text('mark_all_read'.tr),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'clear_all',
-          child: Text('Clear all notifications'),
+          child: Text('clear_all_notifications'.tr),
         ),
       ],
     );
@@ -45,9 +45,9 @@ class NotificationView extends GetView<NotificationController> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Notifications',
-          style: TextStyle(
+        title: Text(
+          'notifications'.tr,
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -81,7 +81,7 @@ class NotificationView extends GetView<NotificationController> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No notifications yet',
+                  'no_notifications_yet'.tr,
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.grey[600],
@@ -90,7 +90,7 @@ class NotificationView extends GetView<NotificationController> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'When you get notifications, they\'ll show up here',
+                  'notifications_show_here'.tr,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],
@@ -101,7 +101,7 @@ class NotificationView extends GetView<NotificationController> {
                 ElevatedButton.icon(
                   onPressed: () => controller.refreshNotifications(),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
+                  label: Text('refresh'.tr),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,

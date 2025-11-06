@@ -21,7 +21,6 @@ Rxn<ProductDetailModel> product = Rxn();
   final RxString imageUrl = ''.obs;
   final RxString discount = ''.obs;
   
-  // final Rx<ProductResponse?> productResponse = Rx<ProductResponse?>(null);
   
   // --- Seller Information ---
   final seller = Seller(
@@ -55,7 +54,7 @@ Rxn<ProductDetailModel> product = Rxn();
   List<String>? get _availableSizes {
     if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) return null;
     return product.value!.sizeType
-        .map((sizeType) => sizeType.size ?? 'One Size')
+        .map((sizeType) => sizeType.size ?? 'one_size'.tr)
         .where((size) => size.isNotEmpty)
         .toList();
   }
@@ -117,10 +116,10 @@ Rxn<ProductDetailModel> product = Rxn();
   // Get current selected variant's size name
   String get currentSize {
     if (product.value?.sizeType == null || product.value!.sizeType.isEmpty) {
-      return 'One Size';
+      return 'one_size'.tr;
     }
     final selectedVariant = product.value!.sizeType[selectedSizeIndex.value.clamp(0, product.value!.sizeType.length - 1)];
-    return selectedVariant.size ?? 'One Size';
+    return selectedVariant.size ?? 'one_size'.tr;
   }
   
   // Get current selected variant's original price (before discount)
@@ -149,30 +148,6 @@ Rxn<ProductDetailModel> product = Rxn();
 
 
 
-  void _loadProductDetailsFromParameters() {
-    try {
-      isLoading.value = true;
-      final argData = Get.arguments;
-      print("kaj kora na kan ");
-      print(argData);
-      if(argData != null && argData is ProductDetailModel){
-        product.value = argData;  
-      }else{
-/////////////  error 
-      }
-      
-
-
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to load product details: ${e.toString()}');
-      name.value = 'Error Loading Product';
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-
- 
 
   // --- UI Actions ---
   void selectSize(int index) {
@@ -210,8 +185,6 @@ Rxn<ProductDetailModel> product = Rxn();
       price.value = basePrice.toString();
       discount.value = '0';
     }
-    
-    print('Updated price for size ${selectedVariant.size}: \$${price.value} (Discount: ${discount.value}%)');
   }
 
   // --- Business Logic Actions ---
@@ -231,7 +204,7 @@ Rxn<ProductDetailModel> product = Rxn();
 
   void onBuyNow() {
     if (product.value == null) {
-      Get.snackbar('Error', 'Product not loaded');
+      Get.snackbar('error'.tr, 'product_not_loaded'.tr);
       return;
     }
 
@@ -242,11 +215,11 @@ Rxn<ProductDetailModel> product = Rxn();
     // Get selected size and color with proper bounds checking
     final selectedSize = sizes.isNotEmpty 
         ? sizes[selectedSizeIndex.value.clamp(0, sizes.length - 1)] 
-        : 'One Size';
+        : 'one_size'.tr;
         
     final selectedColor = colors.isNotEmpty && product.value!.color.isNotEmpty
         ? product.value!.color[selectedColorIndex.value.clamp(0, product.value!.color.length - 1)]
-        : 'Default';
+        : '';
     
     // Create cart item with all necessary details
     final cartItem = {
@@ -254,7 +227,7 @@ Rxn<ProductDetailModel> product = Rxn();
       'name': product.value!.name,
       'brand': product.value!.brand,
       'price': _parsePrice(price.value),
-      'originalPrice': 0.0,
+      'originalPrice': currentOriginalPrice,
       'quantity': quantity.value,
       'size': selectedSize,
       'color': selectedColor,
@@ -270,25 +243,11 @@ Rxn<ProductDetailModel> product = Rxn();
     });
   }
   
-  // Helper method to get color name from Color object
-  String _getColorName(Color color) {
-    if (color == Colors.red) return 'Red';
-    if (color == Colors.blue) return 'Blue';
-    if (color == Colors.green) return 'Green';
-    if (color == Colors.black) return 'Black';
-    if (color == Colors.white) return 'White';
-    if (color == Colors.yellow) return 'Yellow';
-    if (color == Colors.orange) return 'Orange';
-    if (color == Colors.purple) return 'Purple';
-    if (color == Colors.pink) return 'Pink';
-    if (color == Colors.grey) return 'Grey';
-    return 'Custom Color';
-  }
 
   Future<void> onAddToCart() async {
     final currentProduct = product.value;
     if (currentProduct == null) {
-      Get.snackbar('Error', 'Product information not available');
+      Get.snackbar('error'.tr, 'product_info_not_available'.tr);
       return;
     }
 
@@ -296,14 +255,18 @@ Rxn<ProductDetailModel> product = Rxn();
       isAddingToCart.value = true;
       
       // Get available sizes and colors with proper bounds checking
-      final sizes = _availableSizes ?? ['M']; // Default to 'M' if sizes not available
+      final sizes = _availableSizes ?? [];
+      if (sizes.isEmpty) {
+        Get.snackbar('error'.tr, 'no_size_available'.tr);
+        return;
+      }
       final selectedSize = sizes[selectedSizeIndex.value.clamp(0, sizes.length - 1)];
       
-      // Get the color string from product colors if available, otherwise use a default
+      // Get the color string from product colors if available
       final colorString = currentProduct.color.isNotEmpty && 
                          selectedColorIndex.value < currentProduct.color.length
           ? currentProduct.color[selectedColorIndex.value]
-          : '#000000';
+          : '';
       
       // Create AddToCartModel with selected options
       final addToCartModel = AddToCartModel(
@@ -319,12 +282,12 @@ Rxn<ProductDetailModel> product = Rxn();
       final result = await _cartService.addToCart(addToCartModel);
       
       if (result['success'] == true) {
-        Get.snackbar('Success', '${currentProduct.name} added to cart');
+        Get.snackbar('success'.tr, '${currentProduct.name} ${'added_to_cart'.tr}');
       } else {
-        Get.snackbar('Error', result['message'] ?? 'Failed to add to cart');
+        Get.snackbar('error'.tr, result['message'] ?? 'failed_to_add_to_cart'.tr);
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: ${e.toString()}');
+      Get.snackbar('error'.tr, '${'an_error_occurred'.tr}: ${e.toString()}');
     } finally {
       isAddingToCart.value = false;
     }
@@ -354,7 +317,7 @@ Rxn<ProductDetailModel> product = Rxn();
         throw Exception('Invalid product data format');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load product details');
+      Get.snackbar('error'.tr, 'failed_to_load_product_details'.tr);
       Get.back();
     } finally {
       isLoading.value = false;
@@ -364,8 +327,8 @@ Rxn<ProductDetailModel> product = Rxn();
   void _updateFromProductModel(ProductDetailModel productData) {
     product.value = productData;
     productId.value = productData.id ?? '';
-    name.value = productData.name ?? 'Product Not Found';
-    brand.value = productData.brand ?? 'N/A';
+    name.value = productData.name ?? 'product_not_found'.tr;
+    brand.value = productData.brand ?? '';
     
     // Handle images
     if (productData.images != null && productData.images!.isNotEmpty) {
@@ -386,20 +349,9 @@ Rxn<ProductDetailModel> product = Rxn();
     }
     
     // Handle seller info
-    print('=== SELLER INFO DEBUG ===');
-    print('Product ID: ${productData.id}');
-    print('Seller ID Object: ${productData.sellerId}');
-    print('Seller ID: ${productData.sellerId?.id}');
-    print('Seller First Name: ${productData.sellerId?.firstName}');
-    print('Seller Last Name: ${productData.sellerId?.lastName}');
-    
     if (productData.sellerId != null) {
       seller.value = productData.sellerId!;
-      print('Seller info assigned to controller');
-    } else {
-      print('WARNING: No seller info in product data!');
     }
-    print('=== END SELLER INFO DEBUG ===');
     
     // Handle price and discount - set initial price from first size variant
     if (productData.sizeType != null && productData.sizeType!.isNotEmpty) {
@@ -416,9 +368,9 @@ Rxn<ProductDetailModel> product = Rxn();
 
   void _updateFromMap(Map<dynamic, dynamic> data) {
     productId.value = data['id']?.toString() ?? '';
-    name.value = data['name']?.toString() ?? 'Product Not Found';
-    brand.value = data['brand']?.toString() ?? 'N/A';
-    price.value = data['price']?.toString() ?? '\$0.00';
+    name.value = data['name']?.toString() ?? 'product_not_found'.tr;
+    brand.value = data['brand']?.toString() ?? '';
+    price.value = data['price']?.toString() ?? '0.00';
     imageUrl.value = data['imageUrl']?.toString() ?? '';
     discount.value = data['discount']?.toString() ?? '';    
     
@@ -440,7 +392,7 @@ Rxn<ProductDetailModel> product = Rxn();
     String? title,
   }) async {
     if (product.value == null) {
-      Get.snackbar('Error', 'Product not found');
+      Get.snackbar('error'.tr, 'product_not_found'.tr);
       return false;
     }
 
@@ -472,18 +424,18 @@ Rxn<ProductDetailModel> product = Rxn();
         );
         
         Get.snackbar(
-          'Success',
-          'Review submitted successfully!',
+          'success'.tr,
+          'review_submitted_successfully'.tr,
           backgroundColor: Colors.green[50],
           colorText: Colors.green[800],
         );
         return true;
       } else {
-        Get.snackbar('Error', 'Failed to submit review');
+        Get.snackbar('error'.tr, 'failed_to_submit_review'.tr);
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to submit review: ${e.toString()}');
+      Get.snackbar('error'.tr, '${'failed_to_submit_review'.tr}: ${e.toString()}');
       return false;
     } finally {
       isSubmittingReview.value = false;
@@ -499,7 +451,7 @@ Rxn<ProductDetailModel> product = Rxn();
     String? userImage,
   }) {
     final newReview = {
-      'name': 'You', // You can get actual user name from auth
+      'name': 'you'.tr, // You can get actual user name from auth
       'title': title ?? '',
       'review': reviewText,
       'rating': rating,
@@ -524,19 +476,15 @@ Rxn<ProductDetailModel> product = Rxn();
   // Fetch review feedback from API
   Future<void> fetchReviewFeedback() async {
     if (product.value?.id == null) {
-      print('Product ID is null, cannot fetch reviews');
       return;
     }
 
     try {
       isLoadingReviews.value = true;
-      print('Fetching reviews for product ID: ${product.value!.id}');
       
       final response = await _reviewService.getReviewFeedback(
         productId: product.value!.id!,
       );
-      
-      print('Review feedback response: $response');
       
       if (response != null) {
         // Parse the response and update reviews list
@@ -553,7 +501,7 @@ Rxn<ProductDetailModel> product = Rxn();
               final user = feedback['userId'] ?? {};
               final userName = user is Map 
                   ? '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}'.trim()
-                  : 'Anonymous';
+                  : 'anonymous'.tr;
               
               // Extract user profile image
               String? userImageUrl;
@@ -563,7 +511,6 @@ Rxn<ProductDetailModel> product = Rxn();
                   userImageUrl = profileImage.startsWith('http')
                       ? profileImage
                       : '${AppUrls.baseImageUrl}${profileImage.startsWith('/') ? profileImage.substring(1) : profileImage}';
-                  print('User image URL: $userImageUrl');
                 }
               }
               
@@ -587,12 +534,12 @@ Rxn<ProductDetailModel> product = Rxn();
                   final date = DateTime.parse(feedback['createdAt']);
                   formattedDate = _formatDate(date);
                 } catch (e) {
-                  print('Error parsing date: $e');
+                  // Date parsing failed
                 }
               }
               
               final review = {
-                'name': userName.isNotEmpty ? userName : 'Anonymous',
+                'name': userName.isNotEmpty ? userName : 'anonymous'.tr,
                 'title': '', // API doesn't seem to have title field
                 'review': feedback['comment'] ?? '',
                 'rating': (feedback['rating'] ?? 5).toDouble(),
@@ -602,11 +549,8 @@ Rxn<ProductDetailModel> product = Rxn();
               };
               
               reviews.add(review);
-              print('Added review: $review');
             }
           }
-          
-          print('Total reviews loaded: ${reviews.length}');
         }
       }
     } catch (e, stackTrace) {

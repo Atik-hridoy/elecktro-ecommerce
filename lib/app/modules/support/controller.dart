@@ -97,8 +97,8 @@ class SupportController extends GetxController {
   void submitTicket() {
     if (selectedIssueType.isEmpty || subject.isEmpty || message.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please fill in all required fields',
+        'error'.tr,
+        'please_fill_required_fields'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -127,8 +127,8 @@ class SupportController extends GetxController {
       message.value = '';
       
       Get.snackbar(
-        'Success',
-        'Your support ticket has been submitted successfully',
+        'success'.tr,
+        'support_ticket_submitted'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -139,8 +139,8 @@ class SupportController extends GetxController {
   void viewTicketDetails(String ticketId) {
     // Logic to view ticket details
     Get.snackbar(
-      'Ticket Details',
-      'Viewing details for ticket: $ticketId',
+      'ticket_details'.tr,
+      '${'viewing_ticket_details'.tr}: $ticketId',
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -149,12 +149,12 @@ class SupportController extends GetxController {
     // Logic to close ticket
     Get.dialog(
       AlertDialog(
-        title: const Text('Close Ticket'),
-        content: const Text('Are you sure you want to close this ticket?'),
+        title: Text('close_ticket'.tr),
+        content: Text('close_ticket_confirmation'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -165,12 +165,12 @@ class SupportController extends GetxController {
                 supportTickets[ticketIndex]['status'] = 'Closed';
               }
               Get.snackbar(
-                'Ticket Closed',
-                'Ticket $ticketId has been closed',
+                'ticket_closed'.tr,
+                '${'ticket'.tr} $ticketId ${'ticket_has_been_closed'.tr}',
                 snackPosition: SnackPosition.BOTTOM,
               );
             },
-            child: const Text('Close'),
+            child: Text('close'.tr),
           ),
         ],
       ),
@@ -180,8 +180,8 @@ class SupportController extends GetxController {
   void callSupport() {
     // Logic to call support
     Get.snackbar(
-      'Call Support',
-      'Dialing support number...',
+      'call_support'.tr,
+      'dialing_support'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -197,8 +197,8 @@ class SupportController extends GetxController {
     );
     
     Get.snackbar(
-      'Email Support',
-      'Opening email client...',
+      'email_support'.tr,
+      'opening_email_client'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -206,8 +206,8 @@ class SupportController extends GetxController {
   void liveChat() {
     // Logic to start live chat
     Get.snackbar(
-      'Live Chat',
-      'Connecting to live chat agent...',
+      'live_chat'.tr,
+      'connecting_to_agent'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -216,8 +216,8 @@ class SupportController extends GetxController {
     // Validate fields
     if (contactController.text.trim().isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please enter your email address',
+        'error'.tr,
+        'please_enter_email'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -231,8 +231,8 @@ class SupportController extends GetxController {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(contactController.text.trim())) {
       Get.snackbar(
-        'Error',
-        'Please enter a valid email address',
+        'error'.tr,
+        'please_enter_valid_email'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -244,8 +244,8 @@ class SupportController extends GetxController {
     
     if (messageController.text.trim().isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please enter your message',
+        'error'.tr,
+        'please_enter_message'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -272,8 +272,8 @@ class SupportController extends GetxController {
       
       // Show success message
       Get.snackbar(
-        'Success',
-        'Your support request has been submitted successfully. We will contact you soon.',
+        'success'.tr,
+        'support_request_submitted'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFF00BFA5),
         colorText: Colors.white,
@@ -291,7 +291,7 @@ class SupportController extends GetxController {
       
       // Show error message
       Get.snackbar(
-        'Error',
+        'error'.tr,
         e.toString().replaceAll('Exception: ', ''),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,

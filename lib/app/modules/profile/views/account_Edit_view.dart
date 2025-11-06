@@ -20,9 +20,9 @@ class AccountView extends GetView<AccountController> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
+        title: Text(
+          'edit_profile'.tr,
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -244,9 +244,9 @@ class AccountView extends GetView<AccountController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Profile Details',
-                        style: TextStyle(
+                      Text(
+                        'profile_details'.tr,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
@@ -272,10 +272,10 @@ class AccountView extends GetView<AccountController> {
                   ),
                   const SizedBox(height: 20),
 
-                  Obx(() => _buildDetailItem('Registration No', controller.registrationNo.value)),
-                  Obx(() => _buildDetailItem('Name', controller.fullName.value)),
-                  Obx(() => _buildDetailItem('Contact No', controller.phone.value.isNotEmpty ? controller.phone.value : '')),
-                  Obx(() => _buildDetailItem('Gender', controller.gender.value.capitalizeFirst ?? '')),
+                  Obx(() => _buildDetailItem('registration_no'.tr, controller.registrationNo.value)),
+                  Obx(() => _buildDetailItem('name'.tr, controller.fullName.value)),
+                  Obx(() => _buildDetailItem('contact_no'.tr, controller.phone.value.isNotEmpty ? controller.phone.value : '')),
+                  Obx(() => _buildDetailItem('gender'.tr, controller.gender.value.capitalizeFirst ?? '')),
                 ],
               ),
             ),
@@ -304,9 +304,9 @@ class AccountView extends GetView<AccountController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Address',
-                        style: TextStyle(
+                      Text(
+                        'address'.tr,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
@@ -332,7 +332,7 @@ class AccountView extends GetView<AccountController> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Thies address will save for your delivery address',
+                    'address_save_note'.tr,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange[400],
@@ -403,9 +403,9 @@ class AccountView extends GetView<AccountController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Edit Details',
-                          style: TextStyle(
+                        Text(
+                          'edit_details'.tr,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
@@ -419,9 +419,9 @@ class AccountView extends GetView<AccountController> {
                     const SizedBox(height: 24),
 
                     // First Name
-                    const Text(
-                      'First Name',
-                      style: TextStyle(
+                    Text(
+                      'first_name'.tr,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
@@ -448,9 +448,9 @@ class AccountView extends GetView<AccountController> {
                     const SizedBox(height: 16),
 
                     // Last Name
-                    const Text(
-                      'Last Name',
-                      style: TextStyle(
+                    Text(
+                      'last_name'.tr,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
@@ -477,9 +477,9 @@ class AccountView extends GetView<AccountController> {
                     const SizedBox(height: 16),
 
                     // Contact No
-                    const Text(
-                      'Contact No',
-                      style: TextStyle(
+                    Text(
+                      'contact_no'.tr,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
@@ -499,11 +499,11 @@ class AccountView extends GetView<AccountController> {
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s\(\)]')),
                         ],
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
-                          hintText: 'Enter your phone no.',
+                          hintText: 'enter_phone_no'.tr,
                         ),
                         style: const TextStyle(fontSize: 14),
                       ),
@@ -511,9 +511,9 @@ class AccountView extends GetView<AccountController> {
                     const SizedBox(height: 16),
 
                     // Gender
-                    const Text(
-                      'Gender',
-                      style: TextStyle(
+                    Text(
+                      'gender'.tr,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
@@ -540,9 +540,9 @@ class AccountView extends GetView<AccountController> {
                     const SizedBox(height: 16),
 
                     // Date of Birth
-                    const Text(
-                      'Date of Birth',
-                      style: TextStyle(
+                    Text(
+                      'date_of_birth'.tr,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
@@ -621,9 +621,9 @@ class AccountView extends GetView<AccountController> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Confirm',
-                          style: TextStyle(
+                        child: Text(
+                          'confirm'.tr,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
@@ -658,9 +658,9 @@ class AccountView extends GetView<AccountController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Edit Address',
-                      style: TextStyle(
+                    Text(
+                      'edit_address'.tr,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -673,9 +673,9 @@ class AccountView extends GetView<AccountController> {
                 ),
                 const SizedBox(height: 24),
 
-                const Text(
-                  'Address',
-                  style: TextStyle(
+                Text(
+                  'address'.tr,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -692,11 +692,11 @@ class AccountView extends GetView<AccountController> {
                   child: TextFormField(
                     controller: controller.addressController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
-                      hintText: 'Enter your address',
+                      hintText: 'enter_your_address'.tr,
                     ),
                     style: const TextStyle(fontSize: 14),
                   ),
@@ -716,8 +716,8 @@ class AccountView extends GetView<AccountController> {
                         if (context.mounted) {
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Address updated successfully'),
+                            SnackBar(
+                              content: Text('address_updated_successfully'.tr),
                               backgroundColor: Colors.green,
                             ),
                           );
@@ -727,7 +727,7 @@ class AccountView extends GetView<AccountController> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Failed to update address: ${e.toString()}'),
+                              content: Text('${'failed_to_update_address'.tr}: ${e.toString()}'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -741,9 +741,9 @@ class AccountView extends GetView<AccountController> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Confirm',
-                      style: TextStyle(
+                    child: Text(
+                      'confirm'.tr,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,

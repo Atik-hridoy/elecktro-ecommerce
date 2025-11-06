@@ -75,13 +75,13 @@ class CartController extends GetxController {
           print('Cart is empty or no products found in the response');
         }
       } else {
-        errorMessage.value = response['message'] ?? 'Failed to load cart';
+        errorMessage.value = response['message'] ?? 'failed_load_cart'.tr;
         print('Error fetching cart: $errorMessage');
-        Get.snackbar('Error', errorMessage.value);
+        Get.snackbar('error'.tr, errorMessage.value);
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred while loading cart';
-      Get.snackbar('Error', errorMessage.value);
+      errorMessage.value = 'error_loading_cart'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
       // ignore: avoid_print
       print('Error fetching cart: $e');
     } finally {
@@ -114,14 +114,14 @@ class CartController extends GetxController {
       
       if (response['success'] == true) {
         await fetchCart(); // Refresh cart data
-        Get.snackbar('Success', 'Item added to cart');
+        Get.snackbar('success'.tr, 'item_added_to_cart'.tr);
       } else {
-        errorMessage.value = response['message'] ?? 'Failed to add item to cart';
-        Get.snackbar('Error', errorMessage.value);
+        errorMessage.value = response['message'] ?? 'failed_add_to_cart'.tr;
+        Get.snackbar('error'.tr, errorMessage.value);
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred while adding to cart';
-      Get.snackbar('Error', errorMessage.value);
+      errorMessage.value = 'error_adding_to_cart'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
       // ignore: avoid_print
       print('Error adding to cart: $e');
     } finally {
@@ -143,8 +143,8 @@ class CartController extends GetxController {
         );
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred while removing item';
-      Get.snackbar('Error', errorMessage.value);
+      errorMessage.value = 'error_removing_item'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
     } finally {
       isLoading.value = false;
     }
@@ -168,8 +168,8 @@ class CartController extends GetxController {
         cart.value = cart.value!.copyWith(products: updatedProducts);
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred while updating quantity';
-      Get.snackbar('Error', errorMessage.value);
+      errorMessage.value = 'error_updating_quantity'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
     }
   }
   

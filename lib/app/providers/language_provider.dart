@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageProvider extends ChangeNotifier {
-  Locale _locale = const Locale('en');
-  final String _prefKey = 'language_code';
+  Locale _locale = const Locale('en', 'US');
+  final String _prefKey = 'app_language'; // Use same key as AccountSettingsController
 
   Locale get locale => _locale;
 
@@ -14,12 +14,14 @@ class LanguageProvider extends ChangeNotifier {
   Future<void> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final languageCode = prefs.getString(_prefKey) ?? 'en';
-    _locale = Locale(languageCode);
+    _locale = languageCode == 'es' 
+        ? const Locale('es', 'ES') 
+        : const Locale('en', 'US');
     notifyListeners();
   }
 
   Future<void> setLocale(Locale locale) async {
-    if (!['en', 'ar'].contains(locale.languageCode)) return;
+    if (!['en', 'es'].contains(locale.languageCode)) return;
     
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
@@ -34,7 +36,7 @@ class LanguageProvider extends ChangeNotifier {
   bool isRTL() => false; // RTL support removed with Arabic
   
   List<Locale> get supportedLocales => const [
-        Locale('en'),
-        Locale('es'),
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
       ];
 }

@@ -28,9 +28,9 @@ class ProfileTabContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -43,17 +43,17 @@ class ProfileTabContent extends StatelessWidget {
                       children: [
                         Container(
                           width: 4,
-                          height: 20,
+                          height: 24,
                           decoration: BoxDecoration(
                             color: const Color(0xFF00BFA5),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Profile Details',
-                          style: TextStyle(
-                            fontSize: 16,
+                        Text(
+                          'profile_details'.tr,
+                          style: const TextStyle(
+                            fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
@@ -64,30 +64,30 @@ class ProfileTabContent extends StatelessWidget {
                   Divider(height: 1, color: Colors.grey[200]),
                   
                   ProfileDetailRow(
-                    label: 'Registration No',
+                    label: 'registration_no'.tr,
                     value: profile?.registrationNo ?? 'N/A',
                   ),
                   ProfileDetailRow(
-                    label: 'Name',
+                    label: 'name'.tr,
                     value: controller.sellerName,
                   ),
                   if (profile?.shopName?.isNotEmpty ?? false)
                     ProfileDetailRow(
-                      label: 'Shop Name',
+                      label: 'shop_name'.tr,
                       value: profile!.shopName!,
                     ),
                   if (profile?.email?.isNotEmpty ?? false)
                     ProfileDetailRow(
-                      label: 'Email',
+                      label: 'email'.tr,
                       value: profile!.email!,
                     ),
                   if (profile?.phone?.isNotEmpty ?? false)
                     ProfileDetailRow(
-                      label: 'Contact No',
+                      label: 'contact_no'.tr,
                       value: profile!.phone!,
                     ),
                   ProfileDetailRow(
-                    label: 'Address',
+                    label: 'address'.tr,
                     value: profile?.address ?? 'N/A',
                     isLast: true,
                   ),

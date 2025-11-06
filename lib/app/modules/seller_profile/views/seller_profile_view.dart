@@ -40,9 +40,9 @@ class _SellerProfileViewState extends State<SellerProfileView> with SingleTicker
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Seller Profile',
-          style: TextStyle(
+        title: Text(
+          'seller_profile'.tr,
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -65,7 +65,7 @@ class _SellerProfileViewState extends State<SellerProfileView> with SingleTicker
                 Text(
                   controller.errorMessage.value.isNotEmpty 
                     ? controller.errorMessage.value 
-                    : 'Seller information not available',
+                    : 'seller_info_not_available'.tr,
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
@@ -185,10 +185,10 @@ class _SellerProfileViewState extends State<SellerProfileView> with SingleTicker
                   ),
                   indicatorColor: const Color(0xFF00BFA5),
                   indicatorWeight: 2.5,
-                  tabs: const [
-                    Tab(text: 'Profile'),
-                    Tab(text: 'Products'),
-                    Tab(text: 'Dealing History'),
+                  tabs: [
+                    Tab(text: 'profile'.tr),
+                    Tab(text: 'products'.tr),
+                    Tab(text: 'dealing_history'.tr),
                   ],
                 ),
               ),

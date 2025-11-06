@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/notification/notification_controller.dart';
 import '../widget/appbar.dart';
 import '../widget/product_card.dart';
 import '../widget/banner_card.dart';
@@ -22,6 +23,11 @@ class HomeView extends StatelessWidget {
     final accountController = Get.isRegistered<AccountController>()
         ? Get.find<AccountController>()
         : Get.put(AccountController());
+    
+    // Initialize NotificationController if not already initialized
+    final notificationController = Get.isRegistered<NotificationController>()
+        ? Get.find<NotificationController>()
+        : Get.put(NotificationController());
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -33,14 +39,15 @@ class HomeView extends StatelessWidget {
             ? CustomAppBar(
                 userName: accountController.fullName.value.isNotEmpty
                     ? accountController.fullName.value
-                    : 'Guest',
+                    : 'guest'.tr,
                 phoneNumber: accountController.phone.value,
-                searchHint: 'Search products...',
+                searchHint: 'search_products'.tr,
+                hasUnreadNotifications: notificationController.unreadCount > 0,
                 onNotificationTap: () {
                   Get.toNamed(Routes.notification);
                 },
                 onProfileTap: () {
-                  homeController.updateIndex(3); // Navigate to profile
+                  Get.toNamed(Routes.profile);
                 },
                 onSearchChanged: (query) {
                   homeController.searchProducts(query);
@@ -59,26 +66,26 @@ class HomeView extends StatelessWidget {
             ), // Green color from your design
             inactiveColor: Colors.grey,
             backgroundColor: Colors.white,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined, size: 24),
-                activeIcon: Icon(Icons.home, size: 24),
-                label: 'Home',
+                icon: const Icon(Icons.home_outlined, size: 24),
+                activeIcon: const Icon(Icons.home, size: 24),
+                label: 'home'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.category_outlined, size: 24),
-                activeIcon: Icon(Icons.category, size: 24),
-                label: 'Categories',
+                icon: const Icon(Icons.category_outlined, size: 24),
+                activeIcon: const Icon(Icons.category, size: 24),
+                label: 'categories'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_outlined, size: 24),
-                activeIcon: Icon(Icons.shopping_cart, size: 24),
-                label: 'Cart',
+                icon: const Icon(Icons.shopping_cart_outlined, size: 24),
+                activeIcon: const Icon(Icons.shopping_cart, size: 24),
+                label: 'cart'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline, size: 24),
-                activeIcon: Icon(Icons.person, size: 24),
-                label: 'Profile',
+                icon: const Icon(Icons.person_outline, size: 24),
+                activeIcon: const Icon(Icons.person, size: 24),
+                label: 'profile'.tr,
               ),
             ],
           );
@@ -94,8 +101,6 @@ class HomeView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Add top padding to account for status bar
-            SizedBox(height: MediaQuery.of(context).padding.top),
             // Banner Section with auto-sliding
             GetBuilder<HomeController>(
               builder: (controller) {
@@ -157,13 +162,13 @@ class HomeView extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Popular Products',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        'popular_products'.tr,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       if (homeController.searchQuery.value.isNotEmpty)
                         Text(
-                          '${homeController.filteredPopularProducts.length} results found',
+                          '${homeController.filteredPopularProducts.length} ${'results_found'.tr}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -174,9 +179,9 @@ class HomeView extends StatelessWidget {
                   if (homeController.searchQuery.value.isEmpty)
                     GestureDetector(
                       onTap: () {},
-                      child: const Text(
-                        'View All',
-                        style: TextStyle(
+                      child: Text(
+                        'view_all'.tr,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.red,
                           fontWeight: FontWeight.w500,
@@ -186,9 +191,9 @@ class HomeView extends StatelessWidget {
                   else
                     GestureDetector(
                       onTap: () => homeController.clearSearch(),
-                      child: const Text(
-                        'Clear',
-                        style: TextStyle(
+                      child: Text(
+                        'clear'.tr,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.red,
                           fontWeight: FontWeight.w500,
@@ -215,8 +220,8 @@ class HomeView extends StatelessWidget {
                       ? Center(
                           child: Text(
                             homeController.searchQuery.value.isEmpty
-                                ? 'No popular products available'
-                                : 'No products found for "${homeController.searchQuery.value}"',
+                                ? 'no_popular_products'.tr
+                                : '${'no_products_for_search'.tr} "${homeController.searchQuery.value}"',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
@@ -275,11 +280,11 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 24),
 
             // You may like Section
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'You may like',
-                style: TextStyle(
+                'you_may_like'.tr,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,

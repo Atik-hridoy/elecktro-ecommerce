@@ -19,12 +19,12 @@ class AuthSignInController extends GetxController {
   // Handle login
   Future<void> login(String email) async {
     if (email.isEmpty) {
-      errorMessage.value = 'Please enter your email';
+      errorMessage.value = 'please_enter_email'.tr;
       return;
     }
 
     if (!GetUtils.isEmail(email)) {
-      errorMessage.value = 'Please enter a valid email';
+      errorMessage.value = 'please_enter_valid_email'.tr;
       return;
     }
 
@@ -49,10 +49,10 @@ class AuthSignInController extends GetxController {
           },
         );
       } else {
-        errorMessage.value = response['message'] ?? 'Failed to send OTP';
+        errorMessage.value = response['message'] ?? 'failed_resend_otp'.tr;
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred. Please try again.';
+      errorMessage.value = 'error_occurred'.tr;
       print('Login error: $e');
     } finally {
       isLoading.value = false;

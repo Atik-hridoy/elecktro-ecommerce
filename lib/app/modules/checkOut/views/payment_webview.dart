@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
-// Add this at the top of the file
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class PaymentWebView extends StatefulWidget {
   const PaymentWebView({super.key});
@@ -139,27 +139,18 @@ class _PaymentWebViewState extends State<PaymentWebView> {
                   url.contains('checkout.stripe.com/success') ||
                   url.contains('/api/v1/orders/success')) {
                 if (kDebugMode) {
-                  print('Payment success detected in shouldOverrideUrlLoading, redirecting to home...');
+                  print('Payment success detected in shouldOverrideUrlLoading, redirecting to success view...');
                 }
                 
-                // Close WebView and navigate to home
+                // Close WebView and navigate to success view
                 if (mounted) {
                   Get.back();
                   
                   // Add a small delay to ensure smooth navigation
                   await Future.delayed(const Duration(milliseconds: 300));
                   
-                  // Navigate to home
-                  Get.offAllNamed('/home');
-                  
-                  Get.snackbar(
-                    'Payment Successful',
-                    'Your payment was processed successfully!',
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                    duration: const Duration(seconds: 5),
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  // Navigate to success view
+                  Get.offAllNamed(Routes.success);
                 }
                 
                 // Prevent the WebView from loading the success URL
@@ -271,17 +262,8 @@ class _PaymentWebViewState extends State<PaymentWebView> {
         // Add a small delay to ensure smooth navigation
         await Future.delayed(const Duration(milliseconds: 500));
         
-        // Navigate to home and show success message
-        Get.offAllNamed('/home');
-        
-        Get.snackbar(
-          'Payment Successful',
-          'Your payment was processed successfully!',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 5),
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        // Navigate to success view
+        Get.offAllNamed(Routes.success);
       }
       return;
     } 

@@ -1,4 +1,5 @@
 import 'package:elecktro_ecommerce/app/core/navigation/navigation_service.dart';
+import 'package:elecktro_ecommerce/app/core/switching_language_facilities/my_translations.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/controllers/authSignInController.dart';
 import 'package:elecktro_ecommerce/app/modules/home/controllers/home_controller.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812), // Your design size (iPhone 13 size)
+      designSize: const Size(375, 812), 
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
@@ -52,6 +53,12 @@ class MyApp extends StatelessWidget {
               return GetMaterialApp(
             title: 'Elecktro',
             debugShowCheckedModeBanner: false,
+            
+            // GetX Translations
+            translations: MyTranslations(),
+            locale: languageProvider.locale,
+            fallbackLocale: const Locale('en', 'US'),
+            
             theme: AppTheme.lightTheme.copyWith(
               pageTransitionsTheme: const PageTransitionsTheme(
                 builders: {
@@ -69,15 +76,14 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('en'), // English
-              Locale('es'), // Spanish
+              Locale('en', 'US'), // English
+              Locale('es', 'ES'), // Spanish
             ],
-            locale: languageProvider.locale,
             localeResolutionCallback: (locale, supportedLocales) {
               if (supportedLocales.contains(locale)) {
                 return locale;
               }
-              return const Locale('en');
+              return const Locale('en', 'US');
             },
             
             // Responsive framework

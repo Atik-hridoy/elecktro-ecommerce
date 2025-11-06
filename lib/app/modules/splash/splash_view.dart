@@ -51,8 +51,8 @@ class _SplashViewState extends State<SplashView> {
                 ),
                 const SizedBox(height: 16.0),
                 Text(
-                  'Data is Loading',
-                  style: TextStyle(
+                  'data_is_loading'.tr,
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w400,
                     fontStyle: FontStyle.normal,

@@ -47,7 +47,7 @@ class CategoryView extends GetView<CategoryController> {
                   padding: const EdgeInsets.fromLTRB(16, 60, 16, 10),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Search products...',
+                      hintText: 'search_products'.tr,
                       prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -63,22 +63,25 @@ class CategoryView extends GetView<CategoryController> {
                                 controller.searchProducts('');
                               },
                             )
-                          : Padding(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.filter_list,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Filters',
-                                    style: TextStyle(color: Color(0xFF044D37)),
-                                  ),
-                                ],
+                          : GestureDetector(
+                              onTap: () => _showFilterBottomSheet(context),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.filter_list,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'filters'.tr,
+                                      style: TextStyle(color: Color(0xFF044D37)),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                       ),
@@ -129,8 +132,8 @@ class CategoryView extends GetView<CategoryController> {
                   children: [
                     Text(
                       controller.currentCategoryId.value != null
-                          ? 'Filtered Products (${controller.filteredProducts.length})'
-                          : 'All Products (${controller.filteredProducts.length})',
+                          ? '${'filtered_products'.tr} (${controller.filteredProducts.length})'
+                          : '${'all_products'.tr} (${controller.filteredProducts.length})',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -146,9 +149,9 @@ class CategoryView extends GetView<CategoryController> {
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
-                          'Clear Filters',
-                          style: TextStyle(
+                        child: Text(
+                          'clear_filters'.tr,
+                          style: const TextStyle(
                             color: Color(0xFF044D37),
                             fontSize: 14,
                           ),
@@ -169,9 +172,9 @@ class CategoryView extends GetView<CategoryController> {
 
                 final items = controller.filteredProducts;
                 if (items.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: Text('No products found')),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text('no_products_found'.tr)),
                   );
                 }
 
@@ -232,30 +235,231 @@ class CategoryView extends GetView<CategoryController> {
             activeColor: const Color(0xFF044D37),
             inactiveColor: Colors.grey,
             backgroundColor: Colors.white,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined, size: 24),
-                activeIcon: Icon(Icons.home, size: 24),
-                label: 'Home',
+                icon: const Icon(Icons.home_outlined, size: 24),
+                activeIcon: const Icon(Icons.home, size: 24),
+                label: 'home'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.category_outlined, size: 24),
-                activeIcon: Icon(Icons.category, size: 24),
-                label: 'Categories',
+                icon: const Icon(Icons.category_outlined, size: 24),
+                activeIcon: const Icon(Icons.category, size: 24),
+                label: 'categories'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_outlined, size: 24),
-                activeIcon: Icon(Icons.shopping_cart, size: 24),
-                label: 'Cart',
+                icon: const Icon(Icons.shopping_cart_outlined, size: 24),
+                activeIcon: const Icon(Icons.shopping_cart, size: 24),
+                label: 'cart'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline, size: 24),
-                activeIcon: Icon(Icons.person, size: 24),
-                label: 'Profile',
+                icon: const Icon(Icons.person_outline, size: 24),
+                activeIcon: const Icon(Icons.person, size: 24),
+                label: 'profile'.tr,
               ),
             ],
           );
         }),
+      ),
+    );
+  }
+  
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'filters'.tr,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      controller.clearAllFilters();
+                      Navigator.pop(context);
+                    },
+                    child: Text('clear_all'.tr),
+                  ),
+                ],
+              ),
+              const Divider(),
+              
+              // Filter Content
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    // Sort By
+                    Text(
+                      'sort_by'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() => Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildChip('default'.tr, controller.sortBy.value == 'default', () {
+                          controller.updateSort('default');
+                        }),
+                        _buildChip('price_low_to_high'.tr, controller.sortBy.value == 'price_low', () {
+                          controller.updateSort('price_low');
+                        }),
+                        _buildChip('price_high_to_low'.tr, controller.sortBy.value == 'price_high', () {
+                          controller.updateSort('price_high');
+                        }),
+                        _buildChip('highest_rated'.tr, controller.sortBy.value == 'rating', () {
+                          controller.updateSort('rating');
+                        }),
+                      ],
+                    )),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Price Range
+                    Text(
+                      'price_range'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() => RangeSlider(
+                      values: RangeValues(controller.minPrice.value, controller.maxPrice.value),
+                      min: 0,
+                      max: 10000,
+                      divisions: 100,
+                      labels: RangeLabels(
+                        '\$${controller.minPrice.value.toInt()}',
+                        '\$${controller.maxPrice.value.toInt()}',
+                      ),
+                      onChanged: (values) {
+                        controller.updatePriceRange(values.start, values.end);
+                      },
+                    )),
+                    Obx(() => Text(
+                      '\$${controller.minPrice.value.toInt()} - \$${controller.maxPrice.value.toInt()}',
+                      style: const TextStyle(color: Colors.grey),
+                    )),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Rating
+                    Text(
+                      'minimum_rating'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() => Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildChip('all_ratings'.tr, controller.minRating.value == 0, () {
+                          controller.updateMinRating(0);
+                        }),
+                        _buildChip('4+ ⭐', controller.minRating.value == 4, () {
+                          controller.updateMinRating(4);
+                        }),
+                        _buildChip('3+ ⭐', controller.minRating.value == 3, () {
+                          controller.updateMinRating(3);
+                        }),
+                      ],
+                    )),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Brands
+                    Text(
+                      'brands'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      final brands = controller.availableBrands;
+                      if (brands.isEmpty) {
+                        return Text('no_brands_available'.tr, style: const TextStyle(color: Colors.grey));
+                      }
+                      return Wrap(
+                        spacing: 8,
+                        children: brands.map((brand) {
+                          return _buildChip(
+                            brand,
+                            controller.selectedBrands.contains(brand),
+                            () => controller.toggleBrand(brand),
+                          );
+                        }).toList(),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              
+              // Apply Button
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF044D37),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'apply_filters'.tr,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Chip(
+        label: Text(label),
+        backgroundColor: isSelected ? const Color(0xFF044D37) : Colors.grey[200],
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.white : Colors.black87,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
       ),
     );
   }

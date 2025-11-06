@@ -6,8 +6,9 @@ import '../../../core/util/app_logger.dart';
 class AuthCreateUserService extends GetxService {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: AppUrls.baseUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',

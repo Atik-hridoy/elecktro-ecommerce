@@ -29,6 +29,9 @@ class NotificationController extends GetxController {
   final Dio _dio = Dio();
   final RxList<NotificationItem> notifications = <NotificationItem>[].obs;
   final RxBool isLoading = false.obs;
+  
+  // Getter for unread notification count
+  int get unreadCount => notifications.where((n) => n.isHighlighted).length;
 
   @override
   void onInit() {
@@ -47,7 +50,7 @@ class NotificationController extends GetxController {
         );
         return {
           'success': false,
-          'message': 'Authentication required',
+          'message': 'authentication_required'.tr,
           'data': null,
         };
       }
@@ -176,23 +179,23 @@ class NotificationController extends GetxController {
             String message = item['message']?.toString() ?? 
                            item['content']?.toString() ?? 
                            item['description']?.toString() ?? 
-                           'No message available';
+                           'no_message_available'.tr;
             
             // Format order status messages
-            String title = item['title']?.toString() ?? 'Order Update';
+            String title = item['title']?.toString() ?? 'order_update'.tr;
             
             // Special handling for order status messages
             if (message.contains('ORD#')) {
               message = message.replaceAll('\n', ' ').trim();
               
               // If title is not provided, use a default based on message content
-              if (title == 'Order Update') {
+              if (title == 'order_update'.tr) {
                 if (message.toLowerCase().contains('processed')) {
-                  title = 'Order Processed';
+                  title = 'order_processed'.tr;
                 } else if (message.toLowerCase().contains('shipped')) {
-                  title = 'Order Shipped';
+                  title = 'order_shipped'.tr;
                 } else if (message.toLowerCase().contains('delivered')) {
-                  title = 'Order Delivered';
+                  title = 'order_delivered'.tr;
                 }
               }
               
@@ -222,8 +225,8 @@ class NotificationController extends GetxController {
             // Return a default notification item in case of parsing error
             return NotificationItem(
               id: 'error-${DateTime.now().millisecondsSinceEpoch}',
-              title: 'Order Update',
-              message: 'Your order status has been updated',
+              title: 'order_update'.tr,
+              message: 'order_status_updated'.tr,
               time: _formatDateTime(DateTime.now().toIso8601String()),
               isHighlighted: true,
             );
@@ -239,8 +242,8 @@ class NotificationController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Failed to fetch notifications',
+        'error'.tr,
+        'failed_fetch_notifications'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[50],
         colorText: Colors.red[800],
@@ -254,8 +257,8 @@ class NotificationController extends GetxController {
   void deleteNotification(String id) {
     notifications.removeWhere((notification) => notification.id == id);
     Get.snackbar(
-      'Deleted',
-      'Notification deleted successfully',
+      'deleted'.tr,
+      'notification_deleted'.tr,
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
       backgroundColor: Colors.red.shade100,
@@ -288,8 +291,8 @@ class NotificationController extends GetxController {
           notifications.refresh();
           
           Get.snackbar(
-            'Error',
-            result['error']?.toString() ?? 'Failed to mark notification as read',
+            'error'.tr,
+            result['error']?.toString() ?? 'failed_mark_read'.tr,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red[50],
             colorText: Colors.red[800],
@@ -305,8 +308,8 @@ class NotificationController extends GetxController {
       );
       
       Get.snackbar(
-        'Error',
-        'An error occurred while marking the notification as read',
+        'error'.tr,
+        'error_mark_read'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[50],
         colorText: Colors.red[800],
@@ -340,7 +343,7 @@ class NotificationController extends GetxController {
                 color: notification.isHighlighted ? Colors.blue : Colors.grey,
               ),
               title: Text(
-                notification.isHighlighted ? 'Mark as read' : 'Already read',
+                notification.isHighlighted ? 'mark_as_read'.tr : 'already_read'.tr,
                 style: TextStyle(
                   color: notification.isHighlighted ? Colors.black : Colors.grey,
                 ),
@@ -353,9 +356,9 @@ class NotificationController extends GetxController {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text(
-                'Delete',
-                style: TextStyle(color: Colors.red),
+              title: Text(
+                'delete'.tr,
+                style: const TextStyle(color: Colors.red),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -376,29 +379,29 @@ class NotificationController extends GetxController {
   void clearAllNotifications() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Clear All'),
-        content: const Text('Are you sure you want to clear all notifications?'),
+        title: Text('clear_all'.tr),
+        content: Text('clear_all_confirm'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               notifications.clear();
               Get.back();
               Get.snackbar(
-                'Cleared',
-                'All notifications cleared',
+                'cleared'.tr,
+                'all_notifications_cleared'.tr,
                 snackPosition: SnackPosition.BOTTOM,
                 duration: const Duration(seconds: 2),
                 backgroundColor: Colors.orange.shade100,
                 colorText: Colors.orange.shade800,
               );
             },
-            child: const Text(
-              'Clear All',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              'clear_all'.tr,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -424,8 +427,8 @@ class NotificationController extends GetxController {
       
       if (response['success'] == true) {
         Get.snackbar(
-          'Success', 
-          response['message'] ?? 'All notifications marked as read',
+          'success'.tr, 
+          response['message'] ?? 'all_marked_read'.tr,
           snackPosition: SnackPosition.BOTTOM, 
           backgroundColor: Colors.green, 
           colorText: Colors.white
@@ -438,8 +441,8 @@ class NotificationController extends GetxController {
     } catch (e) {
       AppLogger.error('Error marking all notifications as read', tag: 'NotificationController', error: e);
       Get.snackbar(
-        'Error', 
-        'Failed to mark notifications as read: ${e.toString().replaceAll('Exception: ', '')}',
+        'error'.tr, 
+        '${'failed_mark_read'.tr}: ${e.toString().replaceAll('Exception: ', '')}',
         snackPosition: SnackPosition.BOTTOM, 
         backgroundColor: Colors.red, 
         colorText: Colors.white

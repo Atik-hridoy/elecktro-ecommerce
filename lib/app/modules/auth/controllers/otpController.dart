@@ -101,15 +101,15 @@ class OtpController extends GetxController {
       startTimer();
       
       Get.snackbar(
-        'Success',
-        'OTP has been resent to your email',
+        'success'.tr,
+        'otp_resent_success'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
-      errorMessage.value = 'Failed to resend OTP. Please try again.';
+      errorMessage.value = 'failed_resend_otp'.tr;
       Get.snackbar(
-        'Error',
+        'error'.tr,
         errorMessage.value,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -127,10 +127,10 @@ class OtpController extends GetxController {
     
     // Validate OTP format
     if (otp.length != 5 || int.tryParse(otp) == null) {
-      errorMessage.value = 'Please enter a valid 5-digit OTP';
+      errorMessage.value = 'please_enter_valid_otp'.tr;
       AppLogger.warning('Invalid OTP format: $otp');
       Get.snackbar(
-        'Error',
+        'error'.tr,
         errorMessage.value,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -194,10 +194,10 @@ class OtpController extends GetxController {
         
         // Show success message
         Get.snackbar(
-          'Success',
+          'success'.tr,
           isRegistration 
-              ? 'Account created successfully!'
-              : 'Login successful!',
+              ? 'account_created_success'.tr
+              : 'login_success'.tr,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
@@ -229,31 +229,31 @@ class OtpController extends GetxController {
         }
       } else {
         // Handle verification failure
-        final errorMsg = response['message'] ?? 'OTP verification failed';
+        final errorMsg = response['message'] ?? 'failed_verify_otp'.tr;
         errorMessage.value = errorMsg;
         Get.snackbar(
-          'Error',
+          'error'.tr,
           errorMsg,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      String errorMsg = 'Failed to verify OTP. Please try again.';
+      String errorMsg = 'failed_verify_otp'.tr;
       
       if (e is DioException) {
         // Handle Dio errors
         if (e.response?.statusCode == 400) {
-          errorMsg = e.response?.data?['message'] ?? 'Invalid OTP. Please check and try again.';
+          errorMsg = e.response?.data?['message'] ?? 'invalid_otp_check'.tr;
         } else if (e.response?.statusCode == 401) {
-          errorMsg = 'Session expired. Please request a new OTP.';
+          errorMsg = 'session_expired'.tr;
         } else if (e.response?.statusCode == 429) {
-          errorMsg = 'Too many attempts. Please try again later.';
+          errorMsg = 'too_many_attempts'.tr;
         } else if (e.type == DioExceptionType.connectionTimeout) {
-          errorMsg = 'Connection timeout. Please check your internet connection.';
+          errorMsg = 'connection_timeout'.tr;
         }
       } else if (e is FormatException) {
-        errorMsg = 'Invalid OTP format. Please enter a valid 5-digit number.';
+        errorMsg = 'invalid_otp_format'.tr;
       }
       
       errorMessage.value = errorMsg;
@@ -270,7 +270,7 @@ class OtpController extends GetxController {
       );
       
       Get.snackbar(
-        'Verification Failed',
+        'verification_failed'.tr,
         errorMsg,
         backgroundColor: Colors.red,
         colorText: Colors.white,

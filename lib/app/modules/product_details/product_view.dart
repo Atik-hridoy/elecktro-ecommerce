@@ -147,9 +147,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Product Details',
-          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+        title: Text(
+          'product_details'.tr,
+          style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
         ),
         centerTitle: true);
   }
@@ -223,7 +223,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       
                       // --- Price, Size & Color Card ---
                       Card(
-                        elevation: 2,
+                        elevation: 1,
                         color: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
@@ -243,7 +243,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       
                       // --- Overview Card ---
                       Card(
-                        elevation: 2,
+                        elevation: 1,
                         color: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
@@ -255,9 +255,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 children: [
                                   Icon(Icons.description_outlined, size: 20, color: Colors.grey[700]),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    'Overview', 
-                                    style: TextStyle(
+                                  Text(
+                                    'overview'.tr, 
+                                    style: const TextStyle(
                                       fontSize: 16, 
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
@@ -282,7 +282,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       
                       // --- Highlights & Specs Card ---
                       Card(
-                        elevation: 2,
+                        elevation: 1,
                         color: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
@@ -294,9 +294,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 children: [
                                   Icon(Icons.star_outline, size: 20, color: Colors.grey[700]),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    'Highlights', 
-                                    style: TextStyle(
+                                  Text(
+                                    'highlights'.tr, 
+                                    style: const TextStyle(
                                       fontSize: 16, 
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
@@ -313,15 +313,15 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 else if (controller.product.value!.highlights is String)
                                   _buildHighlightItem(controller.product.value!.highlights.toString())
                               else
-                                _buildHighlightItem('No highlights available'),
+                                _buildHighlightItem('no_highlights_available'.tr),
                               const Divider(height: 32),
                               Row(
                                 children: [
                                   Icon(Icons.settings_outlined, size: 20, color: Colors.grey[700]),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    'Tech Specs', 
-                                    style: TextStyle(
+                                  Text(
+                                    'tech_specs'.tr, 
+                                    style: const TextStyle(
                                       fontSize: 16, 
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
@@ -330,12 +330,24 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              _buildSpecRow('Form Factor', 'Hard Case'),
-                              _buildSpecRow('Supported Devices', 'AirTag'),
-                              _buildSpecRow('Material', 'Silicone'),
-                              _buildSpecRow('Length', '1.6 in | 41 cm'),
-                              _buildSpecRow('Width', '1.6 in | 41 cm'),
-                              _buildSpecRow('Height', '0.4 in | 10 cm'),
+                              if (controller.product.value?.techSpecs != null && controller.product.value!.techSpecs.isNotEmpty)
+                                Text(
+                                  controller.product.value!.techSpecs,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                    height: 1.6,
+                                  ),
+                                )
+                              else
+                                Text(
+                                  'no_tech_specs_available'.tr,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -346,9 +358,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Feedback', 
-                            style: TextStyle(
+                          Text(
+                            'feedback'.tr, 
+                            style: const TextStyle(
                               fontSize: 16, 
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
@@ -367,7 +379,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                           onPressed: controller.isLoadingReviews.value
                               ? null
                               : () => controller.fetchReviewFeedback(),
-                          tooltip: 'Refresh reviews',
+                          tooltip: 'refresh_reviews'.tr,
                         )),
                               const Icon(Icons.star, color: Colors.amber, size: 16),
                               const SizedBox(width: 4),
@@ -402,7 +414,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             );
                           },
                           icon: const Icon(Icons.rate_review),
-                          label: const Text('Write a Review'),
+                          label: Text('write_a_review'.tr),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: const BorderSide(color: Color(0xFF00BFA5)),
@@ -434,12 +446,12 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                   Icon(Icons.rate_review_outlined, size: 48, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No reviews yet',
+                                    'no_reviews_yet'.tr,
                                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Be the first to review this product!',
+                                    'be_first_to_review'.tr,
                                     style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                                   ),
                                 ],
@@ -588,13 +600,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   Widget _buildImageError() {
     return Container(
       color: Colors.grey[100],
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.broken_image, size: 48, color: Colors.grey),
-            SizedBox(height: 8),
-            Text('Could not load image', style: TextStyle(color: Colors.grey)),
+            const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+            const SizedBox(height: 8),
+            Text('could_not_load_image'.tr, style: const TextStyle(color: Colors.grey)),
           ],
         ),
       ),
@@ -726,9 +738,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Select Size', 
-              style: TextStyle(
+            Text(
+              'select_size'.tr, 
+              style: const TextStyle(
                 fontSize: 16, 
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
@@ -795,9 +807,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Select Color', 
-              style: TextStyle(
+            Text(
+              'select_color'.tr, 
+              style: const TextStyle(
                 fontSize: 16, 
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
@@ -810,7 +822,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                '${colors.length} ${colors.length > 1 ? 'Colors' : 'Color'}',
+                '${colors.length} ${colors.length > 1 ? 'colors'.tr : 'color_single'.tr}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -896,14 +908,14 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.shopping_bag_outlined, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.shopping_bag_outlined, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'Buy Now', 
-                      style: TextStyle(
+                      'buy_now'.tr, 
+                      style: const TextStyle(
                         fontSize: 16, 
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5,
@@ -941,14 +953,14 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_shopping_cart_outlined, size: 20),
-                          SizedBox(width: 8),
+                          const Icon(Icons.add_shopping_cart_outlined, size: 20),
+                          const SizedBox(width: 8),
                           Text(
-                            'Add to Cart', 
-                            style: TextStyle(
+                            'add_to_cart'.tr, 
+                            style: const TextStyle(
                               fontSize: 16, 
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -974,19 +986,6 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
           Expanded(
             child: Text(text, style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.4)),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSpecRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-          Text(value, style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500)),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import '../models/cart_model.dart';
 
@@ -41,7 +42,7 @@ class CartProductCard extends StatefulWidget {
     Function(bool?)? onSelect,
   }) {
     return CartProductCard(
-      productName: product.name ?? 'Product',
+      productName: product.name ?? 'product'.tr,
       brand: product.brand,
       size: product.size,
       color: product.color,
@@ -181,9 +182,9 @@ class _CartProductCardState extends State<CartProductCard> {
                     runSpacing: 4,
                     children: [
                       if (widget.size.isNotEmpty)
-                        _buildAttributeChip('Size: ${widget.size}'),
+                        _buildAttributeChip('${'size'.tr}: ${widget.size}'),
                       if (widget.color.isNotEmpty)
-                        _buildAttributeChip('Color: ${widget.color}'),
+                        _buildAttributeChip('${'color'.tr}: ${widget.color}'),
                     ],
                   ),
 

@@ -37,9 +37,9 @@ class AuthSignUpController extends GetxController {
           }
         );
       } else {
-        errorMessage.value = response['message'] ?? 'Registration failed';
+        errorMessage.value = response['message'] ?? 'registration_failed'.tr;
         Get.snackbar(
-          'Error', 
+          'error'.tr, 
           errorMessage.value,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
@@ -47,9 +47,9 @@ class AuthSignUpController extends GetxController {
         );
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred. Please try again.';
+      errorMessage.value = 'error_occurred'.tr;
       Get.snackbar(
-        'Error', 
+        'error'.tr, 
         errorMessage.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,

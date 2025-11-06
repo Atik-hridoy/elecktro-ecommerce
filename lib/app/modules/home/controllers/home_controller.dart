@@ -86,10 +86,10 @@ class HomeController extends GetxController {
         banners.assignAll(bannerData);
       } else {
         banners.clear();
-        error('Failed to load banners');
+        error('failed_load_banners'.tr);
       }
     } catch (e) {
-      error('Error loading banners: $e');
+      error('${'error_loading_banners'.tr}: $e');
     } finally {
       isLoading(false);
     }

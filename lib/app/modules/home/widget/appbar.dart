@@ -15,6 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? notificationIcon;
   final bool showSearch;
   final TextEditingController? searchController;
+  final bool hasUnreadNotifications;
 
   const CustomAppBar({
     super.key,
@@ -31,6 +32,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.notificationIcon,
     this.showSearch = true,
     this.searchController,
+    this.hasUnreadNotifications = false,
   });
 
   @override
@@ -68,42 +70,49 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Row(
             children: [
               // Profile icon and greeting
-              GestureDetector(
-                onTap: onProfileTap,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: SvgPicture.asset('assets/icons/Group 290580.svg'),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello $userName',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: txtColor,
-                          ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onProfileTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: SvgPicture.asset('assets/icons/Group 290580.svg'),
+                      ),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hello $userName',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: txtColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              phoneNumber.length > 2
+                                  ? '${'*' * (phoneNumber.length - 2)}${phoneNumber.substring(phoneNumber.length - 2)}'
+                                  : phoneNumber,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: txtColor.withOpacity(0.6),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        Text(
-                          phoneNumber.length > 2
-                              ? '${'*' * (phoneNumber.length - 2)}${phoneNumber.substring(phoneNumber.length - 2)}'
-                              : phoneNumber,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: txtColor.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               // Notification icon
               Stack(
                 clipBehavior: Clip.none,
@@ -118,18 +127,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           height: 24,
                         ),
                   ),
-                  Positioned(
-                    top: -2,
-                    right: -2,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.yellow,
-                        shape: BoxShape.circle,
+                  if (hasUnreadNotifications)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],
