@@ -63,6 +63,9 @@ class MyTranslations extends Translations {
           'error_loading_cart': 'An error occurred while loading cart',
           'error_removing_item': 'An error occurred while removing item',
           'error_updating_quantity': 'An error occurred while updating quantity',
+          'clear_cart': 'Clear Cart',
+          'info': 'Info',
+          'bookmark_removed': 'Bookmark removed',
           
           // 🔹 Update Profile
           'profile_information': 'Profile Information',
@@ -400,6 +403,9 @@ class MyTranslations extends Translations {
           'error_loading_cart': 'Ocurrió un error al cargar el carrito',
           'error_removing_item': 'Ocurrió un error al eliminar el artículo',
           'error_updating_quantity': 'Ocurrió un error al actualizar la cantidad',
+          'clear_cart': 'Vaciar Carrito',
+          'info': 'Información',
+          'bookmark_removed': 'Marcador eliminado',
           
           // 🔹 Update Profile
           'profile_information': 'Información del Perfil',

@@ -140,16 +140,23 @@ class CartController extends GetxController {
     }
   }
   
-  // Update item quantity
-  Future<void> updateQuantity(String itemId, int newQuantity) async {
+  // Update item quantity with API call
+  Future<void> updateQuantity(String productId, int newQuantity) async {
     try {
-      if (newQuantity < 1) return;
+      if (newQuantity < 1) {
+        Get.snackbar('error'.tr, 'Quantity must be at least 1');
+        return;
+      }
       
-      // TODO: Implement update quantity API call
-      // For now, just update the local state
+      // Don't show full loading indicator, just update in background
+      errorMessage.value = '';
+      
+      print('🔄 Updating quantity for product: $productId to $newQuantity');
+      
+      // Optimistically update local state first for better UX
       if (cart.value != null) {
         final updatedProducts = cart.value!.products.map((item) {
-          if (item.id == itemId) {
+          if (item.productId == productId) {
             return item.copyWith(quantity: newQuantity);
           }
           return item;
@@ -157,8 +164,53 @@ class CartController extends GetxController {
         
         cart.value = cart.value!.copyWith(products: updatedProducts);
       }
+      
+      // Then update on server
+      final response = await _cartService.updateCartItemQuantity(productId, newQuantity);
+      
+      if (response['success'] == true) {
+        print('✅ Quantity updated successfully');
+        // Silently refresh cart data from server to sync
+        await fetchCart();
+      } else {
+        errorMessage.value = response['message'] ?? 'Failed to update quantity';
+        Get.snackbar('error'.tr, errorMessage.value);
+        // Revert on failure
+        await fetchCart();
+      }
     } catch (e) {
+      print('❌ Error updating quantity: $e');
       errorMessage.value = 'error_updating_quantity'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
+      // Revert on error
+      await fetchCart();
+    }
+  }
+  
+  // Clear entire cart
+  Future<void> clearCart() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      print('🗑️ Clearing entire cart...');
+      
+      final response = await _cartService.clearCart();
+      
+      if (response['success'] == true) {
+        print('✅ Cart cleared successfully');
+        cart.value = null; // Clear local cart data
+        Get.snackbar('success'.tr, 'Cart cleared successfully');
+      } else {
+        errorMessage.value = response['message'] ?? 'Failed to clear cart';
+        Get.snackbar('error'.tr, errorMessage.value);
+      }
+    } catch (e) {
+      print('❌ Error clearing cart: $e');
+      errorMessage.value = 'Error clearing cart';
+      Get.snackbar('error'.tr, errorMessage.value);
+    } finally {
+      isLoading.value = false;
     }
   }
   

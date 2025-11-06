@@ -1,4 +1,3 @@
-// lib/app/modules/home/controllers/bookmark_controller.dart
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/bookmark_service.dart';
 
@@ -61,6 +60,20 @@ class BookmarkController extends GetxController {
   /// Delete a bookmark by ID
   Future<bool> deleteBookmark(String bookmarkId, String productId) async {
     try {
+      // Validate inputs
+      if (bookmarkId.isEmpty) {
+        print('❌ Cannot delete bookmark: Invalid bookmark ID');
+        Get.snackbar(
+          'error'.tr,
+          'Invalid bookmark ID',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+        return false;
+      }
+      
+      print('🗑️ Attempting to delete bookmark: $bookmarkId for product: $productId');
+      
       final success = await _bookmarkService.deleteBookmark(bookmarkId);
       
       if (success) {
@@ -70,17 +83,39 @@ class BookmarkController extends GetxController {
         _bookmarkedIds.remove(productId);
         update();
         
+        print('✅ Bookmark removed successfully from local state');
+        
         Get.snackbar(
           'success'.tr,
           'bookmark_removed'.tr,
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2),
         );
+      } else {
+        print('⚠️ Bookmark deletion returned false');
       }
       
       return success;
     } catch (e) {
-      print('Error deleting bookmark: $e');
+      print('❌ Error deleting bookmark: $e');
+      
+      // Check if it's a 404 error (bookmark already deleted)
+      if (e.toString().contains('404')) {
+        print('⚠️ Bookmark not found on server, removing from local state');
+        // Remove from local state anyway
+        bookmarks.removeWhere((bookmark) => bookmark['_id'] == bookmarkId);
+        _bookmarkedIds.remove(productId);
+        update();
+        
+        Get.snackbar(
+          'info'.tr,
+          'Bookmark already removed',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+        return true;
+      }
+      
       Get.snackbar(
         'error'.tr,
         'failed_to_remove_bookmark'.tr,

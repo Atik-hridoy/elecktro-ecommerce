@@ -178,6 +178,12 @@ class BookmarkService extends GetxService {
   /// Delete a bookmark by ID
   Future<bool> deleteBookmark(String bookmarkId) async {
     try {
+      // Validate bookmark ID
+      if (bookmarkId.isEmpty) {
+        print('❌ Invalid bookmark ID: empty string');
+        return false;
+      }
+      
       print('🗑️ Deleting bookmark with ID: $bookmarkId');
       
       final response = await _dio.delete(
@@ -187,18 +193,33 @@ class BookmarkService extends GetxService {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
+          validateStatus: (status) => status! < 500, // Don't throw for 4xx errors
         ),
       );
       
       if (response.statusCode == 200 || response.statusCode == 204) {
         print('✅ Successfully deleted bookmark');
         return true;
+      } else if (response.statusCode == 404) {
+        print('⚠️ Bookmark not found (404). It may have already been deleted.');
+        // Return true since the bookmark doesn't exist anyway
+        return true;
       } else {
         print('❌ Failed to delete bookmark. Status: ${response.statusCode}');
+        if (response.data != null) {
+          print('Response: ${response.data}');
+        }
         return false;
       }
+    } on DioException catch (e) {
+      print('❌ Error deleting bookmark: ${e.message}');
+      if (e.response?.statusCode == 404) {
+        print('⚠️ Bookmark not found. It may have already been deleted.');
+        return true;
+      }
+      rethrow;
     } catch (e) {
-      print('❌ Error deleting bookmark: $e');
+      print('❌ Unexpected error deleting bookmark: $e');
       rethrow;
     }
   }

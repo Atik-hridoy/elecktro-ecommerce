@@ -126,4 +126,107 @@ class CartService {
       };
     }
   }
+
+  /// Update cart item quantity using PATCH request
+  /// Requires product ID and new quantity
+  Future<Map<String, dynamic>> updateCartItemQuantity(String productId, int quantity) async {
+    try {
+      print('🔄 Updating cart item quantity - Product ID: $productId, Quantity: $quantity');
+      
+      final response = await _dio.patch(
+        '${AppUrls.editQuentity}$productId',
+        data: {
+          'quantity': quantity,
+        },
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ Cart item quantity updated successfully');
+        return {
+          'success': true,
+          'message': 'Quantity updated successfully',
+          'data': response.data,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to update quantity',
+          'statusCode': response.statusCode,
+        };
+      }
+    } on DioException catch (e) {
+      print('❌ Error updating cart quantity: ${e.message}');
+      String errorMessage = 'An error occurred while updating quantity';
+      
+      if (e.response?.statusCode == 401) {
+        errorMessage = 'Please login to continue';
+      } else if (e.response?.statusCode == 400) {
+        errorMessage = e.response?.data['message'] ?? 'Invalid quantity';
+      } else if (e.response?.statusCode == 404) {
+        errorMessage = 'Product not found in cart';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Connection timeout. Please check your internet connection';
+      }
+
+      return {
+        'success': false,
+        'message': errorMessage,
+        'statusCode': e.response?.statusCode,
+      };
+    } catch (e) {
+      print('❌ Unexpected error: $e');
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Clear entire cart using DELETE request
+  /// Removes all products from the cart
+  Future<Map<String, dynamic>> clearCart() async {
+    try {
+      print('🗑️ Clearing entire cart...');
+      
+      final response = await _dio.delete(AppUrls.deleteItem);
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ Cart cleared successfully');
+        return {
+          'success': true,
+          'message': 'Cart cleared successfully',
+          'data': response.data,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to clear cart',
+          'statusCode': response.statusCode,
+        };
+      }
+    } on DioException catch (e) {
+      print('❌ Error clearing cart: ${e.message}');
+      String errorMessage = 'An error occurred while clearing cart';
+      
+      if (e.response?.statusCode == 401) {
+        errorMessage = 'Please login to continue';
+      } else if (e.response?.statusCode == 404) {
+        errorMessage = 'Cart not found';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Connection timeout. Please check your internet connection';
+      }
+
+      return {
+        'success': false,
+        'message': errorMessage,
+        'statusCode': e.response?.statusCode,
+      };
+    } catch (e) {
+      print('❌ Unexpected error: $e');
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: ${e.toString()}',
+      };
+    }
+  }
 }

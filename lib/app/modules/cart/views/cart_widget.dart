@@ -68,6 +68,22 @@ class _CartProductCardState extends State<CartProductCard> {
     _isChecked = widget.isSelected;
   }
 
+  @override
+  void didUpdateWidget(CartProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update local state when widget props change (e.g., after API refresh)
+    if (oldWidget.quantity != widget.quantity) {
+      setState(() {
+        _quantity = widget.quantity;
+      });
+    }
+    if (oldWidget.isSelected != widget.isSelected) {
+      setState(() {
+        _isChecked = widget.isSelected;
+      });
+    }
+  }
+
   // Increment quantity
   void _incrementQuantity() {
     final newQuantity = _quantity + 1;

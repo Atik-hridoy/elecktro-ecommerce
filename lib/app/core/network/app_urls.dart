@@ -44,6 +44,8 @@ class AppUrls {
   // cart
   static const String addToCart = 'cart/add';
   static const String getCart = 'cart/me';
+  static const String editQuentity = 'cart/item/';
+  static const String deleteItem = 'cart/clear';
   // paymentSession
 
   static const String createPaymentSession = 'orders/create-checkout-session';

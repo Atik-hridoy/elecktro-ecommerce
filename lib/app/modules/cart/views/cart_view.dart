@@ -71,7 +71,7 @@ class CartView extends GetView<CartController> {
 
           return Column(
             children: [
-              // Cart items count and select all
+              // Cart items count, select all, and clear cart button
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 16.0 * widthScale, 
@@ -89,6 +89,29 @@ class CartView extends GetView<CartController> {
                       style: TextStyle(
                         fontSize: 16 * widthScale,
                         fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Clear Cart Button
+                    TextButton.icon(
+                      onPressed: () => _showClearCartDialog(context, controller),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        size: 18 * widthScale,
+                        color: Colors.red,
+                      ),
+                      label: Text(
+                        'clear_cart'.tr,
+                        style: TextStyle(
+                          fontSize: 14 * widthScale,
+                          color: Colors.red,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8 * widthScale,
+                          vertical: 4 * heightScale,
+                        ),
                       ),
                     ),
                   ],
@@ -137,6 +160,10 @@ class CartView extends GetView<CartController> {
                         images: item.images,
                         onRemoveFromCart: () {
                           controller.removeFromCart(item.id);
+                        },
+                        onQuantityChanged: (newQuantity) {
+                          // Call controller with productId for PATCH request
+                          controller.updateQuantity(item.productId, newQuantity);
                         },
                       );
                     },
@@ -251,5 +278,31 @@ class CartView extends GetView<CartController> {
         ],
       );
     });
+  }
+
+  /// Show confirmation dialog before clearing the entire cart
+  void _showClearCartDialog(BuildContext context, CartController controller) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('clear_cart'.tr),
+        content: Text('Are you sure you want to remove all items from your cart?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('cancel'.tr),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Get.back();
+              await controller.clearCart();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: Text('clear'.tr),
+          ),
+        ],
+      ),
+    );
   }
 }

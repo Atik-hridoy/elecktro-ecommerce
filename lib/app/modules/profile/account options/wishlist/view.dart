@@ -206,9 +206,26 @@ Widget _buildWishlistGrid(BookmarkController controller) {
 
   /// Show confirmation dialog before removing item from wishlist
   void _showRemoveConfirmationDialog(BookmarkController controller, Map<String, dynamic> item) {
+    // Debug: Print the entire item structure
+    print('📋 Bookmark item structure: $item');
+    
     final bookmarkId = item['_id']?.toString() ?? '';
     final productId = item['productId']?.toString() ?? '';
     final productName = item['name']?.toString() ?? 'this item';
+    
+    print('🔍 Extracted - Bookmark ID: $bookmarkId, Product ID: $productId');
+    
+    // Validate IDs before showing dialog
+    if (bookmarkId.isEmpty) {
+      print('❌ Warning: Bookmark ID is empty!');
+      Get.snackbar(
+        'Error',
+        'Cannot remove bookmark: Invalid bookmark data',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+      return;
+    }
     
     Get.dialog(
       AlertDialog(

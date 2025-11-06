@@ -43,7 +43,7 @@ class NavigationService extends GetxService {
       break;
     case 1: // Categories
       if (Get.currentRoute != Routes.category) {
-        Get.offAllNamed(Routes.category);
+        Get.toNamed(Routes.category);
       }
       break;
     case 2: // Cart
@@ -69,7 +69,7 @@ class NavigationService extends GetxService {
         break;
       case 1: // Categories
         if (Get.currentRoute != Routes.category) {
-          Get.offAllNamed(Routes.category);
+          Get.toNamed(Routes.category);
         }
         break;
       case 2: // Cart
