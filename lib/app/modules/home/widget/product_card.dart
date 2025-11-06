@@ -46,17 +46,25 @@ class ProductCard extends StatelessWidget {
     this.sellerAvatarUrl,
   });
 
-  // Helper method to get sizes from product
-  List<String>? get _sizes {
-    if (product?.sizeType == null) return null;
-    return product!.sizeType.map((sizeType) => sizeType.size).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final bookmarkController = Get.put<BookmarkController>(BookmarkController());
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Scale factor based on screen width (375 is base design width)
+    var scale = screenWidth / 375;
+    
+    // For very small screens, reduce scale even more
+    if (screenHeight < 700) {
+      scale = scale * 0.85; // 15% smaller on small screens
+    }
+    
+    // Responsive card width based on screen ratio
+    final cardWidth = 180.0 * scale;
 
     void navigateToProductDetails() {
       if (product != null) {
@@ -88,7 +96,7 @@ class ProductCard extends StatelessWidget {
     }
 
     return SizedBox(
-      width: 180, // Provide a fixed width to the card
+      width: cardWidth,
       child: Card(
       elevation: 1, // Use a non-zero elevation for a shadow effect
       color: colorScheme.surface, // Elevated cards use the surface color
@@ -103,7 +111,7 @@ class ProductCard extends StatelessWidget {
             Stack(
               children: [
                 AspectRatio(
-                  aspectRatio: 4 / 3, // Use a more compact aspect ratio
+                  aspectRatio: 1.2, // More compact ratio for small screens
                   child: Container(
                     padding: EdgeInsets.zero,
                     color: colorScheme.surface,
@@ -155,73 +163,81 @@ class ProductCard extends StatelessWidget {
             // --- DETAILS SECTION ---
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(6.0), // Further reduced padding
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text(
-                    name,
-                    style: textTheme.titleSmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    brand,
-                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (showRating) ...[
-                    const SizedBox(height: 4), // Reduced spacing
-                    _buildRating(context, rating, reviewCount),
-                  ],
-                  const SizedBox(height: 4), // Reduced spacing
-                  if (_sizes?.isNotEmpty ?? false) ...[
-                    SizedBox(
-                      height: 24,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: _sizes!.length,
-                        itemBuilder: (context, index) => Container(
-                          margin: const EdgeInsets.only(right: 4, bottom: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                            borderRadius: BorderRadius.circular(4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 6.0 * scale,
+                  vertical: 4.0 * scale,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top section with name and brand
+                    Flexible(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              name,
+                              style: textTheme.titleSmall?.copyWith(fontSize: 13 * scale),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          child: Text(
-                            _sizes![index],
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                          SizedBox(height: 1 * scale),
+                          Text(
+                            brand,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 12 * scale,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                  ],
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        price,
-                        style: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
+                    
+                    // Middle section with rating only
+                    if (showRating)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 2 * scale),
+                        child: _buildRating(context, rating, reviewCount, scale),
                       ),
-                      if (showAddToCart && onAddToCart != null)
-                        IconButton.filledTonal(
-                          onPressed: onAddToCart,
-                          icon: const Icon(Icons.add_shopping_cart),
-                          iconSize: 18,
+                    
+                    // Bottom section with price and cart button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            price,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colorScheme.primary,
+                              fontSize: 14 * scale,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
-              ),
+                        if (showAddToCart && onAddToCart != null)
+                          IconButton.filledTonal(
+                            onPressed: onAddToCart,
+                            icon: const Icon(Icons.add_shopping_cart),
+                            iconSize: 16 * scale,
+                            padding: EdgeInsets.all(6 * scale),
+                            constraints: BoxConstraints(
+                              minWidth: 32 * scale,
+                              minHeight: 32 * scale,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -268,22 +284,28 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Builds the rating display row.
-  Widget _buildRating(BuildContext context, double rating, int reviewCount) {
+  Widget _buildRating(BuildContext context, double rating, int reviewCount, double scale) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Row(
       children: [
-        Icon(Icons.star, color: Colors.amber, size: 16),
-        const SizedBox(width: 4),
+        Icon(Icons.star, color: Colors.amber, size: 16 * scale),
+        SizedBox(width: 4 * scale),
         Text(
           rating.toStringAsFixed(1),
-          style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+          style: textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 12 * scale,
+          ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4 * scale),
         Text(
           '($reviewCount)',
-          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontSize: 11 * scale,
+          ),
         ),
       ],
     );

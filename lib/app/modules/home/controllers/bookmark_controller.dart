@@ -58,6 +58,39 @@ class BookmarkController extends GetxController {
     }
   }
 
+  /// Delete a bookmark by ID
+  Future<bool> deleteBookmark(String bookmarkId, String productId) async {
+    try {
+      final success = await _bookmarkService.deleteBookmark(bookmarkId);
+      
+      if (success) {
+        // Remove from bookmarks list
+        bookmarks.removeWhere((bookmark) => bookmark['_id'] == bookmarkId);
+        // Remove from bookmarked IDs
+        _bookmarkedIds.remove(productId);
+        update();
+        
+        Get.snackbar(
+          'success'.tr,
+          'bookmark_removed'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+      
+      return success;
+    } catch (e) {
+      print('Error deleting bookmark: $e');
+      Get.snackbar(
+        'error'.tr,
+        'failed_to_remove_bookmark'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+      return false;
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();

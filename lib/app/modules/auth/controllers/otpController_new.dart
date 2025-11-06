@@ -54,6 +54,9 @@ class OtpController extends GetxController {
 
   // Handle OTP input changes
   void onOtpChange(dynamic index, String value, BuildContext context) {
+    // Check if controller is still active
+    if (isClosed) return;
+    
     // Convert index to int if it's a string
     final idx = index is int ? index : int.tryParse(index.toString()) ?? 0;
     
@@ -73,12 +76,19 @@ class OtpController extends GetxController {
   void startTimer() {
     canResend.value = false;
     remainingTime.value = resendTimeout;
+    _timer?.cancel(); // Cancel any existing timer
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (remainingTime.value > 1) {
-        remainingTime.value--;
+      // Check if controller is still active before updating state
+      if (!isClosed) {
+        if (remainingTime.value > 1) {
+          remainingTime.value--;
+        } else {
+          _timer?.cancel();
+          canResend.value = true;
+        }
       } else {
-        _timer?.cancel();
-        canResend.value = true;
+        // Cancel timer if controller is closed
+        timer.cancel();
       }
     });
   }

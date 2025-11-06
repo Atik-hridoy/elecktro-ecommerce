@@ -100,18 +100,30 @@ class _CartProductCardState extends State<CartProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Screen scaling
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    var widthScale = screenWidth / 375;
+    var heightScale = screenHeight / 812;
+    
+    // Extra reduction for small screens
+    final isSmallScreen = screenHeight < 700;
+    if (isSmallScreen) {
+      widthScale = widthScale * 0.85;
+      heightScale = heightScale * 0.75;
+    }
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+      margin: EdgeInsets.symmetric(vertical: 8.0 * heightScale, horizontal: 0),
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12 * widthScale),
         side: BorderSide(
           color: Colors.grey.shade200,
           width: 1,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(12.0 * widthScale),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,8 +141,8 @@ class _CartProductCardState extends State<CartProductCard> {
               const SizedBox(width: 40),
 
             // Product Image
-            _buildProductImage(),
-            const SizedBox(width: 12),
+            _buildProductImage(widthScale, heightScale),
+            SizedBox(width: 12 * widthScale),
 
             // Product Details
             Expanded(
@@ -144,8 +156,8 @@ class _CartProductCardState extends State<CartProductCard> {
                       Expanded(
                         child: Text(
                           widget.productName,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: 16 * widthScale,
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 2,
@@ -154,11 +166,11 @@ class _CartProductCardState extends State<CartProductCard> {
                       ),
                       if (widget.onRemoveFromCart != null)
                         IconButton(
-                          icon: const Icon(Icons.close, size: 20),
+                          icon: Icon(Icons.close, size: 20 * widthScale),
                           onPressed: widget.onRemoveFromCart,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          iconSize: 20,
+                          iconSize: 20 * widthScale,
                         ),
                     ],
                   ),
@@ -166,11 +178,11 @@ class _CartProductCardState extends State<CartProductCard> {
                   // Brand
                   if (widget.brand != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 2, bottom: 4),
+                      padding: EdgeInsets.only(top: 2 * heightScale, bottom: 4 * heightScale),
                       child: Text(
                         widget.brand!,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12 * widthScale,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -178,23 +190,23 @@ class _CartProductCardState extends State<CartProductCard> {
 
                   // Size and Color
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
+                    spacing: 8 * widthScale,
+                    runSpacing: 4 * heightScale,
                     children: [
                       if (widget.size.isNotEmpty)
-                        _buildAttributeChip('${'size'.tr}: ${widget.size}'),
+                        _buildAttributeChip('${'size'.tr}: ${widget.size}', widthScale, heightScale),
                       if (widget.color.isNotEmpty)
-                        _buildAttributeChip('${'color'.tr}: ${widget.color}'),
+                        _buildAttributeChip('${'color'.tr}: ${widget.color}', widthScale, heightScale),
                     ],
                   ),
 
                   // Price and Quantity
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8 * heightScale),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPriceSection(),
-                      _buildQuantitySection(),
+                      Flexible(child: _buildPriceSection(widthScale)),
+                      _buildQuantitySection(widthScale, heightScale),
                     ],
                   ),
                 ],
@@ -207,22 +219,23 @@ class _CartProductCardState extends State<CartProductCard> {
   }
 
   // Dynamically build the price section
-  Widget _buildPriceSection() {
+  Widget _buildPriceSection(double widthScale) {
     return Text(
       '\$${widget.price.toStringAsFixed(2)}',
-      style: const TextStyle(
-        fontSize: 16,
+      style: TextStyle(
+        fontSize: 16 * widthScale,
         fontWeight: FontWeight.bold,
         color: Colors.black,
       ),
+      overflow: TextOverflow.ellipsis,
     );
   }
 
   // Dynamically build the action buttons (like favorite and add to cart)
-  Widget _buildProductImage() {
+  Widget _buildProductImage(double widthScale, double heightScale) {
     return Container(
-      width: 80,
-      height: 80,
+      width: 80 * widthScale,
+      height: 80 * heightScale,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
@@ -246,19 +259,22 @@ class _CartProductCardState extends State<CartProductCard> {
     );
   }
 
-  Widget _buildQuantitySection() {
+  Widget _buildQuantitySection(double widthScale, double heightScale) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: 8 * widthScale, 
+        vertical: 4 * heightScale
+      ),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20 * widthScale),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Decrease button
           IconButton(
-            icon: const Icon(Icons.remove, size: 18),
+            icon: Icon(Icons.remove, size: 18 * widthScale),
             onPressed: _decrementQuantity,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -267,15 +283,15 @@ class _CartProductCardState extends State<CartProductCard> {
           // Quantity
           Text(
             '$_quantity',
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 16 * widthScale,
               fontWeight: FontWeight.w500,
             ),
           ),
           
           // Increase button
           IconButton(
-            icon: const Icon(Icons.add, size: 18),
+            icon: Icon(Icons.add, size: 18 * widthScale),
             onPressed: _incrementQuantity,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -285,19 +301,19 @@ class _CartProductCardState extends State<CartProductCard> {
     );
   }
 
-  Widget _buildAttributeChip(String label) {
+  Widget _buildAttributeChip(String label, double widthScale, double heightScale) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      margin: const EdgeInsets.only(right: 4, bottom: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8 * widthScale, vertical: 4 * heightScale),
+      margin: EdgeInsets.only(right: 4 * widthScale, bottom: 4 * heightScale),
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12 * widthScale),
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 12 * widthScale,
           color: Colors.grey[800],
         ),
       ),

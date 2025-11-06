@@ -40,13 +40,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final theme = Theme.of(context);
     final bgColor = backgroundColor ?? Colors.white;
     final txtColor = textColor ?? Colors.black87;
+    
+    // Screen scaling
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final widthScale = screenWidth / 375;
+    final heightScale = screenHeight / 812;
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20 * widthScale),
+          bottomRight: Radius.circular(20 * widthScale),
         ),
         boxShadow: [
           BoxShadow(
@@ -59,10 +65,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       clipBehavior: Clip.antiAlias,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 8,
-        left: 16,
-        right: 16,
-        bottom: 12,
+        top: MediaQuery.of(context).padding.top + (8 * heightScale),
+        left: 16 * widthScale,
+        right: 16 * widthScale,
+        bottom: 12 * heightScale,
       ),
       child: Column(
         children: [
@@ -77,11 +83,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Row(
                     children: [
                       SizedBox(
-                        width: 40,
-                        height: 40,
+                        width: 40 * widthScale,
+                        height: 40 * widthScale,
                         child: SvgPicture.asset('assets/icons/Group 290580.svg'),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12 * widthScale),
                       Flexible(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +95,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                             Text(
                               'Hello $userName',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 16 * widthScale,
                                 fontWeight: FontWeight.w600,
                                 color: txtColor,
                               ),
@@ -100,7 +106,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   ? '${'*' * (phoneNumber.length - 2)}${phoneNumber.substring(phoneNumber.length - 2)}'
                                   : phoneNumber,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 12 * widthScale,
                                 color: txtColor.withOpacity(0.6),
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -112,7 +118,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12 * widthScale),
               // Notification icon
               Stack(
                 clipBehavior: Clip.none,
@@ -123,17 +129,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         notificationIcon ??
                         SvgPicture.asset(
                           'assets/icons/home/notification.svg',
-                          width: 24,
-                          height: 24,
+                          width: 24 * widthScale,
+                          height: 24 * widthScale,
                         ),
                   ),
                   if (hasUnreadNotifications)
                     Positioned(
-                      top: -2,
-                      right: -2,
+                      top: -2 * widthScale,
+                      right: -2 * widthScale,
                       child: Container(
-                        width: 10,
-                        height: 10,
+                        width: 10 * widthScale,
+                        height: 10 * widthScale,
                         decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
@@ -147,28 +153,28 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
           // Search bar
           if (showSearch) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16 * heightScale),
             GestureDetector(
               onTap: onSearchTap,
               child: Container(
-                height: 48,
+                height: 48 * heightScale,
                 decoration: BoxDecoration(
                   color: const Color(0xFFEEEEEE),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20 * widthScale),
                   border: Border.all(color: Colors.grey.shade200, width: 1),
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 16),
-                    Icon(Icons.search, color: Colors.grey.shade500, size: 20),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 16 * widthScale),
+                    Icon(Icons.search, color: Colors.grey.shade500, size: 20 * widthScale),
+                    SizedBox(width: 12 * widthScale),
                     Expanded(
                       child: onSearchTap != null
                           ? Text(
                               searchHint,
                               style: TextStyle(
                                 color: Colors.grey.shade500,
-                                fontSize: 14,
+                                fontSize: 14 * widthScale,
                               ),
                             )
                           : TextField(
@@ -178,17 +184,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 hintText: searchHint,
                                 hintStyle: TextStyle(
                                   color: Colors.grey.shade500,
-                                  fontSize: 14,
+                                  fontSize: 14 * widthScale,
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(24 * widthScale),
                                   borderSide: BorderSide.none,
                                 ),
                                 contentPadding: EdgeInsets.zero,
                                 filled: true,
                                 fillColor: const Color(0xFFEEEEEE),
                               ),
-                              style: TextStyle(color: txtColor, fontSize: 14),
+                              style: TextStyle(color: txtColor, fontSize: 14 * widthScale),
                             ),
                     ),
                   ],
@@ -202,7 +208,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(showSearch ? 140 : 100);
+  Size get preferredSize {
+    // Get screen height for scaling
+    final screenHeight = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height / 
+                        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final heightScale = screenHeight / 812;
+    
+    // Scale the appbar height based on screen size
+    final baseHeight = showSearch ? 140.0 : 100.0;
+    return Size.fromHeight(baseHeight * heightScale);
+  }
 }
 
 // Example usage

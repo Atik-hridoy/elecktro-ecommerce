@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:elecktro_ecommerce/app/modules/profile/controllers/account_edit_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/notification/notification_controller.dart';
+import 'package:elecktro_ecommerce/app/modules/category/controller.dart';
 import 'package:elecktro_ecommerce/app/core/widgets/error_screens/network_error_screen.dart';
 import 'package:elecktro_ecommerce/app/core/widgets/error_screens/server_error_screen.dart';
 import 'package:elecktro_ecommerce/app/core/widgets/error_screens/something_went_wrong_screen.dart';
@@ -100,6 +101,9 @@ class HomeView extends StatelessWidget {
   // Home page body structure
   Widget _buildHomePage(HomeController homeController) {
     return Obx(() {
+      final screenHeight = Get.height;
+      final heightScale = screenHeight / 812;
+      final productListHeight = 240.0 * heightScale;
       // Show Network Error Screen
       if (homeController.hasNetworkError.value) {
         return NetworkErrorScreen(
@@ -281,7 +285,7 @@ class HomeView extends StatelessWidget {
 
               // Show products list
               return SizedBox(
-                height: 240,
+                height: productListHeight,
                 child: Skeletonizer(
                   enabled: isLoading,
                   child: ListView.builder(
@@ -329,6 +333,110 @@ class HomeView extends StatelessWidget {
                   ),
                 );
               }),
+
+            const SizedBox(height: 24),
+
+            // Size-wise Products Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'all_products'.tr,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // All Products Grid
+            Obx(() {
+              final categoryController = Get.find<CategoryController>();
+              final products = categoryController.products;
+              final isLoading = categoryController.isLoadingProducts.value;
+
+              if (isLoading) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.7,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: 6,
+                    itemBuilder: (context, index) {
+                      return ProductCard(
+                        name: '',
+                        productId: 'skeleton-$index',
+                        brand: '',
+                        price: '',
+                        imageUrl: '',
+                      );
+                    },
+                  ),
+                );
+              }
+
+              if (products.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(
+                      'no_products_available'.tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    final price = product.sizeType.isNotEmpty
+                        ? product.sizeType.first.price.toString()
+                        : '0';
+                    final imageUrl = product.images.isNotEmpty
+                        ? product.images.first
+                        : '';
+
+                    return ProductCard(
+                      product: product,
+                      name: product.name,
+                      productId: product.id,
+                      brand: product.brand,
+                      price: '\$$price',
+                      imageUrl: imageUrl,
+                      rating: product.rating,
+                      reviewCount: product.reviewCount,
+                    );
+                  },
+                ),
+              );
+            }),
 
             const SizedBox(
               height: 20,

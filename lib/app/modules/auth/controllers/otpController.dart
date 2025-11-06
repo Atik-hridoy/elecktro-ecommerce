@@ -57,6 +57,9 @@ class OtpController extends GetxController {
 
   // Handle OTP input changes
   void onOtpChange(dynamic index, String value, BuildContext context) {
+    // Check if controller is still active
+    if (isClosed) return;
+    
     // Convert index to int if it's a string
     final idx = index is int ? index : int.tryParse(index.toString()) ?? 0;
     
@@ -76,12 +79,19 @@ class OtpController extends GetxController {
   void startTimer() {
     canResend.value = false;
     remainingTime.value = resendTimeout;
+    _timer?.cancel(); // Cancel any existing timer
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (remainingTime.value > 1) {
-        remainingTime.value--;
+      // Check if controller is still active before updating state
+      if (!isClosed) {
+        if (remainingTime.value > 1) {
+          remainingTime.value--;
+        } else {
+          _timer?.cancel();
+          canResend.value = true;
+        }
       } else {
-        _timer?.cancel();
-        canResend.value = true;
+        // Cancel timer if controller is closed
+        timer.cancel();
       }
     });
   }
@@ -94,20 +104,55 @@ class OtpController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       
-      // Call the sign-in service to resend OTP
-      // This assumes you have a method in your auth service to resend OTP
-      // You might need to implement this based on your API
-      // For now, we'll just restart the timer
-      startTimer();
-      
-      Get.snackbar(
-        'success'.tr,
-        'otp_resent_success'.tr,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      AppLogger.info(
+        'Resending OTP to email: $email',
+        tag: 'OtpController',
       );
+      
+      // Call the resend OTP service with email
+      final response = await _otpService.resendOtp(email: email.trim());
+      
+      if (response['success'] == true) {
+        // Restart the timer after successful resend
+        startTimer();
+        
+        AppLogger.success(
+          'OTP resent successfully',
+          tag: 'OtpController',
+        );
+        
+        Get.snackbar(
+          'success'.tr,
+          response['message'] ?? 'otp_resent_success'.tr,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        // Handle failure
+        final errorMsg = response['message'] ?? 'failed_resend_otp'.tr;
+        errorMessage.value = errorMsg;
+        
+        AppLogger.warning(
+          'Failed to resend OTP: $errorMsg',
+          tag: 'OtpController',
+        );
+        
+        Get.snackbar(
+          'error'.tr,
+          errorMsg,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } catch (e) {
       errorMessage.value = 'failed_resend_otp'.tr;
+      
+      AppLogger.error(
+        'Error resending OTP',
+        error: e,
+        tag: 'OtpController',
+      );
+      
       Get.snackbar(
         'error'.tr,
         errorMessage.value,

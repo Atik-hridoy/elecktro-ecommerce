@@ -35,108 +35,136 @@ class _OtpViewState extends State<OtpView> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
 
     return Scaffold(
       backgroundColor: const Color(0xFFE6F8F3),
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
+        bottom: false, // Remove bottom padding to blend with screen edge
         child: Column(
           children: [
-            // Top Image - Responsive
+            // Top Image - Responsive with adaptive flex
             Expanded(
-              flex: 3,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.05,
-                  vertical: screenHeight * 0.02,
-                ),
-                child: Image.asset(
-                  'assets/auth/auth1.png',
-                  fit: BoxFit.contain,
-                ),
+              flex: isSmallScreen ? 2 : 3,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.05,
+                      vertical: isSmallScreen ? screenHeight * 0.01 : screenHeight * 0.02,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: screenWidth > 600 ? 500 : screenWidth * 0.9,
+                          maxHeight: constraints.maxHeight * 0.85,
+                        ),
+                        child: Image.asset(
+                          'assets/auth/auth1.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
 
-            // Form Section - Responsive
+            // Form Section - Responsive with adaptive flex
             Expanded(
-              flex: 4,
+              flex: isSmallScreen ? 5 : 4,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth > 600 ? 48 : screenWidth * 0.06,
-                    ),
+                    color: const Color(0xFFE6F8F3), // Match scaffold background
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Background Image
+                        // Background Image - Full width with top curves only
                         Positioned.fill(
-                          child: Image.asset(
-                            'assets/auth/auth2.png',
-                            fit: BoxFit.fill,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth > 600 ? 32 : 24),
+                              topRight: Radius.circular(screenWidth > 600 ? 32 : 24),
+                              bottomLeft: Radius.zero,
+                              bottomRight: Radius.zero,
+                            ),
+                            child: Image.asset(
+                              'assets/auth/auth2.png',
+                              fit: BoxFit.fill,
+                            ),
                           ),
                         ),
                         // Form Content
                         Center(
-                          child: ConstrainedBox(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth > 600 ? 48 : screenWidth * 0.06,
+                            ),
+                            child: ConstrainedBox(
                             constraints: BoxConstraints(
                               maxWidth: 400,
-                              maxHeight: constraints.maxHeight * 0.95,
                             ),
                             child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  // Logo
-                                  SvgPicture.asset(
-                                    'assets/icons/Group 290580.svg',
-                                    width: screenWidth > 600 ? 110 : 94.84,
-                                    height: screenWidth > 600 ? 145 : 128.32,
+                                  SizedBox(
+                                    height: isSmallScreen ? 8 : 16,
+                                  ),
+                                  // Logo - Flexible size
+                                  LayoutBuilder(
+                                    builder: (context, logoConstraints) {
+                                      final logoSize = isSmallScreen ? 60.0 :
+                                                      screenWidth > 600 ? 110.0 : 
+                                                      screenWidth > 400 ? 95.0 : 80.0;
+                                      return SvgPicture.asset(
+                                        'assets/icons/Group 290580.svg',
+                                        width: logoSize,
+                                        height: logoSize * 1.35,
+                                      );
+                                    },
                                   ),
                                   SizedBox(
-                                    height: constraints.maxHeight * 0.02,
+                                    height: isSmallScreen ? 8 : 16,
                                   ),
 
                                   // Title
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      'otp_verification'.tr,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        color: const Color(0xFF09B782),
-                                        fontSize: screenWidth > 600 ? 28 : 24,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                  Text(
+                                    'otp_verification'.tr,
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      color: const Color(0xFF09B782),
+                                      fontSize: isSmallScreen ? 20 : (screenWidth > 600 ? 28 : 24),
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   SizedBox(
-                                    height: constraints.maxHeight * 0.01,
+                                    height: isSmallScreen ? 4 : 8,
                                   ),
 
                                   // Subtitle
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      child: Text(
-                                        '${'enter_otp_sent'.tr}\n${controller.email}',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          color: const Color(0xFF606060),
-                                          fontSize: screenWidth > 600 ? 16 : 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      '${'enter_otp_sent'.tr}\n${controller.email}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: const Color(0xFF606060),
+                                        fontSize: isSmallScreen ? 12 : (screenWidth > 600 ? 16 : 14),
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ),
                                   SizedBox(
-                                    height: constraints.maxHeight * 0.03,
+                                    height: isSmallScreen ? 12 : 20,
                                   ),
 
                                   // OTP Input Fields
@@ -150,8 +178,8 @@ class _OtpViewState extends State<OtpView> {
                                       children: List.generate(
                                         5,
                                         (index) => Container(
-                                          width: screenWidth > 600 ? 65 : 55,
-                                          height: screenWidth > 600 ? 70 : 60,
+                                          width: isSmallScreen ? 50 : (screenWidth > 600 ? 65 : 55),
+                                          height: isSmallScreen ? 52 : (screenWidth > 600 ? 70 : 60),
                                           decoration: BoxDecoration(
                                             color: const Color(0xFFE6E6E6),
                                             borderRadius: BorderRadius.circular(
@@ -197,13 +225,13 @@ class _OtpViewState extends State<OtpView> {
                                     return errorMessage.isNotEmpty
                                         ? Padding(
                                             padding: EdgeInsets.only(
-                                              top: constraints.maxHeight * 0.02,
+                                              top: isSmallScreen ? 8 : 12,
                                             ),
                                             child: Text(
                                               errorMessage,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 color: Colors.red,
-                                                fontSize: 14,
+                                                fontSize: isSmallScreen ? 12 : 14,
                                               ),
                                             ),
                                           )
@@ -211,7 +239,7 @@ class _OtpViewState extends State<OtpView> {
                                   }),
 
                                   SizedBox(
-                                    height: constraints.maxHeight * 0.02,
+                                    height: isSmallScreen ? 8 : 12,
                                   ),
 
                                   // Resend OTP
@@ -240,13 +268,13 @@ class _OtpViewState extends State<OtpView> {
                                   }),
 
                                   SizedBox(
-                                    height: constraints.maxHeight * 0.02,
+                                    height: isSmallScreen ? 12 : 16,
                                   ),
 
                                   // Verify Button
                                   SizedBox(
                                     width: double.infinity,
-                                    height: 48,
+                                    height: isSmallScreen ? 44 : 48,
                                     child: Obx(() {
                                       final isLoading =
                                           controller.isLoading.value;
@@ -309,9 +337,13 @@ class _OtpViewState extends State<OtpView> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(
+                                    height: isSmallScreen ? 8 : 16,
+                                  ),
                                 ],
                               ),
                             ),
+                          ),
                           ),
                         ),
                       ],

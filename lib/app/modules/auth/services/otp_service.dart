@@ -150,4 +150,87 @@ AppLogger.debug(
       };
     }
   }
+
+  // Resend OTP
+  Future<Map<String, dynamic>> resendOtp({
+    required String email,
+  }) async {
+    try {
+      AppLogger.debug(
+        'Sending resend OTP request',
+        tag: 'AuthVerifyOtpService',
+        details: {
+          'email': email,
+          'endpoint': AppUrls.resendOtp,
+        },
+      );
+
+      final response = await _dio.post(
+        AppUrls.resendOtp,
+        data: {
+          'email': email.trim(),
+        },
+      );
+
+      AppLogger.debug(
+        'Received resend OTP response',
+        tag: 'AuthVerifyOtpService',
+        details: {
+          'statusCode': response.statusCode ?? 200,
+          'response': response.data,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        AppLogger.success(
+          'OTP resent successfully',
+          tag: 'AuthVerifyOtpService',
+        );
+
+        return {
+          'success': true,
+          'message': response.data['message'] ?? 'OTP resent successfully',
+        };
+      } else {
+        AppLogger.debug(
+          'Resend OTP failed',
+          tag: 'AuthVerifyOtpService',
+          details: {
+            'statusCode': response.statusCode ?? 200,
+            'message': response.data['message'] ?? 'No message from server',
+          },
+        );
+        
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to resend OTP',
+          'statusCode': response.statusCode ?? 200,
+        };
+      }
+    } on DioException catch (e) {
+      AppLogger.error(
+        'Dio error in resendOtp',
+        error: e,
+        tag: 'AuthVerifyOtpService',
+      );
+      return {
+        'success': false,
+        'message': e.response?.data?['message'] ?? 
+                  e.message ?? 
+                  'Network error during OTP resend',
+        'statusCode': e.response?.statusCode ?? 0,
+      };
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Unexpected error in resendOtp',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'AuthVerifyOtpService',
+      );
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred while resending OTP',
+      };
+    }
+  }
 }

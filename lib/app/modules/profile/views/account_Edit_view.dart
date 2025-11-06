@@ -388,18 +388,34 @@ class AccountView extends GetView<AccountController> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        // Screen scaling
+        final screenHeight = MediaQuery.of(context).size.height;
+        final screenWidth = MediaQuery.of(context).size.width;
+        var heightScale = screenHeight / 812;
+        var widthScale = screenWidth / 375;
+        
+        // Extra reduction for small screens
+        if (screenHeight < 700) {
+          heightScale = heightScale * 0.75;
+          widthScale = widthScale * 0.85;
+        }
+        
         return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16 * widthScale),
               ),
               child: Container(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                padding: EdgeInsets.all(24 * widthScale),
+                constraints: BoxConstraints(
+                  maxHeight: screenHeight * 0.8, // Max 80% of screen height
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -632,6 +648,7 @@ class AccountView extends GetView<AccountController> {
                       ),
                     ),
                   ],
+                ),
                 ),
               ),
             );

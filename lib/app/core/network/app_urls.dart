@@ -9,6 +9,7 @@ class AppUrls {
   static const String signIn = 'auth/login';
   static const String verifyOtp = 'auth/verify-otp';
   static const String updateProfile = 'users/complete';
+  static const String resendOtp = 'auth/resend-otp';
 
   // profile
 
@@ -36,6 +37,7 @@ class AppUrls {
   static const String getProductDetails = 'products/single/';
   static const String postBookmark = 'bookmarks/';
   static const String getBookmarks = 'bookmarks/';
+  static const String deleteBookmark = 'bookmarks/';
   static const String postReviewFeedback = 'feedbacks/create';
   static const String getReviewFeedback = 'feedbacks/';
 

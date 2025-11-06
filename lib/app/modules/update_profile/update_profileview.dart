@@ -10,19 +10,22 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(375, 812));
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
     
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.all(isSmallScreen ? 12.w : 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
-                SizedBox(height: 24.h),
-                _buildForm(),
+                _buildHeader(isSmallScreen),
+                SizedBox(height: isSmallScreen ? 16.h : 24.h),
+                _buildForm(isSmallScreen),
               ],
             ),
           ),
@@ -31,10 +34,10 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isSmallScreen) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(isSmallScreen ? 14.w : 20.w),
       decoration: BoxDecoration(
         color: Colors.teal.shade50,
         borderRadius: BorderRadius.circular(12.r),
@@ -45,16 +48,16 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
           Text(
             'profile_information'.tr,
             style: TextStyle(
-              fontSize: 24.sp,
+              fontSize: isSmallScreen ? 20.sp : 24.sp,
               fontWeight: FontWeight.bold,
               color: Colors.teal.shade600,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: isSmallScreen ? 4.h : 8.h),
           Text(
             'confirm_real_info'.tr,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: isSmallScreen ? 12.sp : 14.sp,
               color: Colors.grey[600],
             ),
           ),
@@ -63,10 +66,10 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(bool isSmallScreen) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(isSmallScreen ? 14.w : 20.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -85,30 +88,30 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFirstNameField(),
-            SizedBox(height: 20.h),
-            _buildLastNameField(),
-            SizedBox(height: 20.h),
-            _buildGenderField(),
-            SizedBox(height: 20.h),
+            _buildFirstNameField(isSmallScreen),
+            SizedBox(height: isSmallScreen ? 14.h : 20.h),
+            _buildLastNameField(isSmallScreen),
+            SizedBox(height: isSmallScreen ? 14.h : 20.h),
+            _buildGenderField(isSmallScreen),
+            SizedBox(height: isSmallScreen ? 14.h : 20.h),
             _buildDateField(),
-            SizedBox(height: 20.h),
-            _buildAddressField(),
-            SizedBox(height: 24.h),
-            _buildConfirmButton(),
+            SizedBox(height: isSmallScreen ? 14.h : 20.h),
+            _buildAddressField(isSmallScreen),
+            SizedBox(height: isSmallScreen ? 16.h : 24.h),
+            _buildConfirmButton(isSmallScreen),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, bool isSmallScreen) {
     return Text(
   text.endsWith('*') 
       ? '${text.substring(0, text.length - 1)}*'.tr 
       : text.tr,
   style: TextStyle(
-    fontSize: 14.sp,
+    fontSize: isSmallScreen ? 12.sp : 14.sp,
     fontWeight: FontWeight.w500,
     color: Colors.black87,
   ),
@@ -120,6 +123,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
     required String hintText,
     int maxLines = 1,
     String? Function(String?)? validator,
+    required bool isSmallScreen,
   }) {
     return TextFormField(
       controller: controller,
@@ -129,7 +133,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
         hintText: hintText.tr,
         hintStyle: TextStyle(
           color: Colors.grey[400],
-          fontSize: 14.sp,
+          fontSize: isSmallScreen ? 12.sp : 14.sp,
         ),
         filled: true,
         fillColor: Colors.grey[50],
@@ -149,47 +153,52 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
           borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Colors.red),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 12.w : 16.w, 
+          vertical: isSmallScreen ? 10.h : 12.h
+        ),
       ),
     );
   }
 
-  Widget _buildFirstNameField() {
+  Widget _buildFirstNameField(bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('first_name'),
-        SizedBox(height: 8.h),
+        _buildLabel('first_name', isSmallScreen),
+        SizedBox(height: isSmallScreen ? 6.h : 8.h),
         _buildTextField(
           controller: controller.firstNameController,
           hintText: 'John',
           validator: controller.validateFirstName,
+          isSmallScreen: isSmallScreen,
         ),
       ],
     );
   }
 
-  Widget _buildLastNameField() {
+  Widget _buildLastNameField(bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('last_name'),
-        SizedBox(height: 8.h),
+        _buildLabel('last_name', isSmallScreen),
+        SizedBox(height: isSmallScreen ? 6.h : 8.h),
         _buildTextField(
           controller: controller.lastNameController,
           hintText: 'Doe',
           validator: controller.validateLastName,
+          isSmallScreen: isSmallScreen,
         ),
       ],
     );
   }
 
-  Widget _buildGenderField() {
+  Widget _buildGenderField(bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('gender'),
-        SizedBox(height: 8.h),
+        _buildLabel('gender', isSmallScreen),
+        SizedBox(height: isSmallScreen ? 6.h : 8.h),
         Obx(() => _buildDropdown(
           value: controller.selectedGender.value.isNotEmpty
               ? controller.selectedGender.value
@@ -197,6 +206,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
           items: controller.genderOptions,
           onChanged: (value) => controller.selectedGender.value = value ?? '',
           hintText: 'Select Gender'.tr,
+          isSmallScreen: isSmallScreen,
         )),
       ],
     );
@@ -206,26 +216,27 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
     return const SizedBox.shrink(); // Date field removed as per requirements
   }
 
-  Widget _buildAddressField() {
+  Widget _buildAddressField(bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('address'),
-        SizedBox(height: 8.h),
+        _buildLabel('address', isSmallScreen),
+        SizedBox(height: isSmallScreen ? 6.h : 8.h),
         _buildTextField(
           controller: controller.addressController,
           hintText: 'enter_full_address'.tr,
-          maxLines: 3,
+          maxLines: isSmallScreen ? 2 : 3,
           validator: controller.validateAddress,
+          isSmallScreen: isSmallScreen,
         ),
       ],
     );
   }
 
-  Widget _buildConfirmButton() {
+  Widget _buildConfirmButton(bool isSmallScreen) {
     return SizedBox(
       width: double.infinity,
-      height: 50.h,
+      height: isSmallScreen ? 44 : 50,
       child: Obx(() => ElevatedButton(
         onPressed: controller.isLoading.value ? null : controller.updateProfile,
         style: ElevatedButton.styleFrom(
@@ -234,12 +245,13 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
             borderRadius: BorderRadius.circular(8.r),
           ),
           elevation: 0,
+          minimumSize: Size(double.infinity, isSmallScreen ? 44 : 50),
         ),
         child: controller.isLoading.value
-            ? SizedBox(
-                height: 20.h,
-                width: 20.w,
-                child: const CircularProgressIndicator(
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -247,7 +259,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
             : Text(
                 'confirm'.tr,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: isSmallScreen ? 14.sp : 16.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -261,6 +273,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
     required List<String> items,
     required Function(String?) onChanged,
     required String hintText,
+    required bool isSmallScreen,
   }) {
     return DropdownButtonFormField<String>(
       initialValue: value,
@@ -268,7 +281,10 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
       items: items.map((String item) {
         return DropdownMenuItem<String>(
           value: item,
-          child: Text(item.tr),
+          child: Text(
+            item.tr,
+            style: TextStyle(fontSize: isSmallScreen ? 12.sp : 14.sp),
+          ),
         );
       }).toList(),
       onChanged: onChanged,
@@ -276,7 +292,7 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
         hintText: hintText,
         hintStyle: TextStyle(
           color: Colors.grey[400],
-          fontSize: 14.sp,
+          fontSize: isSmallScreen ? 12.sp : 14.sp,
         ),
         filled: true,
         fillColor: Colors.grey[50],
@@ -292,37 +308,12 @@ class ProfileInfoView extends GetView<ProfileInfoController> {
           borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide(color: Colors.teal.shade300, width: 2),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      ),
-    );
-  }
-
-  Widget _buildDateFieldInput({
-
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            
-            Icon(
-              Icons.calendar_today,
-              color: Colors.grey[400],
-              size: 20.sp,
-            ),
-          ],
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 12.w : 16.w, 
+          vertical: isSmallScreen ? 10.h : 12.h
         ),
       ),
     );
   }
+
 }

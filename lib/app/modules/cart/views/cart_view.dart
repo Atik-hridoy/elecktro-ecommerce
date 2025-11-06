@@ -18,6 +18,19 @@ class CartView extends GetView<CartController> {
   Widget build(BuildContext context) {
     final controller = Get.find<CartController>();
     
+    // Screen scaling
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    var widthScale = screenWidth / 375;
+    var heightScale = screenHeight / 812;
+    
+    // Extra reduction for small screens
+    final isSmallScreen = screenHeight < 700;
+    if (isSmallScreen) {
+      widthScale = widthScale * 0.85;
+      heightScale = heightScale * 0.75;
+    }
+    
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -26,8 +39,8 @@ class CartView extends GetView<CartController> {
       child: Scaffold(
         appBar: RoundedAppBar(
           title: 'my_cart'.tr,
-          height: 60.0,
-          borderRadius: 20.0,
+          height: 60.0 * heightScale,
+          borderRadius: 20.0 * widthScale,
           backgroundColor: Colors.white,
           textColor: Colors.black,
           elevation: 4.0,
@@ -60,7 +73,10 @@ class CartView extends GetView<CartController> {
             children: [
               // Cart items count and select all
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.0 * widthScale, 
+                  vertical: 8.0 * heightScale
+                ),
                 child: Row(
                   children: [
                     Obx(() => Checkbox(
@@ -70,8 +86,8 @@ class CartView extends GetView<CartController> {
                         )),
                     Text(
                       '${controller.itemCount} ${'items_in_cart'.tr}',
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16 * widthScale,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -106,7 +122,7 @@ class CartView extends GetView<CartController> {
                   }
                   
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: EdgeInsets.symmetric(horizontal: 16.0 * widthScale),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final item = products[index];
@@ -130,7 +146,7 @@ class CartView extends GetView<CartController> {
               
               // Checkout section
               Container(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0 * widthScale),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
@@ -149,22 +165,22 @@ class CartView extends GetView<CartController> {
                       children: [
                         Text(
                           'total'.tr,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: 18 * widthScale,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Obx(() => Text(
                               '\$${controller.totalAmount.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 20,
+                              style: TextStyle(
+                                fontSize: 20 * widthScale,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             )),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * heightScale),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -175,16 +191,16 @@ class CartView extends GetView<CartController> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 16 * heightScale),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(30 * widthScale),
                           ),
                         ),
                         child: Text(
                           'proceed_to_checkout'.tr,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 16 * widthScale,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

@@ -175,6 +175,34 @@ class BookmarkService extends GetxService {
     }
   }
 
+  /// Delete a bookmark by ID
+  Future<bool> deleteBookmark(String bookmarkId) async {
+    try {
+      print('🗑️ Deleting bookmark with ID: $bookmarkId');
+      
+      final response = await _dio.delete(
+        '${AppUrls.baseUrl}${AppUrls.deleteBookmark}$bookmarkId',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ Successfully deleted bookmark');
+        return true;
+      } else {
+        print('❌ Failed to delete bookmark. Status: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Error deleting bookmark: $e');
+      rethrow;
+    }
+  }
+
   /// Check if a product is bookmarked
   Future<bool> isBookmarked(String productId) async {
     try {

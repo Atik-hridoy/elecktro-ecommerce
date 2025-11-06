@@ -78,9 +78,20 @@ class ReusableNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    // Screen scaling
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    var widthScale = screenWidth / 375;
+    
+    // Extra reduction for small screens
+    if (screenHeight < 700) {
+      widthScale = widthScale * 0.85;
+    }
+    
     final defaultBorderRadius = BorderRadius.only(
-      topLeft: const Radius.circular(25),
-      topRight: const Radius.circular(25),
+      topLeft: Radius.circular(25 * widthScale),
+      topRight: Radius.circular(25 * widthScale),
     );
 
     return Container(
@@ -113,14 +124,14 @@ class ReusableNavBar extends StatelessWidget {
             unselectedItemColor: inactiveColor,
             selectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 12,
+              fontSize: 12 * widthScale,
             ),
             unselectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 12,
+              fontSize: 12 * widthScale,
             ),
             showUnselectedLabels: true,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
+            selectedFontSize: 12 * widthScale,
+            unselectedFontSize: 12 * widthScale,
             items: items,
           ),
         ),

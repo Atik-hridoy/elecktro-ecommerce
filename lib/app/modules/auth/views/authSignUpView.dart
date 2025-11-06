@@ -26,135 +26,157 @@ class _AuthSignUpViewState extends State<AuthSignUpView> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700;
 
     return Scaffold(
       backgroundColor: const Color(0xFFE6F8F3),
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
+        bottom: false,
         child: GetBuilder<AuthSignUpController>(
           builder: (controller) => Column(
             children: [
-              // Top Image - Responsive
+              // Top Image - Responsive with adaptive flex
               Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.05,
-                    vertical: screenHeight * 0.02,
-                  ),
-                  child: Image.asset(
-                    'assets/auth/auth1.png',
-                    fit: BoxFit.contain,
-                  ),
+                flex: isSmallScreen ? 2 : 3,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.05,
+                        vertical: isSmallScreen ? screenHeight * 0.01 : screenHeight * 0.02,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: screenWidth > 600 ? 500 : screenWidth * 0.9,
+                            maxHeight: constraints.maxHeight * 0.85,
+                          ),
+                          child: Image.asset(
+                            'assets/auth/auth1.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
 
-              // Form Section - Responsive
+              // Form Section - Responsive with adaptive flex
               Expanded(
-                flex: 4,
+                flex: isSmallScreen ? 5 : 4,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return Container(
                       width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth > 600 ? 48 : screenWidth * 0.06,
-                      ),
+                      color: const Color(0xFFE6F8F3),
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Background Image
+                          // Background Image - Full width with top curves only
                           Positioned.fill(
-                            child: Image.asset(
-                              'assets/auth/auth2.png',
-                              fit: BoxFit.fill,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(screenWidth > 600 ? 32 : 24),
+                                topRight: Radius.circular(screenWidth > 600 ? 32 : 24),
+                                bottomLeft: Radius.zero,
+                                bottomRight: Radius.zero,
+                              ),
+                              child: Image.asset(
+                                'assets/auth/auth2.png',
+                                fit: BoxFit.fill,
+                              ),
                             ),
                           ),
                           // Form Content
                           Center(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: 400,
-                                maxHeight: constraints.maxHeight * 0.95,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth > 600 ? 48 : screenWidth * 0.06,
                               ),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Logo - Flexible size
-                                    Flexible(
-                                      flex: 2,
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: SvgPicture.asset(
-                                          'assets/icons/Group 290580.svg',
-                                          width: 94.84,
-                                          height: 128.32,
-                                        ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: 400,
+                                ),
+                                child: SingleChildScrollView(
+                                  physics: const BouncingScrollPhysics(),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                      SizedBox(
+                                        height: isSmallScreen ? 8 : 16,
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: constraints.maxHeight * 0.02,
-                                    ),
+                                      // Logo - Flexible size
+                                      LayoutBuilder(
+                                        builder: (context, logoConstraints) {
+                                          final logoSize = isSmallScreen ? 60.0 :
+                                                          screenWidth > 600 ? 110.0 : 
+                                                          screenWidth > 400 ? 95.0 : 80.0;
+                                          return SvgPicture.asset(
+                                            'assets/icons/Group 290580.svg',
+                                            width: logoSize,
+                                            height: logoSize * 1.35,
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 8 : 16,
+                                      ),
 
-                                    // Title
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
+                                      // Title
+                                      Text(
                                         'create_account'.tr,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           color: const Color(0xFF09B782),
-                                          fontSize: screenWidth > 600 ? 28 : 24,
+                                          fontSize: isSmallScreen ? 20 : (screenWidth > 600 ? 28 : 24),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: constraints.maxHeight * 0.01,
-                                    ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 4 : 8,
+                                      ),
 
-                                    // Subtitle
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
+                                      // Subtitle
+                                      Text(
                                         'enter_email_continue'.tr,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           color: const Color(0xFF606060),
-                                          fontSize: screenWidth > 600 ? 16 : 14,
+                                          fontSize: isSmallScreen ? 12 : (screenWidth > 600 ? 16 : 14),
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: constraints.maxHeight * 0.03,
-                                    ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 12 : 20,
+                                      ),
 
-                                    // Error Message
-                                    Obx(() {
-                                      if (_authController
-                                          .errorMessage
-                                          .isNotEmpty) {
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                            bottom:
-                                                constraints.maxHeight * 0.02,
-                                          ),
-                                          child: Text(
-                                            _authController.errorMessage.value,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              color: Colors.red,
-                                              fontSize: 14,
+                                      // Error Message
+                                      Obx(() {
+                                        if (_authController
+                                            .errorMessage
+                                            .isNotEmpty) {
+                                          return Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: isSmallScreen ? 8 : 12,
                                             ),
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    }),
+                                            child: Text(
+                                              _authController.errorMessage.value,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: isSmallScreen ? 12 : 14,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      }),
 
                                     // Email Input Field
                                     TextFormField(
@@ -195,16 +217,16 @@ class _AuthSignUpViewState extends State<AuthSignUpView> {
                                           bottom: 8,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: constraints.maxHeight * 0.03,
-                                    ),
+                                      ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 16 : 24,
+                                      ),
 
-                                    // Sign Up Button
-                                    Obx(
-                                      () => SizedBox(
-                                        width: double.infinity,
-                                        height: 48,
+                                      // Sign Up Button
+                                      Obx(
+                                        () => SizedBox(
+                                          width: double.infinity,
+                                          height: isSmallScreen ? 44 : 48,
                                         child: ElevatedButton(
                                           onPressed:
                                               _authController.isLoading.value
@@ -250,43 +272,48 @@ class _AuthSignUpViewState extends State<AuthSignUpView> {
                                                     color: Colors.white,
                                                   ),
                                                 ),
+                                          ),
                                         ),
                                       ),
-                                    ),
 
-                                    SizedBox(
-                                      height: constraints.maxHeight * 0.02,
-                                    ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 12 : 16,
+                                      ),
 
-                                    // Sign In Link
-                                    TextButton(
-                                      onPressed: () {
-                                        Get.offNamed(Routes.authSignIn);
-                                      },
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
+                                      // Sign In Link
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.offNamed(Routes.authSignIn);
+                                        },
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: Text(
-                                        'already_have_account'.tr,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                          color: Color(0xFF09B782),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                        child: Text(
+                                          'already_have_account'.tr,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontFamily: 'Poppins',
+                                            color: Color(0xFF09B782),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
+                                      SizedBox(
+                                        height: isSmallScreen ? 8 : 16,
+                                      ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
                             ),
+                          ),
                           ),
                         ],
                       ),

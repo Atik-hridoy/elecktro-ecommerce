@@ -19,6 +19,19 @@ class CategoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Screen scaling
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    var heightScale = screenHeight / 812;
+    var widthScale = screenWidth / 375;
+    
+    // Extra reduction for small screens
+    final isSmallScreen = screenHeight < 700;
+    if (isSmallScreen) {
+      heightScale = heightScale * 0.75;
+      widthScale = widthScale * 0.85;
+    }
+    
     // Use LayoutBuilder to create a responsive UI that adapts to screen size.
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -48,10 +61,10 @@ class CategoryList extends StatelessWidget {
         // For smaller screens, display the horizontal list.
         else {
           return SizedBox(
-            height: 120, // Set a fixed height for the horizontal list
+            height: 120 * heightScale, // Responsive height
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16 * widthScale),
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
@@ -61,6 +74,8 @@ class CategoryList extends StatelessWidget {
                   thumbnail: category.thumbnail,
                   categoryId: category.id,
                   isSelected: selectedCategoryId == category.id,
+                  heightScale: heightScale,
+                  widthScale: widthScale,
                 );
               },
             ),
@@ -77,14 +92,16 @@ class CategoryList extends StatelessWidget {
     required String thumbnail,
     required String categoryId,
     bool isSelected = false,
+    double heightScale = 1.0,
+    double widthScale = 1.0,
   }) {
     final textTheme = Theme.of(context).textTheme;
 
     return SizedBox(
-      width: 80, // Fixed width for each item
+      width: 80 * widthScale, // Responsive width
       child: Material(
         clipBehavior: Clip.antiAlias,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12 * widthScale),
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
@@ -93,17 +110,17 @@ class CategoryList extends StatelessWidget {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(4.0),
+            padding: EdgeInsets.all(4.0 * widthScale),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // The thumbnail container
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 60 * widthScale,
+                  height: 60 * heightScale,
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF044D37).withOpacity(0.2) : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16 * widthScale),
                     border: isSelected ? Border.all(color: const Color(0xFF044D37), width: 2) : null,
                     image: thumbnail.isNotEmpty
                         ? DecorationImage(
@@ -113,15 +130,15 @@ class CategoryList extends StatelessWidget {
                         : null,
                   ),
                   child: thumbnail.isEmpty
-                      ? const Icon(Icons.category, size: 30, color: Colors.black)
+                      ? Icon(Icons.category, size: 30 * widthScale, color: Colors.black)
                       : null,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8 * heightScale),
                 // The category title text
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: textTheme.bodySmall,
+                  style: textTheme.bodySmall?.copyWith(fontSize: 12 * widthScale),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

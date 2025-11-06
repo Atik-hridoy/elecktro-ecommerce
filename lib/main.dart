@@ -11,12 +11,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
-import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'app/providers/language_provider.dart';
 import 'app/theme/app_theme.dart';
 import 'app/widgets/responsive_layout.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,12 +32,7 @@ void main() async {
   // Initialize services
   await Get.putAsync(() => NavigationService.init());
   
-  runApp(
-    DevicePreview(
-      enabled: !kReleaseMode, // Only enable in debug mode
-      builder: (context) => const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -61,9 +53,7 @@ class MyApp extends StatelessWidget {
             title: 'Elecktro',
             debugShowCheckedModeBanner: false,
             
-            // Device Preview Configuration
-            useInheritedMediaQuery: true,
-            locale: DevicePreview.locale(context) ?? languageProvider.locale,
+            locale: languageProvider.locale,
             
             // GetX Translations
             translations: MyTranslations(),
@@ -96,23 +86,13 @@ class MyApp extends StatelessWidget {
               return const Locale('en', 'US');
             },
             
-            // Responsive framework with Device Preview
-            builder: (context, child) => DevicePreview.appBuilder(
-              context,
-              ResponsiveBreakpoints.builder(
-              child: ResponsiveLayout(
-                child: Directionality(
-                  textDirection: languageProvider.isRTL() 
-                      ? TextDirection.rtl 
-                      : TextDirection.ltr,
-                  child: child!,
-                ),
-              ),
-                breakpoints: [
-                  const Breakpoint(start: 0, end: 450, name: MOBILE),
-                  const Breakpoint(start: 451, end: 800, name: TABLET),
-                  const Breakpoint(start: 801, end: 1920, name: 'DESKTOP'),
-                ],
+            // Responsive framework
+            builder: (context, child) => ResponsiveLayout(
+              child: Directionality(
+                textDirection: languageProvider.isRTL() 
+                    ? TextDirection.rtl 
+                    : TextDirection.ltr,
+                child: child!,
               ),
             ),
             

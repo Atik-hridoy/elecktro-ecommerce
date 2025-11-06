@@ -1,6 +1,7 @@
 import 'package:elecktro_ecommerce/app/modules/home/controllers/bookmark_controller.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/bookmark_service.dart';
 import 'package:elecktro_ecommerce/app/modules/home/services/get_category_on_home_view_service.dart';
+import 'package:elecktro_ecommerce/app/modules/category/controller.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 
@@ -9,6 +10,10 @@ class HomeBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<HomeController>(
       () => HomeController(),
+    );
+    Get.lazyPut<CategoryController>(
+      () => CategoryController(),
+      fenix: true, // Keep alive to maintain products data
     );
     Get.lazyPut<ProductCategoryService>(
       () => ProductCategoryService(),

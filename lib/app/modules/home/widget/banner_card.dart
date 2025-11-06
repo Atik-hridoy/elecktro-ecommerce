@@ -105,6 +105,9 @@ class _BannerCardState extends State<BannerCard> {
 }
 
 Widget _buildIndicator(bool isActive, int index) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final widthScale = screenWidth / 375;
+  
   return GestureDetector(
     onTap: () {
       if (_currentPage != index) {
@@ -127,9 +130,9 @@ Widget _buildIndicator(bool isActive, int index) {
     },
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: isActive ? 24 : 8,
-      height: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
+      width: isActive ? (24 * widthScale) : (8 * widthScale),
+      height: 4 * widthScale,
+      margin: EdgeInsets.symmetric(horizontal: 2 * widthScale),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(2),
         color: isActive ? const Color(0xFF044D37) : Colors.grey.shade300,
@@ -139,9 +142,13 @@ Widget _buildIndicator(bool isActive, int index) {
 }
 
   Widget _buildPageView() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final heightScale = screenHeight / 812;
+    final bannerHeight = 200.0 * heightScale;
+    
     if (widget.items.isEmpty) {
       return Container(
-        height: 200,
+        height: bannerHeight,
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(12.0),
@@ -206,14 +213,27 @@ Widget _buildIndicator(bool isActive, int index) {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Scale factor based on screen dimensions
+    final widthScale = screenWidth / 375;
+    final heightScale = screenHeight / 812;
+    final scale = (widthScale + heightScale) / 2; // Average scale
+    
+    final bannerHeight = 200.0 * scale;
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16.0 * widthScale, 
+        vertical: 8.0 * heightScale
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Main Image with smooth sliding and gesture detection
           SizedBox(
-            height: 200,
+            height: bannerHeight,
             child: GestureDetector(
               onPanDown: (_) {
                 _isUserScrolling = true;
@@ -226,7 +246,7 @@ Widget _buildIndicator(bool isActive, int index) {
               child: _buildPageView(),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12 * heightScale),
           // Page indicators
           _buildPageIndicator(),
 

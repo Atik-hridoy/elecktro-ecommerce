@@ -16,6 +16,24 @@ class CategoryView extends GetView<CategoryController> {
   @override
   Widget build(BuildContext context) {
     final navigationService = NavigationService.to;
+    
+    // Screen scaling
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    var widthScale = screenWidth / 375;
+    var heightScale = screenHeight / 812;
+    
+    // Extra reduction for small screens
+    final isSmallScreen = screenHeight < 700;
+    if (isSmallScreen) {
+      widthScale = widthScale * 0.85;
+      heightScale = heightScale * 0.75; // 25% smaller on small screens
+    }
+    
+    // AppBar height - calculated to fit all elements without overflow
+    // Need enough space for: top padding + search box + category list + spacing
+    // With heightScale reduction (0.75), we need higher base to compensate
+    final appBarHeight = isSmallScreen ? 240.0 : 220.0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -24,9 +42,9 @@ class CategoryView extends GetView<CategoryController> {
       ),
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(
-            220,
-          ), // Increased height to accommodate both search and categories
+          preferredSize: Size.fromHeight(
+            appBarHeight * heightScale,
+          ), // Responsive height based on screen
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -45,18 +63,25 @@ class CategoryView extends GetView<CategoryController> {
               children: [
                 // Search Box
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 60, 16, 10),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'search_products'.tr,
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  padding: EdgeInsets.fromLTRB(
+                    16 * widthScale, 
+                    60 * heightScale, 
+                    16 * widthScale, 
+                    10 * heightScale
+                  ),
+                  child: SizedBox(
+                    height: 48 * heightScale,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'search_products'.tr,
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12 * widthScale),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 0),
                       suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
@@ -91,9 +116,10 @@ class CategoryView extends GetView<CategoryController> {
                         minHeight: 32,
                       ),
                     ),
-                    onChanged: (value) {
-                      controller.searchProducts(value);
-                    },
+                      onChanged: (value) {
+                        controller.searchProducts(value);
+                      },
+                    ),
                   ),
                 ),
 
@@ -127,7 +153,12 @@ class CategoryView extends GetView<CategoryController> {
             children: [
               // Products Header
               Obx(() => Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: EdgeInsets.fromLTRB(
+                  16 * widthScale, 
+                  16 * heightScale, 
+                  16 * widthScale, 
+                  8 * heightScale
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -135,8 +166,8 @@ class CategoryView extends GetView<CategoryController> {
                       controller.currentCategoryId.value != null
                           ? '${'filtered_products'.tr} (${controller.filteredProducts.length})'
                           : '${'all_products'.tr} (${controller.filteredProducts.length})',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: 18 * widthScale,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -152,9 +183,9 @@ class CategoryView extends GetView<CategoryController> {
                         ),
                         child: Text(
                           'clear_filters'.tr,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Color(0xFF044D37),
-                            fontSize: 14,
+                            fontSize: 14 * widthScale,
                           ),
                         ),
                       ),
@@ -189,15 +220,15 @@ class CategoryView extends GetView<CategoryController> {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16 * widthScale,
+                    vertical: 8 * heightScale,
                   ),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 16,
+                    childAspectRatio: isSmallScreen ? 0.68 : 0.7,
+                    crossAxisSpacing: 12 * widthScale,
+                    mainAxisSpacing: 16 * heightScale,
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {

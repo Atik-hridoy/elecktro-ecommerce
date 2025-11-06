@@ -1,5 +1,4 @@
 import 'package:elecktro_ecommerce/app/modules/home/controllers/bookmark_controller.dart';
-import 'package:elecktro_ecommerce/app/modules/home/widget/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
@@ -128,30 +127,35 @@ Widget _buildWishlistGrid(BookmarkController controller) {
                         // Product details
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(4.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  productName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      productName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      brand,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  brand,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const Spacer(),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -202,6 +206,7 @@ Widget _buildWishlistGrid(BookmarkController controller) {
 
   /// Show confirmation dialog before removing item from wishlist
   void _showRemoveConfirmationDialog(BookmarkController controller, Map<String, dynamic> item) {
+    final bookmarkId = item['_id']?.toString() ?? '';
     final productId = item['productId']?.toString() ?? '';
     final productName = item['name']?.toString() ?? 'this item';
     
@@ -217,9 +222,8 @@ Widget _buildWishlistGrid(BookmarkController controller) {
           FilledButton(
             onPressed: () async {
               Get.back();
-              await controller.toggleBookmark(productId);
-              // Refresh the bookmarks list
-              await controller.getBookmarks();
+              // Use deleteBookmark method to remove from list
+              await controller.deleteBookmark(bookmarkId, productId);
             },
             child: const Text('Remove'),
           ),
