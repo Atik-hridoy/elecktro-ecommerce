@@ -705,6 +705,23 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 '\$${controller.currentOriginalPrice.toStringAsFixed(2)}', // ✅ Dynamic original price
                 style: TextStyle(fontSize: 16, color: Colors.grey[400], decoration: TextDecoration.lineThrough),
               ),
+            const SizedBox(width: 8),
+            if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${double.parse(controller.discount.value).toStringAsFixed(0)}% OFF',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         )),
         Row(

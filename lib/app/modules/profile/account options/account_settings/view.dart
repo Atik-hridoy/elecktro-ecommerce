@@ -352,19 +352,69 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        title: Text(
-          'delete_account'.tr,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'delete_account'.tr,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-        content: Text(
-          'delete_account_confirmation'.tr,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'delete_account_confirmation'.tr,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'this_action_cannot_be_undone'.tr,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -377,30 +427,39 @@ class AccountSettingsView extends GetView<AccountSettingsController> {
               ),
             ),
           ),
-          TextButton(
-            onPressed: () {
-              controller.deleteAccount();
-              Get.back();
-              // Show success message
-              Get.snackbar(
-                'account_deleted'.tr,
-                'account_deleted_success'.tr,
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red.withOpacity(0.9),
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 8,
-              );
-            },
-            child: Text(
-              'delete'.tr,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
+          Obx(() => ElevatedButton(
+            onPressed: controller.isDeletingAccount.value
+                ? null
+                : () async {
+                    Get.back(); // Close dialog first
+                    await controller.deleteAccount();
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              disabledBackgroundColor: Colors.red.withOpacity(0.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-          ),
+            child: controller.isDeletingAccount.value
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'delete'.tr,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          )),
         ],
       ),
     );

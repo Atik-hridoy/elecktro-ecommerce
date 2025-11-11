@@ -311,6 +311,9 @@ class HomeView extends StatelessWidget {
                             final price = product.sizeType.isNotEmpty
                                 ? product.sizeType.first.price.toString()
                                 : '0';
+                            final discount = product.sizeType.isNotEmpty
+                                ? product.sizeType.first.discount.toString()
+                                : '0';
                             final imageUrl = product.images.isNotEmpty
                                 ? product.images.first
                                 : '';
@@ -323,6 +326,7 @@ class HomeView extends StatelessWidget {
                                 productId: product.id,
                                 brand: product.brand,
                                 price: '\$$price',
+                                discount: discount,
                                 imageUrl: imageUrl,
                                 rating: product.rating,
                                 reviewCount: product.reviewCount,
@@ -419,6 +423,9 @@ class HomeView extends StatelessWidget {
                     final price = product.sizeType.isNotEmpty
                         ? product.sizeType.first.price.toString()
                         : '0';
+                    final discount = product.sizeType.isNotEmpty
+                        ? product.sizeType.first.discount.toString()
+                        : '0';
                     final imageUrl = product.images.isNotEmpty
                         ? product.images.first
                         : '';
@@ -429,6 +436,7 @@ class HomeView extends StatelessWidget {
                       productId: product.id,
                       brand: product.brand,
                       price: '\$$price',
+                      discount: discount,
                       imageUrl: imageUrl,
                       rating: product.rating,
                       reviewCount: product.reviewCount,

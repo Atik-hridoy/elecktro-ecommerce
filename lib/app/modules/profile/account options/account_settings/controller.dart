@@ -1,13 +1,19 @@
 import 'package:elecktro_ecommerce/app/providers/language_provider.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'services/delete_account_service.dart';
 
 class AccountSettingsController extends GetxController {
   // Observable variables
   final RxBool isLoading = false.obs;
+  final RxBool isDeletingAccount = false.obs;
   final RxString currentLanguage = 'en'.obs;
+  
+  // Service
+  final DeleteAccountService _deleteAccountService = DeleteAccountService();
   
   @override
   void onInit() {
@@ -123,10 +129,46 @@ class AccountSettingsController extends GetxController {
     // Or you can show a dialog/bottom sheet here
   }
   
-  void deleteAccount() {
-    // Logic to delete account - API call would go here
-    print('Account deletion requested');
-    // Add API call here to delete account
-    // await accountService.deleteAccount();
+  Future<void> deleteAccount() async {
+    try {
+      isDeletingAccount.value = true;
+      
+      // Call the delete account service
+      final result = await _deleteAccountService.deleteAccount();
+      
+      if (result['success'] == true) {
+        // Show success message
+        Get.snackbar(
+          'account_deleted'.tr,
+          'account_deleted_success'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.9),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 8,
+          duration: const Duration(seconds: 2),
+        );
+        
+        // Wait a moment for the user to see the message
+        await Future.delayed(const Duration(seconds: 1));
+        
+        // Navigate to login screen and clear all previous routes
+        Get.offAllNamed(Routes.authSignIn);
+      }
+    } catch (e) {
+      // Show error message
+      Get.snackbar(
+        'error'.tr,
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isDeletingAccount.value = false;
+    }
   }
 }

@@ -18,6 +18,7 @@ class AppUrls {
   static const String updateProfileInsideApp = 'users/profile';
   static const String faqs = 'faqs/';
   static const String createHelp = 'help/create';
+  static const String deleteAccount = 'users/delete';
 
   static const String getSellerProfile = 'products/seller-info/';
   static const String getSellerProducts = 'products/seller-products/';

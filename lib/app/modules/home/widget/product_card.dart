@@ -147,15 +147,24 @@ class ProductCard extends StatelessWidget {
   ),
 ),
                 // --- DISCOUNT BADGE ---
-                if (showDiscountBadge && discount != null)
+                if (discount != null && discount!.isNotEmpty && double.tryParse(discount!) != null && double.parse(discount!) > 0)
                   Positioned(
                     top: 8,
                     left: 8,
-                    child: Badge(
-                      backgroundColor: colorScheme.errorContainer,
-                      textColor: colorScheme.onErrorContainer,
-                      label: Text('$discount% OFF'),
-                      largeSize: 20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${double.parse(discount!).toStringAsFixed(0)}% OFF',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
               ],
