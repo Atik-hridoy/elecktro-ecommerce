@@ -41,16 +41,27 @@ class CheckoutController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Check if we have direct checkout data
+    // Check if we have checkout data (either direct or from cart)
     final args = Get.arguments;
+    print('🛒 Checkout received arguments: $args');
+    
     if (args != null && args is Map<String, dynamic>) {
-      if (args['directCheckout'] == true && args['cartItems'] is List) {
-        // Clear existing cart and add the direct checkout item
+      if (args['cartItems'] is List && (args['cartItems'] as List).isNotEmpty) {
+        // Load cart items from arguments (both direct checkout and cart checkout)
         cartItems.clear();
         cartItems.addAll(List<Map<String, dynamic>>.from(args['cartItems']));
+        print('✅ Loaded ${cartItems.length} items from arguments');
+        
+        // Set totals if provided
+        if (args['totalAmount'] != null) {
+          subtotal.value = (args['totalAmount'] as num).toDouble();
+        }
+      } else {
+        print('⚠️ No cart items found in arguments, loading mock data');
+        _loadCartItems();
       }
     } else {
-      // Normal cart loading
+      print('⚠️ No arguments provided, loading mock data');
       _loadCartItems();
     }
 
@@ -97,9 +108,17 @@ class CheckoutController extends GetxController {
   void _calculateSubtotal() {
     double total = 0.0;
     for (var item in cartItems) {
-      total += (item['price'] as num).toDouble() * (item['quantity'] as int);
+      final price = (item['price'] as num?)?.toDouble() ?? 0.0;
+      final quantity = (item['quantity'] as num?)?.toInt() ?? 1;
+      total += price * quantity;
     }
-    subtotal.value = total;
+    
+    // Only update subtotal if it wasn't already set from arguments
+    if (subtotal.value == 0.0) {
+      subtotal.value = total;
+    }
+    
+    print('💰 Calculated subtotal: ${subtotal.value} (from ${cartItems.length} items)');
 
     // Re-apply voucher if any
     if (voucherCode.value.isNotEmpty) {

@@ -361,20 +361,82 @@ Rxn<ProductDetailModel> product = Rxn();
   }
 
   void _updateFromMap(Map<dynamic, dynamic> data) {
-    productId.value = data['id']?.toString() ?? '';
+    productId.value = data['id']?.toString() ?? data['_id']?.toString() ?? '';
     name.value = data['name']?.toString() ?? 'product_not_found'.tr;
     brand.value = data['brand']?.toString() ?? '';
     price.value = data['price']?.toString() ?? '0.00';
-    imageUrl.value = data['imageUrl']?.toString() ?? '';
+    
+    // Handle images - support both single imageUrl and images array
+    print('🖼️ Processing images from data: ${data['images']} | imageUrl: ${data['imageUrl']}');
+    
+    if (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty) {
+      imageUrl.value = data['imageUrl'].toString();
+      print('✅ Set imageUrl from imageUrl field: ${imageUrl.value}');
+    } else if (data['images'] != null && data['images'] is List) {
+      final imagesList = data['images'] as List;
+      print('📋 Images list: $imagesList');
+      if (imagesList.isNotEmpty) {
+        final firstImage = imagesList[0].toString();
+        if (firstImage.startsWith('http')) {
+          imageUrl.value = firstImage;
+        } else {
+          final cleanPath = firstImage.startsWith('/') ? firstImage.substring(1) : firstImage;
+          imageUrl.value = '${AppUrls.baseImageUrl}$cleanPath';
+        }
+        print('✅ Set imageUrl from images array: ${imageUrl.value}');
+      }
+    } else {
+      print('⚠️ No valid images found in data');
+    }
+    
     discount.value = data['discount']?.toString() ?? '';    
     
-    // Update seller info if available
-    if (data['sellerName'] != null) {
+    // Handle seller info - support multiple formats
+    if (data['sellerId'] != null && data['sellerId'] is Map) {
+      final sellerData = data['sellerId'] as Map;
+      seller.value = Seller(
+        id: sellerData['_id']?.toString() ?? sellerData['id']?.toString() ?? '',
+        firstName: sellerData['firstName']?.toString() ?? '',
+        lastName: sellerData['lastName']?.toString() ?? '',
+      );
+    } else if (data['sellerName'] != null) {
       seller.value = Seller(
         id: data['sellerId']?.toString() ?? '',
         firstName: data['sellerName']?.toString() ?? '',
         lastName: data['sellerLastName']?.toString() ?? '',
       );
+    }
+    
+    // Handle rating and review count if available
+    if (data['rating'] != null) {
+      rating.value = (data['rating'] as num?)?.toDouble() ?? 0.0;
+    }
+    if (data['reviewCount'] != null) {
+      reviewCount.value = (data['reviewCount'] as num?)?.toInt() ?? 0;
+    }
+    
+    // Create a basic ProductDetailModel from the map data for consistency
+    try {
+      final Map<String, dynamic> stringKeyMap = Map<String, dynamic>.from(data);
+      final productModel = ProductDetailModel.fromJson(stringKeyMap);
+      product.value = productModel;
+      
+      // Ensure images are properly set in the product model
+      if (data['images'] != null && data['images'] is List) {
+        final imagesList = (data['images'] as List).cast<String>();
+        product.value = productModel.copyWith(images: imagesList);
+        print('🔄 Updated product model with images: $imagesList');
+      }
+      
+      // Update price based on size variants if available
+      if (productModel.sizeType != null && productModel.sizeType!.isNotEmpty) {
+        selectedSizeIndex.value = 0;
+        _updatePriceAndStock();
+      }
+    } catch (e) {
+      // If conversion fails, continue with basic data
+      print('⚠️ Could not convert map to ProductDetailModel: $e');
+      print('📋 Original data keys: ${data.keys.toList()}');
     }
   }
   

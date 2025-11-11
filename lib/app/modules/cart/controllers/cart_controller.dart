@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/cart/models/cart_model.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/services/add_to_card_service.dart';
 import 'package:elecktro_ecommerce/app/modules/product_details/model/add_to_cart.dart';
+import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 
 class CartController extends GetxController {
   static CartController get to => Get.find();
@@ -31,25 +32,52 @@ class CartController extends GetxController {
   // Prepare cart data for checkout
   Map<String, dynamic> prepareCheckoutData() {
     if (cart.value == null || cart.value!.products.isEmpty) {
-      return {'cartItems': []};
+      return {
+        'cartItems': [],
+        'totalAmount': 0.0,
+        'itemCount': 0,
+      };
     }
 
     return {
       'cartItems': cart.value!.products.map((item) => {
+            'id': item.productId, // Use productId as id for checkout compatibility
             'productId': item.productId,
+            'name': item.name ?? 'Product',
+            'brand': item.brand ?? 'Brand',
             'size': item.size,
             'quantity': item.quantity,
+            'price': item.price,
+            'originalPrice': item.price, // Add originalPrice for checkout display
             'profit': item.profit,
             'color': item.color,
+            'images': item.images,
+            'image': item.images.isNotEmpty ? item.images.first : '',
           }).toList(),
+      'totalAmount': cart.value!.totalAmount,
+      'itemCount': cart.value!.products.length,
+      'subtotal': cart.value!.totalAmount,
+      // Add any additional checkout metadata
+      'directCheckout': false, // This is from cart, not direct product purchase
     };
   }
 
   // Navigate to checkout
   void navigateToCheckout() {
+    if (cart.value == null || cart.value!.products.isEmpty) {
+      Get.snackbar(
+        'empty_cart'.tr,
+        'add_items_to_cart_first'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    
     final checkoutData = prepareCheckoutData();
+    print('🛒 Navigating to checkout with data: $checkoutData');
+    
     // Navigate to checkout screen with the prepared data
-    Get.toNamed('/checkout', arguments: checkoutData);
+    Get.toNamed(Routes.checkout, arguments: checkoutData);
   }
 
   // Fetch cart data from API

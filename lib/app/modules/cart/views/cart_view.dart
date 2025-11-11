@@ -212,9 +212,8 @@ class CartView extends GetView<CartController> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle checkout
-                          // Get.toNamed(Routes.CHECKOUT);
-                          Get.snackbar('checkout'.tr, 'proceeding_to_checkout'.tr);
+                          // Navigate to checkout with cart data
+                          controller.navigateToCheckout();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,

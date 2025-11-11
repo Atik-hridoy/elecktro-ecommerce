@@ -63,4 +63,11 @@ class AppUrls {
   static const String markAllNotificationsRead = 'notifications/';
   static const String readSingleNotification = 'notifications/single/';
 
+
+
+// settings
+
+
+ static const String aboutUs = 'settings?key=aboutUs';
+
 }
