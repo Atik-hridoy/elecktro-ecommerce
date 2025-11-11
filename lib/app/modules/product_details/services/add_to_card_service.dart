@@ -127,43 +127,110 @@ class CartService {
     }
   }
 
-  /// Update cart item quantity using PATCH request
-  /// Requires product ID and new quantity
-  Future<Map<String, dynamic>> updateCartItemQuantity(String productId, int quantity) async {
+  /// Increment cart item quantity by 1
+  /// Uses cart item ID from the products array _id field
+  Future<Map<String, dynamic>> incrementQuantity(String cartItemId) async {
     try {
-      print('🔄 Updating cart item quantity - Product ID: $productId, Quantity: $quantity');
+      print('➕ Incrementing cart item - Item ID: $cartItemId');
+      final url = AppUrls.increaseQuentity.replaceAll(':productId', cartItemId);
+      print('📤 Request URL: $url');
       
-      final response = await _dio.patch(
-        '${AppUrls.editQuentity}$productId',
-        data: {
-          'quantity': quantity,
-        },
-      );
+      final response = await _dio.patch(url);
       
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('✅ Cart item quantity updated successfully');
+        print('✅ Cart item quantity incremented successfully');
         return {
           'success': true,
-          'message': 'Quantity updated successfully',
+          'message': 'Quantity increased successfully',
           'data': response.data,
         };
       } else {
         return {
           'success': false,
-          'message': response.data['message'] ?? 'Failed to update quantity',
+          'message': response.data['message'] ?? 'Failed to increase quantity',
           'statusCode': response.statusCode,
         };
       }
     } on DioException catch (e) {
-      print('❌ Error updating cart quantity: ${e.message}');
-      String errorMessage = 'An error occurred while updating quantity';
+      print('❌ Error incrementing quantity: ${e.message}');
+      print('❌ Status Code: ${e.response?.statusCode}');
+      print('❌ Response Data: ${e.response?.data}');
+      
+      String errorMessage = 'An error occurred while increasing quantity';
       
       if (e.response?.statusCode == 401) {
         errorMessage = 'Please login to continue';
       } else if (e.response?.statusCode == 400) {
-        errorMessage = e.response?.data['message'] ?? 'Invalid quantity';
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? 
+                        e.response?.data['error'] ?? 
+                        'Invalid request';
+        } else {
+          errorMessage = 'Invalid request: ${e.response?.data}';
+        }
       } else if (e.response?.statusCode == 404) {
-        errorMessage = 'Product not found in cart';
+        errorMessage = 'Item not found in cart';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Connection timeout. Please check your internet connection';
+      }
+
+      return {
+        'success': false,
+        'message': errorMessage,
+        'statusCode': e.response?.statusCode,
+      };
+    } catch (e) {
+      print('❌ Unexpected error: $e');
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Decrement cart item quantity by 1
+  /// Uses cart item ID from the products array _id field
+  Future<Map<String, dynamic>> decrementQuantity(String cartItemId) async {
+    try {
+      print('➖ Decrementing cart item - Item ID: $cartItemId');
+      final url = AppUrls.decreaseQuentity.replaceAll(':productId', cartItemId);
+      print('📤 Request URL: $url');
+      
+      final response = await _dio.patch(url);
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ Cart item quantity decremented successfully');
+        return {
+          'success': true,
+          'message': 'Quantity decreased successfully',
+          'data': response.data,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response.data['message'] ?? 'Failed to decrease quantity',
+          'statusCode': response.statusCode,
+        };
+      }
+    } on DioException catch (e) {
+      print('❌ Error decrementing quantity: ${e.message}');
+      print('❌ Status Code: ${e.response?.statusCode}');
+      print('❌ Response Data: ${e.response?.data}');
+      
+      String errorMessage = 'An error occurred while decreasing quantity';
+      
+      if (e.response?.statusCode == 401) {
+        errorMessage = 'Please login to continue';
+      } else if (e.response?.statusCode == 400) {
+        if (e.response?.data is Map) {
+          errorMessage = e.response?.data['message'] ?? 
+                        e.response?.data['error'] ?? 
+                        'Invalid request';
+        } else {
+          errorMessage = 'Invalid request: ${e.response?.data}';
+        }
+      } else if (e.response?.statusCode == 404) {
+        errorMessage = 'Item not found in cart';
       } else if (e.type == DioExceptionType.connectionTimeout) {
         errorMessage = 'Connection timeout. Please check your internet connection';
       }
@@ -188,7 +255,7 @@ class CartService {
     try {
       print('🗑️ Clearing entire cart...');
       
-      final response = await _dio.delete(AppUrls.deleteItem);
+      final response = await _dio.delete(AppUrls.clearCart);
       
       if (response.statusCode == 200 || response.statusCode == 204) {
         print('✅ Cart cleared successfully');

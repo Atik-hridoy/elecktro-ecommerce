@@ -140,24 +140,18 @@ class CartController extends GetxController {
     }
   }
   
-  // Update item quantity with API call
-  Future<void> updateQuantity(String productId, int newQuantity) async {
+  // Increment item quantity by 1
+  Future<void> incrementQuantity(String cartItemId) async {
     try {
-      if (newQuantity < 1) {
-        Get.snackbar('error'.tr, 'Quantity must be at least 1');
-        return;
-      }
-      
-      // Don't show full loading indicator, just update in background
       errorMessage.value = '';
       
-      print('🔄 Updating quantity for product: $productId to $newQuantity');
+      print('➕ Incrementing quantity for cart item: $cartItemId');
       
       // Optimistically update local state first for better UX
       if (cart.value != null) {
         final updatedProducts = cart.value!.products.map((item) {
-          if (item.productId == productId) {
-            return item.copyWith(quantity: newQuantity);
+          if (item.id == cartItemId) {
+            return item.copyWith(quantity: item.quantity + 1);
           }
           return item;
         }).toList();
@@ -166,16 +160,130 @@ class CartController extends GetxController {
       }
       
       // Then update on server
-      final response = await _cartService.updateCartItemQuantity(productId, newQuantity);
+      final response = await _cartService.incrementQuantity(cartItemId);
       
       if (response['success'] == true) {
-        print('✅ Quantity updated successfully');
-        // Silently refresh cart data from server to sync
+        print('✅ Quantity incremented successfully');
+        // Refresh cart data from server to sync
         await fetchCart();
       } else {
-        errorMessage.value = response['message'] ?? 'Failed to update quantity';
+        errorMessage.value = response['message'] ?? 'Failed to increase quantity';
         Get.snackbar('error'.tr, errorMessage.value);
         // Revert on failure
+        await fetchCart();
+      }
+    } catch (e) {
+      print('❌ Error incrementing quantity: $e');
+      errorMessage.value = 'error_updating_quantity'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
+      // Revert on error
+      await fetchCart();
+    }
+  }
+  
+  // Decrement item quantity by 1
+  Future<void> decrementQuantity(String cartItemId) async {
+    try {
+      errorMessage.value = '';
+      
+      print('➖ Decrementing quantity for cart item: $cartItemId');
+      
+      // Optimistically update local state first for better UX
+      if (cart.value != null) {
+        final cartItem = cart.value!.products.firstWhereOrNull(
+          (item) => item.id == cartItemId
+        );
+        
+        // Don't decrement below 1
+        if (cartItem != null && cartItem.quantity <= 1) {
+          Get.snackbar('error'.tr, 'Quantity cannot be less than 1');
+          return;
+        }
+        
+        final updatedProducts = cart.value!.products.map((item) {
+          if (item.id == cartItemId) {
+            return item.copyWith(quantity: item.quantity - 1);
+          }
+          return item;
+        }).toList();
+        
+        cart.value = cart.value!.copyWith(products: updatedProducts);
+      }
+      
+      // Then update on server
+      final response = await _cartService.decrementQuantity(cartItemId);
+      
+      if (response['success'] == true) {
+        print('✅ Quantity decremented successfully');
+        // Refresh cart data from server to sync
+        await fetchCart();
+      } else {
+        errorMessage.value = response['message'] ?? 'Failed to decrease quantity';
+        Get.snackbar('error'.tr, errorMessage.value);
+        // Revert on failure
+        await fetchCart();
+      }
+    } catch (e) {
+      print('❌ Error decrementing quantity: $e');
+      errorMessage.value = 'error_updating_quantity'.tr;
+      Get.snackbar('error'.tr, errorMessage.value);
+      // Revert on error
+      await fetchCart();
+    }
+  }
+  
+  // Update item quantity to a specific value
+  Future<void> updateQuantity(String productId, int newQuantity) async {
+    try {
+      errorMessage.value = '';
+      
+      if (newQuantity < 1) {
+        Get.snackbar('error'.tr, 'Quantity cannot be less than 1');
+        return;
+      }
+      
+      print('🔄 Updating quantity for product: $productId to $newQuantity');
+      
+      // Find the cart item by productId
+      if (cart.value != null) {
+        final cartItem = cart.value!.products.firstWhereOrNull(
+          (item) => item.productId == productId
+        );
+        
+        if (cartItem == null) {
+          print('❌ Cart item not found for product: $productId');
+          return;
+        }
+        
+        final currentQuantity = cartItem.quantity;
+        final difference = newQuantity - currentQuantity;
+        
+        // Optimistically update local state first for better UX
+        final updatedProducts = cart.value!.products.map((item) {
+          if (item.productId == productId) {
+            return item.copyWith(quantity: newQuantity);
+          }
+          return item;
+        }).toList();
+        
+        cart.value = cart.value!.copyWith(products: updatedProducts);
+        
+        // Update on server by calling increment/decrement multiple times
+        // or implement a direct update API call if available
+        if (difference > 0) {
+          // Need to increment
+          for (int i = 0; i < difference; i++) {
+            await _cartService.incrementQuantity(cartItem.id);
+          }
+        } else if (difference < 0) {
+          // Need to decrement
+          for (int i = 0; i < difference.abs(); i++) {
+            await _cartService.decrementQuantity(cartItem.id);
+          }
+        }
+        
+        print('✅ Quantity updated successfully');
+        // Refresh cart data from server to sync
         await fetchCart();
       }
     } catch (e) {

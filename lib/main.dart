@@ -14,6 +14,8 @@ import 'package:dio/dio.dart';
 import 'app/providers/language_provider.dart';
 import 'app/theme/app_theme.dart';
 import 'app/widgets/responsive_layout.dart';
+import 'app/core/socket_facility/notification_overlay.dart';
+import 'app/core/socket_facility/socket_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,8 @@ void main() async {
   // Initialize storage
   await GetStorage.init();
 
+  // Initialize socket from stored credentials (if user is logged in)
+  await SocketInitializer.initializeFromStorage();
 
   // Register HTTP client
   Get.put(Dio());
@@ -52,6 +56,9 @@ class MyApp extends StatelessWidget {
               return GetMaterialApp(
             title: 'Elecktro',
             debugShowCheckedModeBanner: false,
+            
+            // Add this for global notification snackbars
+            scaffoldMessengerKey: NotificationOverlay().scaffoldMessengerKey,
             
             locale: languageProvider.locale,
             

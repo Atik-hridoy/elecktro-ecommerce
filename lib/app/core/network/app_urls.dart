@@ -2,6 +2,7 @@ class AppUrls {
 
   static const String baseUrl = 'http://10.10.7.62:7010/api/v1/';
   static const String baseImageUrl = 'http://10.10.7.62:7010/';
+  static const String socketUrl = 'http://10.10.7.62:7010';
 
 
 
@@ -45,8 +46,9 @@ class AppUrls {
   // cart
   static const String addToCart = 'cart/add';
   static const String getCart = 'cart/me';
-  static const String editQuentity = 'cart/item/';
-  static const String deleteItem = 'cart/clear';
+  static const String increaseQuentity = 'cart/item/:productId/increment';
+  static const String decreaseQuentity = 'cart/item/:productId/decrement';
+  static const String clearCart = 'cart/clear';
   // paymentSession
 
   static const String createPaymentSession = 'orders/create-checkout-session';
