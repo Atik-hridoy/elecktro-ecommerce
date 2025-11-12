@@ -6,6 +6,7 @@ import 'package:elecktro_ecommerce/app/modules/home/services/get_populer_product
 import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
 import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
+import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 
 class HomeController extends GetxController {
   var selectedIndex = 0.obs; // Observable variable for the selected index
@@ -47,10 +48,69 @@ class HomeController extends GetxController {
         ? Get.find<GetPopularProductService>()
         : Get.put(GetPopularProductService());
     
-    fetchCategories();
-    fetchBanners();
-    fetchPopularProducts();
-    _startBannerTimer();
+    _initializeHomeData();
+  }
+  
+  // Initialize home data - just load the home screen and fetch data
+  Future<void> _initializeHomeData() async {
+    try {
+      // Load home screen immediately without aggressive auth checks
+      print('Loading home screen...');
+      
+      // Just ensure storage is loaded
+      await LocalStorage.getAllPrefData();
+      
+      // Small delay to let everything settle
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Proceed with data fetching - let individual services handle auth errors
+      print('Fetching home data...');
+      fetchCategories();
+      fetchBanners();
+      fetchPopularProducts();
+      _startBannerTimer();
+      
+      print('Home screen loaded successfully');
+    } catch (e) {
+      print('Error initializing home data: $e');
+      // Handle initialization error gracefully
+      error.value = 'Failed to initialize home screen';
+      isLoading.value = false;
+    }
+  }
+  
+  // Verify authentication with retry mechanism
+  Future<bool> _verifyAuthenticationWithRetry() async {
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      await LocalStorage.getAllPrefData();
+      
+      print('Authentication check attempt $attempt: Token=${LocalStorage.token.isNotEmpty}, LoggedIn=${LocalStorage.isLogIn}');
+      
+      if (LocalStorage.token.isNotEmpty && LocalStorage.isLogIn) {
+        print('Authentication verified successfully on attempt $attempt');
+        return true;
+      }
+      
+      if (attempt < 3) {
+        print('Authentication check failed, retrying in ${attempt * 500}ms...');
+        await Future.delayed(Duration(milliseconds: attempt * 500));
+      }
+    }
+    
+    // Don't redirect immediately - let API calls handle 403 errors
+    // This prevents conflicts when token exists but might be expired
+    print('No valid authentication found after 3 attempts - letting API calls handle auth errors');
+    
+    // Only redirect if we're absolutely sure there's no token
+    if (LocalStorage.token.isEmpty) {
+      print('No token found, redirecting to auth');
+      Get.offAllNamed('/auth');
+      return false;
+    }
+    
+    // Token exists but might be expired - let API calls handle it
+    print('Token exists but might be expired - proceeding with API calls');
+    return true;
   }
   
   @override

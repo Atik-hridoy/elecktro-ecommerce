@@ -70,22 +70,9 @@ class BookmarkService extends GetxService {
             
             if (statusCode == 401 || statusCode == 403) {
               // Handle token expiration or invalid token
-              print('⚠️ Authentication error. Attempting to refresh token...');
-              try {
-                // Clear invalid token
-                await LocalStorage.setString(LocalStorageKeys.token, '');
-                await LocalStorage.setBool(LocalStorageKeys.isLogIn, false);
-                
-                // Navigate to login if not already there
-                if (Get.currentRoute != Routes.auth) {
-                  Get.offAllNamed(Routes.auth);
-                }
-                
-                return handler.reject(e);
-              } catch (refreshError) {
-                print('❌ Error during token refresh: $refreshError');
-                return handler.reject(e);
-              }
+              print('⚠️ Authentication error in bookmark service - letting main app handle it');
+              // Don't clear tokens or redirect immediately to prevent conflicts with OTP flow
+              return handler.reject(e);
             }
             
             if (e.response?.data != null) {
@@ -123,9 +110,8 @@ class BookmarkService extends GetxService {
       final token = LocalStorage.token;
       if (token == null || token.isEmpty) {
         print('⚠️ User is not authenticated. Cannot fetch bookmarks.');
-        if (Get.currentRoute != Routes.auth) {
-          Get.offAllNamed(Routes.auth);
-        }
+        // Don't redirect immediately - just return empty list
+        // This prevents conflicts with navigation from OTP verification
         return [];
       }
       
@@ -148,11 +134,7 @@ class BookmarkService extends GetxService {
       } else if (response.statusCode == 401 || response.statusCode == 403) {
         // Handle unauthorized/forbidden
         print('🔒 Authentication required or token expired');
-        await LocalStorage.setString(LocalStorageKeys.token, '');
-        await LocalStorage.setBool(LocalStorageKeys.isLogIn, false);
-        if (Get.currentRoute != Routes.auth) {
-          Get.offAllNamed(Routes.auth);
-        }
+        // Don't clear tokens or redirect immediately - let the app handle it gracefully
         return [];
       } else {
         // Handle other errors
@@ -162,11 +144,8 @@ class BookmarkService extends GetxService {
     } on DioException catch (e) {
       print('❌ Dio error fetching bookmarks: ${e.message}');
       if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
-        await LocalStorage.setString(LocalStorageKeys.token, '');
-        await LocalStorage.setBool(LocalStorageKeys.isLogIn, false);
-        if (Get.currentRoute != Routes.auth) {
-          Get.offAllNamed(Routes.auth);
-        }
+        print('🔒 Authentication error in bookmark service - letting app handle gracefully');
+        // Don't clear tokens or redirect - let the main authentication flow handle it
       }
       rethrow;
     } catch (e) {

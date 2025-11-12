@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/core/stroage/storage_services.dart';
 import 'package:elecktro_ecommerce/app/core/stroage/storage_keys.dart';
 import 'package:elecktro_ecommerce/app/core/util/app_logger.dart';
+import 'package:elecktro_ecommerce/app/core/network/app_urls.dart';
 import 'package:elecktro_ecommerce/app/routes/app_pages.dart';
 import '../services/otp_service.dart';
 
@@ -212,6 +213,12 @@ class OtpController extends GetxController {
           throw Exception('Access token or refresh token is missing in the response');
         }
         
+        // Debug token information
+        AppLogger.info(
+          'Received tokens - Access: ${accessToken.toString().length} chars, Refresh: ${refreshToken.toString().length} chars',
+          tag: 'OtpController',
+        );
+        
         // Check if profile is complete from API response
         final isProfileCompleteFromApi = data?['isProfileCompleted'] ?? false;
         
@@ -225,12 +232,22 @@ class OtpController extends GetxController {
         
         // Store tokens and user data
         await Future.wait([
-          LocalStorage.setString(LocalStorageKeys.token, accessToken),
-          LocalStorage.setString(LocalStorageKeys.refreshToken, refreshToken),
+          LocalStorage.setString(LocalStorageKeys.token, accessToken.toString().trim()),
+          LocalStorage.setString(LocalStorageKeys.refreshToken, refreshToken.toString().trim()),
           LocalStorage.setString(LocalStorageKeys.myEmail, email),
           LocalStorage.setBool(LocalStorageKeys.isLogIn, true),
           LocalStorage.setBool(LocalStorageKeys.isProfileCompleted, isProfileCompleteFromApi),
         ]);
+        
+        // Verify tokens were stored correctly
+        await LocalStorage.getAllPrefData();
+        AppLogger.info(
+          'Tokens stored - Access: ${LocalStorage.token.length} chars, Refresh: ${LocalStorage.refreshToken.length} chars',
+          tag: 'OtpController',
+        );
+        
+        // Test token validity immediately after storage
+        await _testTokenValidity();
 
         AppLogger.success(
           'OTP verified and ${isRegistration ? 'account created' : 'login'} successful',
@@ -249,6 +266,28 @@ class OtpController extends GetxController {
         
         // Refresh local storage data to get the latest profile status
         await LocalStorage.getAllPrefData();
+        
+        // Add a small delay to ensure token is properly stored and loaded
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // Verify token is properly loaded
+        if (LocalStorage.token.isEmpty) {
+          AppLogger.error(
+            'Token not properly loaded after OTP verification',
+            tag: 'OtpController',
+          );
+          throw Exception('Authentication token not properly stored');
+        }
+        
+        AppLogger.debug(
+          'Token verification after OTP',
+          tag: 'OtpController',
+          details: {
+            'hasToken': LocalStorage.token.isNotEmpty,
+            'tokenLength': LocalStorage.token.length,
+            'isLoggedIn': LocalStorage.isLogIn,
+          },
+        );
         
         // Navigate based on the flow
         if (isRegistration) {
@@ -323,6 +362,37 @@ class OtpController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+  
+  // Test token validity by making a simple API call
+  Future<void> _testTokenValidity() async {
+    try {
+      AppLogger.info('Testing token validity immediately after OTP', tag: 'OtpController');
+      
+      final dio = Dio();
+      final response = await dio.get(
+        '${AppUrls.baseUrl}${AppUrls.getProfile}',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${LocalStorage.token}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      
+      if (response.statusCode == 200) {
+        AppLogger.success('Token validation successful immediately after OTP', tag: 'OtpController');
+      } else {
+        AppLogger.warning('Token validation returned status: ${response.statusCode}', tag: 'OtpController');
+      }
+    } catch (e) {
+      AppLogger.error('Token validation failed immediately after OTP', tag: 'OtpController', error: e);
+      
+      if (e is DioException && e.response?.statusCode == 403) {
+        AppLogger.error('403 error immediately after OTP - token might be invalid format', tag: 'OtpController');
+      }
     }
   }
 }

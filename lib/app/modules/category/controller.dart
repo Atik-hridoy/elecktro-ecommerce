@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:elecktro_ecommerce/app/modules/home/models/get_category_on_home_view.dart';
 import 'package:elecktro_ecommerce/app/modules/category/models/get_product_details_models.dart';
@@ -52,6 +53,26 @@ class CategoryController extends GetxController {
     try {
       isLoadingProducts.value = true;
       final res = await service.getProducts();
+      
+      // Check if the response indicates authentication failure
+      if (res.statusCode == 403) {
+        print('Received 403 response - authentication issue, but staying on home screen');
+        // Don't exit - just show empty products list but stay on home
+        products.clear();
+        filteredProducts.clear();
+        
+        // Show a gentle message to user
+        Get.snackbar(
+          'Authentication Issue',
+          'Please check your login status. Some features may not work properly.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        return;
+      }
+      
       final body = res.body;
       List dataList;
       if (body is Map<String, dynamic>) {
@@ -100,8 +121,17 @@ class CategoryController extends GetxController {
       products.assignAll(byId.values.toList());
       filteredProducts.assignAll(products); // Initialize filtered products with all products
       _hasLoadedProducts = true;
-    } catch (_) {
-      products.clear();
+    } catch (e) {
+      print('Error fetching products: $e');
+      
+      // Check if it's an authentication error
+      if (e.toString().contains('Authentication failed') || e.toString().contains('403')) {
+        print('Authentication error detected in category controller');
+        // Don't clear products immediately, let the service handle the redirect
+      } else {
+        // For other errors, clear products
+        products.clear();
+      }
     } finally {
       isLoadingProducts.value = false;
     }

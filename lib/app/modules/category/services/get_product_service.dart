@@ -114,6 +114,12 @@ class ProductService extends GetxService {
         throw Exception('No authentication token found. Please log in again.');
       }
 
+      // Debug token format
+      AppLogger.info(
+        'Making API request with token - Length: ${token.length}, First 20 chars: ${token.length > 20 ? token.substring(0, 20) : token}...',
+        tag: 'ProductService',
+      );
+
       final res = await _dio.get<dynamic>(
         url,
         queryParameters: query,
@@ -121,6 +127,7 @@ class ProductService extends GetxService {
           headers: {
             'Authorization': 'Bearer $token',
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
           },
         ),
       );
@@ -143,6 +150,27 @@ class ProductService extends GetxService {
     } on DioException catch (e) {
       sw.stop();
       final status = e.response?.statusCode;
+      
+      // Handle 403 Forbidden error - just return error response, don't redirect
+      if (status == 403) {
+        AppLogger.error(
+          'Authentication failed - 403 Forbidden. Endpoint: $url, Token: ${LocalStorage.token.isNotEmpty ? 'Present' : 'Missing'}, Length: ${LocalStorage.token.length}, LoggedIn: ${LocalStorage.isLogIn}',
+          tag: 'ProductService',
+          error: e,
+        );
+        
+        // Just return error response - let the UI handle it gracefully
+        return Response(
+          body: {
+            'success': false, 
+            'message': 'Authentication error. Please check your login status.',
+            'data': []
+          },
+          statusCode: 403,
+          statusText: 'Authentication Failed',
+        );
+      }
+      
       AppLogger.apiError(
         method: 'GET',
         endpoint: url,

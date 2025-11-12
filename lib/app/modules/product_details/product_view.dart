@@ -693,38 +693,48 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Obx(() => Row(
-          children: [
-            Text(
-              '\$${controller.currentDiscountedPrice.toStringAsFixed(2)}', // ✅ Dynamic discounted price
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-            const SizedBox(width: 8),
-            if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
-              Text(
-                '\$${controller.currentOriginalPrice.toStringAsFixed(2)}', // ✅ Dynamic original price
-                style: TextStyle(fontSize: 16, color: Colors.grey[400], decoration: TextDecoration.lineThrough),
-              ),
-            const SizedBox(width: 8),
-            if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+        Expanded(
+          child: Obx(() => Row(
+            children: [
+              Flexible(
                 child: Text(
-                  '${double.parse(controller.discount.value).toStringAsFixed(0)}% OFF',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                  '\$${controller.currentDiscountedPrice.toStringAsFixed(2)}', // ✅ Dynamic discounted price
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
+                Flexible(
+                  child: Text(
+                    '\$${controller.currentOriginalPrice.toStringAsFixed(2)}', // ✅ Dynamic original price
+                    style: TextStyle(fontSize: 16, color: Colors.grey[400], decoration: TextDecoration.lineThrough),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-          ],
-        )),
+              const SizedBox(width: 8),
+              if (controller.discount.value.isNotEmpty && controller.discount.value != '0')
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${double.parse(controller.discount.value).toStringAsFixed(0)}% OFF',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          )),
+        ),
+        const SizedBox(width: 16),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               onPressed: controller.quantity > 1 
