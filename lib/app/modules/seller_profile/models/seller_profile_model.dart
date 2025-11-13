@@ -1,3 +1,5 @@
+import '../../../core/network/app_urls.dart';
+
 class SellerProfileModel {
   final bool success;
   final String message;
@@ -57,9 +59,8 @@ class SellerProfileData {
       if (imagePath.startsWith('http')) {
         formattedImage = imagePath;
       } else {
-        // Import AppUrls at the top: import '../../../core/network/app_urls.dart';
-        const baseImageUrl = 'http://10.10.7.62:7010/';
-        formattedImage = '$baseImageUrl${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
+        // Use base image URL from AppUrls
+        formattedImage = '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
       }
     }
     

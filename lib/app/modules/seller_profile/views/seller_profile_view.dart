@@ -27,6 +27,27 @@ class _SellerProfileViewState extends State<SellerProfileView> with SingleTicker
     super.dispose();
   }
 
+  /// Helper method to get seller image provider
+  /// Checks both API seller profile image and legacy seller image from navigation
+  ImageProvider? _getSellerImageProvider(SellerProfileController controller) {
+    // First check API seller profile image
+    if (controller.sellerProfile.value?.image != null && 
+        controller.sellerProfile.value!.image!.isNotEmpty) {
+      print('🖼️ Using API seller profile image: ${controller.sellerProfile.value!.image!}');
+      return NetworkImage(controller.sellerProfile.value!.image!);
+    }
+    
+    // Fallback to legacy seller image from navigation arguments
+    if (controller.seller.value?.image != null && 
+        controller.seller.value!.image!.isNotEmpty) {
+      print('🖼️ Using navigation seller image: ${controller.seller.value!.image!}');
+      return NetworkImage(controller.seller.value!.image!);
+    }
+    
+    print('⚠️ No seller image available - showing initials');
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SellerProfileController());
@@ -86,16 +107,15 @@ class _SellerProfileViewState extends State<SellerProfileView> with SingleTicker
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avatar
+                    // Avatar with error handling
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: const Color(0xFF00BFA5),
-                      backgroundImage: controller.sellerProfile.value?.image != null && 
-                                       controller.sellerProfile.value!.image!.isNotEmpty
-                          ? NetworkImage(controller.sellerProfile.value!.image!)
-                          : null,
-                      child: controller.sellerProfile.value?.image == null || 
-                             controller.sellerProfile.value!.image!.isEmpty
+                      backgroundImage: _getSellerImageProvider(controller),
+                      onBackgroundImageError: (exception, stackTrace) {
+                        print('❌ Error loading seller image: $exception');
+                      },
+                      child: _getSellerImageProvider(controller) == null
                           ? Text(
                               controller.sellerInitials,
                               style: const TextStyle(

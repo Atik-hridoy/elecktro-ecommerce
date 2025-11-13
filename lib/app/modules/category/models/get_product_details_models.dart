@@ -1,3 +1,5 @@
+import '../../../core/network/app_urls.dart';
+
 class ProductDetailModel {
   final String id;
   final Seller sellerId;
@@ -152,9 +154,21 @@ class Seller {
   });
 
   factory Seller.fromJson(Map<String, dynamic> json) {
+    // Format image URL if it exists and is not already a full URL
+    String? formattedImage;
+    if (json['image'] != null && json['image'].toString().isNotEmpty) {
+      final imagePath = json['image'].toString();
+      if (imagePath.startsWith('http')) {
+        formattedImage = imagePath;
+      } else {
+        // Use base image URL from AppUrls
+        formattedImage = '${AppUrls.baseImageUrl}${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}';
+      }
+    }
+    
     return Seller(
       id: json['_id'] ?? '',
-      image: json['image'],
+      image: formattedImage,
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
     );

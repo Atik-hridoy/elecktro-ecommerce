@@ -5,9 +5,15 @@ class AppUrls {
   // static const String socketUrl = 'http://10.10.7.62:7010';
 
 
-  static const String baseUrl = 'http://178.16.129.213:7010/api/v1/';
-  static const String baseImageUrl = 'http://178.16.129.213:7010/';
-  static const String socketUrl = 'http://178.16.129.213:7010';
+  static const String baseUrl = 'https://rakibur5000.binarybards.online/api/v1/';
+  static const String baseImageUrl = 'https://rakibur5000.binarybards.online/';
+  static const String socketUrl = 'https://rakibur5000.binarybards.online/';
+
+
+
+  // static const String baseUrl = 'http://178.16.129.213:7010/api/v1/';
+  // static const String baseImageUrl = 'http://178.16.129.213:7010/';
+  // static const String socketUrl = 'http://178.16.129.213:7010';
 
 
 
