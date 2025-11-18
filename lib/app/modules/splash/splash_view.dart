@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'splash_controller.dart';
@@ -29,11 +28,11 @@ class _SplashViewState extends State<SplashView> {
           Center(
             child: Opacity(
               opacity: 1.0,
-              child: SvgPicture.asset(
-                'assets/icons/Group 290580.svg',
+              child: Image.asset(
+                'assets/icons/sundor logo.png',
                 width: 154.33,
                 height: 192.29,
-                placeholderBuilder: (BuildContext context) => const CircularProgressIndicator(),
+                fit: BoxFit.contain,
               ),
             ),
           ),

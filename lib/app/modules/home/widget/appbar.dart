@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
+
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
@@ -83,9 +84,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Row(
                     children: [
                       SizedBox(
-                        width: 40 * widthScale,
-                        height: 40 * widthScale,
-                        child: SvgPicture.asset('assets/icons/Group 290580.svg'),
+                        width: 48 * widthScale,
+                        height: 48 * widthScale,
+                        child: Transform.translate(
+                          offset: Offset(0, -7 * heightScale),
+                          child: Image.asset(
+                            'assets/icons/sundor logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                       SizedBox(width: 12 * widthScale),
                       Flexible(

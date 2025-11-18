@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:elecktro_ecommerce/app/modules/auth/controllers/otpController.dart';
 
 class OtpView extends StatefulWidget {
@@ -122,10 +121,11 @@ class _OtpViewState extends State<OtpView> {
                                       final logoSize = isSmallScreen ? 60.0 :
                                                       screenWidth > 600 ? 110.0 : 
                                                       screenWidth > 400 ? 95.0 : 80.0;
-                                      return SvgPicture.asset(
-                                        'assets/icons/Group 290580.svg',
+                                      return Image.asset(
+                                        'assets/icons/sundor logo.png',
                                         width: logoSize,
                                         height: logoSize * 1.35,
+                                        fit: BoxFit.contain,
                                       );
                                     },
                                   ),
