@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     
     <application
-        android:label="elektro_ecommerce"
+        android:label="Dore Hoagr"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
